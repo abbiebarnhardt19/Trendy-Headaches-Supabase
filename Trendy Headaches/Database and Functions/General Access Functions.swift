@@ -59,3 +59,118 @@ extension Database {
         }
     }
 }
+
+//
+//  Database.swift
+//  learning_xcode
+//
+//  Created by Abigail Barnhardt on 8/24/25.
+//
+//
+//  Database.swift
+//  learning_xcode
+//
+//  Created by Abigail Barnhardt on 8/24/25.
+//
+//
+//  General Access Functions.swift
+//  Trendy Headaches
+//
+//  Created by Abigail Barnhardt on 8/30/25.
+//
+//import Foundation
+//import Supabase
+//
+//extension Database {
+//    
+//    // Get a single column value using userID from users table
+//    func getSingleVal(userId: Int64, col: String) async throws -> String? {
+//        let user: User = try await client
+//            .from("users")
+//            .select()
+//            .eq("user_id", value: String(userId))
+//            .single()
+//            .execute()
+//            .value
+//        
+//        // Map column names to User properties
+//        switch col {
+//        case "email":
+//            return user.email
+//        case "password":
+//            return user.password
+//        case "security_question":
+//            return user.securityQuestion
+//        case "security_answer":
+//            return user.securityAnswer
+//        case "background_color":
+//            return user.backgroundColor
+//        case "accent_color":
+//            return user.accentColor
+//        default:
+//            return nil
+//        }
+//    }
+//    
+//    // Get all values for a user from a table where userID is a foreign key
+//    func getListVals(userId: Int64, table: String, col: String, filterCol: String? = nil, filterVal: String? = nil) async throws -> [String] {
+//        
+//        switch table.lowercased() {
+//        case "medications":
+//            let medications: [Medication] = try await fetchFilteredList(userId: userId, tableName: "medications", filterCol: filterCol, filterVal: filterVal)
+//            return medications.compactMap { medication in
+//                switch col {
+//                case "medication_name":
+//                    return medication.medicationName
+//                case "medication_category":
+//                    return medication.medicationCategory
+//                default:
+//                    return nil
+//                }
+//            }
+//            
+//        case "symptoms":
+//            let symptoms: [Symptom] = try await fetchFilteredList(userId: userId, tableName: "symptoms", filterCol: filterCol, filterVal: filterVal)
+//            return symptoms.compactMap { symptom in
+//                switch col {
+//                case "symptom_name":
+//                    return symptom.symptomName
+//                default:
+//                    return nil
+//                }
+//            }
+//            
+//        case "triggers":
+//            let triggers: [Trigger] = try await fetchFilteredList(userId: userId, tableName: "triggers", filterCol: filterCol, filterVal: filterVal)
+//            return triggers.compactMap { trigger in
+//                switch col {
+//                case "trigger_name":
+//                    return trigger.triggerName
+//                default:
+//                    return nil
+//                }
+//            }
+//            
+//        default:
+//            return []
+//        }
+//    }
+//    
+//    // Helper function to fetch filtered lists
+//    private func fetchFilteredList<T: Codable>(userId: Int64, tableName: String, filterCol: String?, filterVal: String?) async throws -> [T] {
+//        let endColumnName = "\(tableName.dropLast())_end"
+//        
+//        var query = client
+//            .from(tableName)
+//            .select()
+//            .eq("user_id", value: String(userId))
+//            .is(endColumnName, value: nil)  // Change to nil instead of "null"
+//        
+//        if let filterCol = filterCol, let filterVal = filterVal {
+//            query = query.eq(filterCol, value: filterVal)
+//        }
+//        
+//        let response: [T] = try await query.execute().value
+//        return response
+//    }
+//}

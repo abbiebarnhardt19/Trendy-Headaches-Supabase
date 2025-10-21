@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		360F6BB92E5BAE3F00415F0E /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 360F6BB82E5BAE3F00415F0E /* SQLite */; };
+		36E894DA2EA82CAA0046C443 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 36E894D92EA82CAA0046C443 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36E894DA2EA82CAA0046C443 /* Supabase in Frameworks */,
 				360F6BB92E5BAE3F00415F0E /* SQLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -126,6 +128,7 @@
 			name = "Trendy Headaches New";
 			packageProductDependencies = (
 				360F6BB82E5BAE3F00415F0E /* SQLite */,
+				36E894D92EA82CAA0046C443 /* Supabase */,
 			);
 			productName = "Trendy Headaches";
 			productReference = 360F6B532E57853E00415F0E /* Trendy Headaches New.app */;
@@ -211,6 +214,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				360F6BB62E5BACB900415F0E /* XCRemoteSwiftPackageReference "SQLite" */,
+				36E894D52EA829F00046C443 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 360F6B542E57853E00415F0E /* Products */;
@@ -618,6 +622,14 @@
 				minimumVersion = 0.15.4;
 			};
 		};
+		36E894D52EA829F00046C443 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -625,6 +637,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 360F6BB62E5BACB900415F0E /* XCRemoteSwiftPackageReference "SQLite" */;
 			productName = SQLite;
+		};
+		36E894D92EA82CAA0046C443 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 36E894D52EA829F00046C443 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
