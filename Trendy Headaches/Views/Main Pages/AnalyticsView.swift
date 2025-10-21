@@ -5,10 +5,9 @@
 //  Created by Abigail Barnhardt on 8/31/25.
 //
 
-//testing if new SQL repo works
+//testing if the new supabase repo works
 import SwiftUI
-//test test
-//test three, the working file is trnedy headaches SQLite
+
 
 struct AnalyticsView: View {
     
