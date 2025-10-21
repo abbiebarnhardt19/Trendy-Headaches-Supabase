@@ -1,0 +1,251 @@
+//
+//  ProfileView.swift
+//  Trendy Headaches
+//
+//  Created by Abigail Barnhardt on 8/31/25.
+//
+
+import SwiftUI
+
+struct ProfileView: View {
+    // Passed-in Values
+    var userID: Int64
+    @Binding var bg: String
+    @Binding var accent: String
+    
+    //  UI State
+    @State private var isEditing = false
+    @State private var logOut = false
+    @State private var showPolicy = false
+    @State private var showDelete = false
+    
+    //  User Data
+    @State private var symps: [String] = []
+    @State private var triggs: [String] = []
+    @State private var prevMeds: [String] = []
+    @State private var emergMeds: [String] = []
+    @State private var sQ = ""
+    @State private var sA = ""
+    @State private var themeName = ""
+    
+    //  Editable Values
+    @State private var newSQ = ""
+    @State private var newSA = ""
+    @State private var newTN = ""
+    @State private var newBG = ""
+    @State private var newAcc = ""
+    
+    //  Constants
+    private let themeOptions = ["Classic Light", "Light Pink", "Light Yellow", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
+    private let buttonNames = ["Edit Profile", "Data Policy", "Sign Out", "Delete Account"]
+    private let screenWidth = UIScreen.main.bounds.width
+    
+    // MARK: - Body
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                ProfileBGComps(bg: newBG, accent: newAcc)
+                
+                // Content
+                ScrollView {
+                    VStack{
+                        if isEditing {
+                            editingView()
+                        } else {
+                            viewingView()
+                        }
+                    }
+                }
+                .ignoresSafeArea(edges: .bottom)
+                
+                // Bottom Nav Bar
+                VStack {
+                    Spacer()
+                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3))
+                }
+                .ignoresSafeArea(edges: .bottom)
+                .zIndex(1)
+            }
+            //delete confirmation
+            .alert("Are you sure you want to delete your account?", isPresented: $showDelete) {
+                Button("Delete", role: .destructive) {
+                    Database.shared.deleteUser(userID: userID)
+                    logOut = true
+                }
+                Button("Cancel", role: .cancel) {}
+            }
+            //go to login if cancel account
+            .fullScreenCover(isPresented: $logOut) {
+                InitialView()
+            }
+            //get data on load
+            .onAppear {
+                Database.shared.loadData(userID: userID,  symps: &symps, triggs: &triggs,  prevMeds: &prevMeds, emergMeds: &emergMeds,  SQ: &sQ,  SA: &sA, newSQ: &newSQ, bg: &bg, accent: &accent, newBG: &newBG, newAccent: &newAcc, theme: &themeName,  newTN: &newTN)}
+        }
+    }
+    
+    // Editing View
+    @ViewBuilder
+    private func editingView() -> some View {
+        let colWidth = screenWidth / 2
+        
+        CustomText(text: "User Profile", color: newAcc, textAlign: .center, textSize: 45)
+            .padding(.top, 30)
+            .padding(.bottom, 10)
+        
+        HStack(alignment: .top) {
+            VStack(alignment: .center) {
+                //symptom editable list
+                sectionTitle("Symptoms", width: colWidth)
+                EditableList(items: $symps,  title: "Symptoms", bg: newBG, accent: newAcc,
+                     onAdd: { newSymptom in Database.shared.insertItem( table: Database.shared.symptoms, userID: userID, nameCol: Database.shared.symptom_name, name: newSymptom, startCol: Database.shared.symptom_start, endCol: Database.shared.symptom_end)},
+                             
+                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.symptoms, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.symptom_name)},
+                     
+                     onDelete: { value in Database.shared.endItem( table: Database.shared.symptoms, userID: userID, name: value, nameCol: Database.shared.symptom_name, endCol: Database.shared.symptom_end)} )
+                
+                //prev meds editable list
+                sectionTitle("Preventative Medications", width: colWidth)
+                EditableList(items: $prevMeds, title: "Preventative Medications", bg: newBG, accent: newAcc,
+                     onAdd: { newPrevMed in Database.shared.insertItem( table: Database.shared.medications, userID: userID, nameCol: Database.shared.medication_name, name: newPrevMed, startCol: Database.shared.medication_start, endCol: Database.shared.medication_end, medCat: "preventative" )},
+                             
+                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.medications, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.medication_name, medCat: "preventative")},
+                             
+                    onDelete: { value in Database.shared.endItem( table: Database.shared.medications, userID: userID, name: value, nameCol: Database.shared.medication_name, endCol: Database.shared.medication_end, medCat: "preventative")})
+                
+                //non-editable list fields
+                sectionTitle("Security Question", width: colWidth)
+                CustomTextField(bg: newBG, accent: newAcc, placeholder: "",  text: $newSQ,  width: colWidth - 15, height: 50, corner: 8, textSize: 20,  multiline: true)
+                
+                sectionTitle("Color Theme", width: colWidth)
+                CustomDropdown(theme: $newTN, bg: $newBG, accent: $newAcc, options: themeOptions, width: colWidth - 15, height: 50,  corner: 8, fontSize: 20)
+                
+                //conditionally show hex code text boxes
+                if newTN == "Custom" {
+                    sectionTitle("Hex Codes", width: colWidth)
+                    ColorTextField(accent: newAcc, bg: newBG, update: $newBG, placeholder: "Enter HEX color", width: colWidth-10)
+                    .padding(.vertical, 15)
+
+                    ColorTextField(accent: newAcc, bg: newBG, update: $newAcc, placeholder: "Enter HEX color", width: colWidth - 10)
+                }
+            }
+            .frame(maxWidth: colWidth)
+            .padding(.leading, 10)
+            
+            //second column
+            VStack {
+                //triggers editable list
+                sectionTitle("Triggers", width: colWidth)
+                EditableList(items: $triggs, title: "Triggers", bg: newBG, accent: newAcc,
+                     onAdd: { newTrigger in Database.shared.insertItem( table: Database.shared.triggers, userID: userID, nameCol: Database.shared.trigger_name, name: newTrigger, startCol: Database.shared.trigger_start, endCol: Database.shared.trigger_end)},
+                             
+                     onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.triggers, userID: userID,  old: oldValue, new: newValue, nameCol: Database.shared.trigger_name)},
+                     
+                     onDelete: { value in Database.shared.endItem( table: Database.shared.triggers, userID: userID, name: value, nameCol: Database.shared.trigger_name, endCol: Database.shared.trigger_end)} )
+                
+                //emerg meds editable list
+                sectionTitle("Emergency Medications", width: colWidth)
+                EditableList( items: $emergMeds, title: "Emergency Medications", bg: newBG, accent: newAcc,
+                      onAdd: { newEmergencyMed in Database.shared.insertItem( table: Database.shared.medications, userID: userID, nameCol: Database.shared.medication_name, name: newEmergencyMed, startCol: Database.shared.medication_start, endCol: Database.shared.medication_end,  medCat: "emergency")},
+                              
+                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.medications, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.medication_name, medCat: "emergency")},
+                              
+                    onDelete: { value in Database.shared.endItem( table: Database.shared.medications, userID: userID, name: value, nameCol: Database.shared.medication_name, endCol: Database.shared.medication_end, medCat: "emergency")})
+                
+                //non-edtiable list text field
+                sectionTitle("Security Answer", width: colWidth)
+                CustomTextField(bg: newBG, accent: newAcc, placeholder: "", text: $newSA, width: colWidth - 15, height: 50, corner: 8, textSize: 16)
+                
+                //push the changes to the database
+                CustomButton( text: "Save", bg: newBG, accent: newAcc, height: 50, width: colWidth - 25, corner: 36,  bold: true, textSize: 25, action: saveProfileChanges )
+                .padding(.top, 10)
+            }
+            .padding(.trailing, 10)
+        }
+        .frame(width: screenWidth)
+        .padding(.bottom, 120)
+    }
+    
+    //  Viewing View
+    @ViewBuilder
+    private func viewingView() -> some View {
+        let colWidth = screenWidth / 2
+        
+        CustomText(text: "User Profile", color: newAcc, textAlign: .center, textSize: 45)
+            .padding(.vertical, 50)
+        
+        HStack(alignment: .top) {
+            //column one
+            VStack {
+                //display the data in a non-editable list
+                section(colTitle: "Symptoms", items: symps, width: colWidth)
+                section(colTitle: "Preventative Meds", items: prevMeds, width: colWidth)
+                section(colTitle: "Security Question", items: [newSQ], width: colWidth)
+            }
+            .frame(maxWidth: colWidth)
+            
+            //column two
+            VStack {
+                //display the data in a non-editable list
+                section(colTitle: "Triggers", items: triggs, width: colWidth)
+                section(colTitle: "Emergency Meds", items: emergMeds, width: colWidth)
+                section(colTitle: "Color Theme", items: [themeName], width: colWidth)
+                
+                //options button
+                HStack {
+                    Spacer()
+                    let buttonActions: [() -> Void] = [ { isEditing = true },  { showPolicy = true },  { logOut = true },  { showDelete = true } ]
+                    
+                    FloatButton( accent: newAcc,  bg: newBG,  options: buttonNames, actions: buttonActions)
+                        .padding(.top, 20)
+                    .fullScreenCover(isPresented: $showPolicy) {
+                        PolicySheetView(policyFileName: "DataPolicy", showsAgreeButton: false)
+                    }
+                    .padding(.trailing, 10)
+                }
+            }
+            .frame(maxWidth: colWidth)
+        }
+    }
+    
+    //Break repetive code into reusable sections
+    private func sectionTitle(_ title: String, width: CGFloat) -> some View {
+        CustomText(text: title, color: newAcc, width: width - 15, textAlign: .center, multiAlign: .center, bold: true)
+    }
+    
+    private func section(colTitle: String, items: [String], width: CGFloat) -> some View {
+            VStack {
+                sectionTitle(colTitle, width: width)
+                CustomList(items: items, color: newAcc)
+            }
+    }
+    
+    private func saveProfileChanges() {
+        if sQ != newSQ {
+            Database.shared.updateUser(userID: userID, value: newSQ, col: "security_question")
+        }
+        
+        let normSA = Database.normalize(newSA)
+        let hashedSA = Database.hashString(normSA)
+        if hashedSA != sA {
+            Database.shared.updateUser(userID: userID, value: hashedSA, col: "security_answer")
+        }
+        
+        if bg != newBG {
+            Database.shared.updateUser(userID: userID, value: newBG, col: "background_color")
+            bg = newBG
+            themeName = Database.getThemeName(background: newBG, accent: newAcc)
+            newTN = themeName.contains("Custom") ? "Custom" : themeName
+        }
+        
+        if accent != newAcc {
+            Database.shared.updateUser(userID: userID, value: newAcc, col: "accent_color")
+            accent = newAcc
+        }
+        isEditing = false
+    }
+}
+
+#Preview {
+    ProfileView(userID: 1, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+}

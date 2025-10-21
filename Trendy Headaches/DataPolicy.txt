@@ -1,0 +1,48 @@
+#Introduction
+Welcome to Trendy Headaches! We are so happy that you’ve joined our community. We understand that sharing your health information can be scary, and we believe in transparency. This policy explains what data we collect, why we collect it, and how we keep it safe so you can use our app with confidence.
+
+#What Data We Collect
+##Account Data
+• Email: Used to uniquely identify your account
+• Password: Used to verify your identity when logging in
+• Security Question and Answer: Used to recover your account if you forget your password
+• App Color Theme: Used to personalize the look of your app
+
+##Health Data
+This data is used to customize your log page options, ultimately powering your personalized experience.
+• Symptoms/Illnesses: Conditions or symptoms you choose to log (e.g., “POTS,” “headache,” “nausea”)
+• Preventative Medications: Medications taken regularly to reduce the chance of symptoms
+• Emergency Medications: Medications taken to reduce the severity of symptoms when they occur
+• Triggers: Things you believe may contribute to the onset or severity of symptoms (e.g., stress, weather changes)
+• Start/End Dates: The date range for each of the above items
+
+##Log Data
+This is the main data you enter when using the app:
+• Date of event
+• Timeframe of onset
+• Severity level
+• Symptom/Illness logged
+• Emergency medication(s) taken (if any)
+• Trigger(s) present
+• Symptom description
+• Emergency medication effectiveness
+This information allows you to see patterns and insights over time.
+
+#How We Use Your Data
+• Account Data: Used to manage your account securely and personalize your experience
+• Health Data: Used to filter and organize logs, generate symptom and medication options, and help you view trends
+• Log Data: Used to identify patterns in frequency, timing, severity, triggers, and medication effectiveness. This data powers visualizations and reports to help you better understand your health
+
+#How We Store Your Data
+• Passwords & Security Answers: Stored securely in encrypted form
+• Personal Information: Kept separate from health and log data for additional privacy
+• Health & Log Data: Stored exactly as you enter it (capitalization, spelling, and punctuation included)
+
+#Your Control Over Your Data
+• You Own Your Data: We never sell your data to third parties
+• You Can Delete Your Data: Deleting your account permanently removes your data from our servers
+• Profile Edits Don’t Delete Data: If you delete a medication, trigger, or symptom, it will be marked as inactive but remain in your history for accurate reporting
+
+#Our Commitment to You
+• Your data is never shared or sold to advertisers or third parties
+• Your data is used only for the purposes described in this policy
