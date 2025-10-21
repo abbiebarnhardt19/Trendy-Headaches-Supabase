@@ -200,7 +200,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 360F6B4E2E57853E00415F0E /* Build configuration list for PBXProject "Trendy Headaches SQLite" */;
+			buildConfigurationList = 360F6B4E2E57853E00415F0E /* Build configuration list for PBXProject "Trendy Headaches Supabase" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -427,7 +427,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-New";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-Supabase";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -466,7 +466,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-New";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-Supabase";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -489,7 +489,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-NewTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-SupabaseTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -512,7 +512,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-NewTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-SupabaseTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -534,7 +534,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-NewUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-SupabaseUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -556,7 +556,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-NewUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "abbiebarnhardt.Trendy-Headaches-SupabaseUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
@@ -571,7 +571,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		360F6B4E2E57853E00415F0E /* Build configuration list for PBXProject "Trendy Headaches SQLite" */ = {
+		360F6B4E2E57853E00415F0E /* Build configuration list for PBXProject "Trendy Headaches Supabase" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				360F6B762E57854000415F0E /* Debug */,
