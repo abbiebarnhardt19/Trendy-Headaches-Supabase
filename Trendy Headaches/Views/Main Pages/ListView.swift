@@ -3,7 +3,6 @@
 //  Trendy Headaches
 //
 //  Created by Abigail Barnhardt on 9/19/25.
-//
 
 import SwiftUI
 
@@ -19,6 +18,7 @@ struct ListView: View {
     
     //list of all logs for the table
     @State private var logList: [UnifiedLog] = []
+    @State private var allLogs: [UnifiedLog] = []
     
     //bool for showing the filter dropdowns
     @State private var showFilter: Bool = false
@@ -55,7 +55,6 @@ struct ListView: View {
     
     //call this when any filter values change
     func filterLogs() {
-        let allLogs = Database.shared.getLogList(userID: userID)
         logList = allLogs.filter { log in
             guard logTypeFilter.contains(log.log_type) else { return false }
             
@@ -143,15 +142,16 @@ struct ListView: View {
             }
         }
         //load in user logs
-        .onAppear{
-            logList = Database.shared.getLogList(userID: userID)
+        .task {
+            allLogs = await Database.shared.getLogList(userID: userID)
+            logList = allLogs
             
-            if let earliest = logList.map({ $0.date }).min() {
+            if let earliest = allLogs.map({ $0.date }).min() {
                 startDate = earliest
                 stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
             }
             
-            sympOptions = Array(Set( logList.compactMap { log in
+            sympOptions = Array(Set( allLogs.compactMap { log in
                         if let symptom = log.symptom_name, !symptom.isEmpty {
                             return symptom
                         } else {
@@ -169,11 +169,16 @@ struct ListView: View {
         .onChange(of: sevStart) { filterLogs() }
         .onChange(of: sevEnd) {  filterLogs() }
         .onChange(of: selectedSymps) {  filterLogs() }
-        .onChange(of: deleteCount) {  filterLogs() }
+        .onChange(of: deleteCount) {
+            Task {
+                allLogs = await Database.shared.getLogList(userID: userID)
+                filterLogs()
+            }
+        }
         .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
-    ListView(userID: 1, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ListView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

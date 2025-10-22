@@ -3,558 +3,292 @@
 //  learning_xcode
 //
 //  Created by Abigail Barnhardt on 8/24/25.
-//
 
 import Foundation
-import SQLite
+import Supabase
 
 enum DatabaseError: Error {
     case connectionFailed
+    case insertFailed(String)
+    case queryFailed(String)
+    case userNotFound
 }
 
 class Database {
     static let shared = Database()
-    private let db: Connection
-
-    // tables
-    let users = Table("Users")
-    let symptoms = Table("Symptoms")
-    let medications = Table("Medications")
-    let triggers = Table("Triggers")
-    let logs = Table("Logs")
-    let log_triggers = Table("Log_Triggers")
-    let side_effects = Table("Side_Effects")
-
-    // columns
-    // users columns
-    let user_id = SQLite.Expression<Int64>("user_id")
-    let email = SQLite.Expression<String>("email")
-    let password = SQLite.Expression<String>("password")
-    let security_question = SQLite.Expression<String>("security_question")
-    let security_answer = SQLite.Expression<String>("security_answer")
-    let background_color = SQLite.Expression<String>("background_color")
-    let accent_color = SQLite.Expression<String>("accent_color")
+    internal let client: SupabaseClient
     
-    // symptoms columns
-    let symptom_id = SQLite.Expression<Int64>("symptom_id")
-    let symptom_name = SQLite.Expression<String>("symptom_name")
-    let symptom_start = SQLite.Expression<Date>("symptom_start")
-    let symptom_end = SQLite.Expression<Date?>("symptom_end")
-    
-    // medications columns
-    let medication_id = SQLite.Expression<Int64>("medication_id")
-    let medication_category = SQLite.Expression<String>("medication_category")
-    let medication_name = SQLite.Expression<String>("medication_name")
-    let medication_start = SQLite.Expression<Date>("medication_start")
-    let medication_end = SQLite.Expression<Date?>("medication_end")
-    
-    // triggers columns
-    let trigger_id = SQLite.Expression<Int64>("trigger_id")
-    let trigger_name = SQLite.Expression<String>("trigger_name")
-    let trigger_start = SQLite.Expression<Date>("trigger_start")
-    let trigger_end = SQLite.Expression<Date?>("trigger_end")
-    
-    // log columns
-    let log_id = SQLite.Expression<Int64>("log_id")
-    let date = SQLite.Expression<Date>("date")
-    let onset_time = SQLite.Expression<String?>("onset_time")
-    let severity = SQLite.Expression<Int64>("severity_level")
-    let med_taken = SQLite.Expression<Bool>("med_taken")
-    let med_worked = SQLite.Expression<Bool?>("med_worked")
-    let symptom_description = SQLite.Expression<String>("symptom_description")
-    let notes = SQLite.Expression<String>("notes")
-    let submit_time = SQLite.Expression<Date>("submit_time")
-    let log_medication_id = SQLite.Expression<Int64?>("log_medication_id")
-
-    //columns for table that handles many to many relationships
-    let lt_log_id = SQLite.Expression<Int64>("log_id")
-    let lt_trigger_id = SQLite.Expression<Int64>("trigger_id")
-    
-    let side_effect_id = SQLite.Expression<Int64>("side_effect_id")
-    let side_effect_name = SQLite.Expression<String>("side_effect_name")
-    let side_effect_severity = SQLite.Expression<Int64>("side_effect_severity")
-    let side_effect_date = SQLite.Expression<Date>("date")
-    let side_effect_medication_id = SQLite.Expression<Int64?>("medication_id")
-    let side_effect_submit_time = SQLite.Expression<Date>("side_effect_submit_time")
-
-    
-    //create database
     private init() {
-        // Get path to documents directory
-        let path = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first!
-        let dbPath = "\(path)/headache_tracker.sqlite3"
-        
-        // Delete old database if it exists (for testing)
-//                let fileManager = FileManager.default
-//                if fileManager.fileExists(atPath: dbPath) {
-//                    do {
-//                        try fileManager.removeItem(atPath: dbPath)
-//                        print("Old database deleted successfully")
-//                    } catch {
-//                        print("Failed to delete old database: \(error)")
-//                   }
-//                }
-        //make the database
-        
-        do {
-            db = try Connection(dbPath)
-            db.foreignKeys = true
-            createTables()
-            
-        } catch {
-            fatalError("Database connection failed: \(error)")
-        }
+        client = SupabaseClient(
+            supabaseURL: URL(string: SupabaseConfig.supabaseURL)!,
+            supabaseKey: SupabaseConfig.supabaseAnonKey
+        )
     }
-
-    //create each tabke with the predefined columns
-    private func createTables() {
-        do {
-            // create users columns
-            try db.run(users.create(ifNotExists: true) { t in
-                t.column(user_id, primaryKey: .autoincrement)
-                t.column(email, unique: true)
-                t.column(password)
-                t.column(security_question)
-                t.column(security_answer)
-                t.column(background_color)
-                t.column(accent_color)
-            })
-            
-            // create symptoms columns
-            try db.run(symptoms.create(ifNotExists: true) { t in
-                t.column(symptom_id, primaryKey: .autoincrement)
-                t.column(user_id)
-                t.column(symptom_name)
-                t.column(symptom_start)
-                t.column(symptom_end)
-                t.foreignKey(user_id, references: users, user_id, delete: .cascade)
-            })
-            
-            // create medications columns
-            try db.run(medications.create(ifNotExists: true) { t in
-                t.column(medication_id, primaryKey: .autoincrement)
-                t.column(medication_category)
-                t.column(medication_name)
-                t.column(medication_start)
-                t.column(medication_end)
-                t.column(user_id)
-                t.foreignKey(user_id, references: users, user_id, delete: .cascade)
-            })
-            
-            // create triggers columns
-            try db.run(triggers.create(ifNotExists: true) { t in
-                t.column(trigger_id, primaryKey: .autoincrement)
-                t.column(user_id)
-                t.column(trigger_name)
-                t.column(trigger_start)
-                t.column(trigger_end)
-                t.foreignKey(user_id, references: users, user_id, delete: .cascade)
-            })
-            
-            // create logs columns
-            try db.run(logs.create(ifNotExists: true) { t in
-                t.column(log_id, primaryKey: .autoincrement)
-                t.column(user_id)
-                t.column(date)
-                t.column(onset_time)
-                t.column(severity)
-                t.column(symptom_id)
-                t.column(med_taken)
-                t.column(log_medication_id)
-                t.column(med_worked)
-                t.column(symptom_description)
-                t.column(notes)
-                t.column(submit_time)
-                t.foreignKey(user_id, references: users, user_id, delete: .cascade)
-                t.foreignKey(log_medication_id, references: medications, medication_id, delete: .cascade)
-                t.foreignKey(symptom_id, references: symptoms, symptom_id, delete: .setNull)
-            })
-            
-            // create log_triggers (junction table for many to many relationship)
-            try db.run(log_triggers.create(ifNotExists: true) { t in
-                t.column(lt_log_id)
-                t.column(lt_trigger_id)
-                t.foreignKey(lt_log_id, references: logs, log_id, delete: .cascade)
-                t.foreignKey(lt_trigger_id, references: triggers, trigger_id, delete: .cascade)
-                t.primaryKey(lt_log_id, lt_trigger_id) // composite primary key
-            })
-            
-            try db.run(side_effects.create(ifNotExists: true) { t in
-                t.column(side_effect_id, primaryKey: .autoincrement)
-                t.column(user_id)
-                t.column(side_effect_medication_id)
-                t.column(side_effect_name)
-                t.column(side_effect_severity)
-                t.column(side_effect_date)
-                t.column(side_effect_submit_time)
-                t.foreignKey(user_id, references: users, user_id, delete: .cascade)
-                t.foreignKey(side_effect_medication_id, references: medications, medication_id, delete: .cascade)
-            })
-
-        } catch {
-            print("Table creation error: \(error)")
+    
+    // MARK: - Insert Structs
+    
+    struct UserInsert: Encodable {
+        let email: String
+        let password: String
+        let security_question: String
+        let security_answer: String
+        let background_color: String
+        let accent_color: String
+    }
+    
+    struct MedicationInsert: Encodable {
+        let user_id: Int64
+        let medication_category: String
+        let medication_name: String
+        let medication_start: String
+        let medication_end: String?
+        
+        init(user_id: Int64, medication_category: String, medication_name: String, medication_start: String, medication_end: String? = nil) {
+            self.user_id = user_id
+            self.medication_category = medication_category
+            self.medication_name = medication_name
+            self.medication_start = medication_start
+            self.medication_end = medication_end
         }
     }
     
-    //add a user to the database
-    func addUser(security_question_string: String, security_answer_string: String, emailAddress: String, passwordHash: String, userBackground: String, userAccent: String, preventativeMedsCSV: String? = nil, emergencyMedsCSV: String? = nil, symptomsCSV: String? = nil, triggersCSV: String? = nil) throws -> Int64 {
+    struct SymptomInsert: Encodable {
+        let user_id: Int64
+        let symptom_name: String
+        let symptom_start: String
+        let symptom_end: String?
         
-        var userId: Int64 = 0
+        init(user_id: Int64, symptom_name: String, symptom_start: String, symptom_end: String? = nil) {
+            self.user_id = user_id
+            self.symptom_name = symptom_name
+            self.symptom_start = symptom_start
+            self.symptom_end = symptom_end
+        }
+    }
+    
+    struct TriggerInsert: Encodable {
+        let user_id: Int64
+        let trigger_name: String
+        let trigger_start: String
+        let trigger_end: String?
         
-        // add the user data to the user table
+        init(user_id: Int64, trigger_name: String, trigger_start: String, trigger_end: String? = nil) {
+            self.user_id = user_id
+            self.trigger_name = trigger_name
+            self.trigger_start = trigger_start
+            self.trigger_end = trigger_end
+        }
+    }
+    
+    func addUser(
+        security_question_string: String,
+        security_answer_string: String,
+        emailAddress: String,
+        passwordHash: String,
+        userBackground: String,
+        userAccent: String,
+        preventativeMedsCSV: String? = nil,
+        emergencyMedsCSV: String? = nil,
+        symptomsCSV: String? = nil,
+        triggersCSV: String? = nil
+    ) async throws -> Int64 {
+        
+        let userData = UserInsert(
+            email: emailAddress,
+            password: passwordHash,
+            security_question: security_question_string,
+            security_answer: security_answer_string,
+            background_color: userBackground,
+            accent_color: userAccent
+        )
+        
+        // Insert user
+        let insertedUser: User
         do {
-            let insertUser = users.insert(security_question <- security_question_string, security_answer <- security_answer_string, email <- emailAddress, password <- passwordHash, background_color <- userBackground, accent_color <- userAccent)
-            //save the user id to use as a foriegn key in the other tables
-            userId = try db.run(insertUser)
+            insertedUser = try await client
+                .from("Users")
+                .insert(userData)
+                .select()
+                .single()
+                .execute()
+                .value
+        } catch let error as PostgrestError {
+            print("Failed to insert user:")
+            print("- Message: \(error.message)")
+            print("- Code: \(error.code ?? "no code")")
+            print("- Details: \(error.detail ?? "no details")")
+            print("- Hint: \(error.hint ?? "no hint")")
+            throw DatabaseError.insertFailed("Failed to create user account: \(error.message)")
         } catch {
-            throw NSError(domain: "Database Error", code: 1, userInfo: [NSLocalizedDescriptionKey: "Oops! Something went wrong. Please try again later."])
+            print("Unexpected error inserting user: \(error)")
+            throw DatabaseError.insertFailed("Failed to create user account")
         }
         
-        //add preventative meds, seperate on commas and remove whitespace
+        let userId = insertedUser.userId
+        print("User created successfully with ID: \(userId)")
+        
+        // Insert preventative medications
         if let preventative = preventativeMedsCSV, !preventative.isEmpty {
             let medsArray = preventative.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
+                let medicationData = MedicationInsert(
+                    user_id: userId,
+                    medication_category: "preventative",
+                    medication_name: med,
+                    medication_start: ISO8601DateFormatter().string(from: Date())
+                )
                 do {
-                    let insertMed = medications.insert(user_id <- userId, medication_category <- "preventative", medication_name <- med, medication_start <- Date(), medication_end <- nil)
-                    try db.run(insertMed)
+                    try await client.from("Medications").insert(medicationData).execute()
+                } catch let error as PostgrestError {
+                    print("Failed to insert preventative medication '\(med)':")
+                    print("- Message: \(error.message)")
+                    print("- Code: \(error.code ?? "no code")")
+                    // Continue with other medications instead of failing completely
                 } catch {
-                    throw NSError(domain: "Database Error", code: 2, userInfo: [NSLocalizedDescriptionKey: "Oops! Something went wrong. Please try again later."])
+                    print("Unexpected error inserting preventative medication '\(med)': \(error)")
                 }
             }
         }
         
-        //add emergency meds, seperate on commas and remove whitespace
+        // Insert emergency medications
         if let emergency = emergencyMedsCSV, !emergency.isEmpty {
             let medsArray = emergency.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
+                let medicationData = MedicationInsert(
+                    user_id: userId,
+                    medication_category: "emergency",
+                    medication_name: med,
+                    medication_start: ISO8601DateFormatter().string(from: Date())
+                )
                 do {
-                    let insertMed = medications.insert(user_id <- userId, medication_category <- "emergency",  medication_name <- med, medication_start <- Date(), medication_end <- nil)
-                    try db.run(insertMed)
+                    try await client.from("Medications").insert(medicationData).execute()
+                } catch let error as PostgrestError {
+                    print("Failed to insert emergency medication '\(med)':")
+                    print("- Message: \(error.message)")
+                    print("- Code: \(error.code ?? "no code")")
+                    // Continue with other medications instead of failing completely
                 } catch {
-                    throw NSError(domain: "Database Error", code: 3, userInfo: [NSLocalizedDescriptionKey: "Oops! Something went wrong. Please try again later."])
+                    print("Unexpected error inserting emergency medication '\(med)': \(error)")
                 }
             }
         }
         
-        //add triggers,seperate on commas and remove whitespace
+        // Insert triggers
         if let triggersList = triggersCSV, !triggersList.isEmpty {
             let array = triggersList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for trig in array where !trig.isEmpty {
+                let triggerData = TriggerInsert(
+                    user_id: userId,
+                    trigger_name: trig,
+                    trigger_start: ISO8601DateFormatter().string(from: Date())
+                )
                 do {
-                    let insertTrig = triggers.insert(user_id <- userId, trigger_name <- trig,  trigger_start <- Date(), trigger_end <- nil)
-                    try db.run(insertTrig)
+                    try await client.from("Triggers").insert(triggerData).execute()
+                } catch let error as PostgrestError {
+                    print("Failed to insert trigger '\(trig)':")
+                    print("- Message: \(error.message)")
+                    print("- Code: \(error.code ?? "no code")")
+                    // Continue with other triggers instead of failing completely
                 } catch {
-                    throw NSError(domain: "Database Error", code: 4, userInfo: [NSLocalizedDescriptionKey: "Oops! Something went wrong. Please try again later."])
+                    print("Unexpected error inserting trigger '\(trig)': \(error)")
                 }
             }
         }
         
-        //add symptoms to the symptoms table
-        //seperate on commas and remove whitespace
+        // Insert symptoms
         if let symptomsList = symptomsCSV, !symptomsList.isEmpty {
             let array = symptomsList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for symptom in array where !symptom.isEmpty {
+                let symptomData = SymptomInsert(
+                    user_id: userId,
+                    symptom_name: symptom,
+                    symptom_start: ISO8601DateFormatter().string(from: Date())
+                )
                 do {
-                    let insertSymptom = symptoms.insert(
-                        user_id <- userId,
-                        symptom_name <- symptom,
-                        symptom_start <- Date(),
-                        symptom_end <- nil
-                    )
-                    try db.run(insertSymptom)
+                    try await client.from("Symptoms").insert(symptomData).execute()
+                } catch let error as PostgrestError {
+                    print("Failed to insert symptom '\(symptom)':")
+                    print("- Message: \(error.message)")
+                    print("- Code: \(error.code ?? "no code")")
+                    // Continue with other symptoms instead of failing completely
                 } catch {
-                    throw NSError(domain: "Database Error", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to insert symptom '\(symptom)'. Error: \(error)"])
+                    print("Unexpected error inserting symptom '\(symptom)': \(error)")
                 }
             }
         }
+        
+        print("User setup completed for user ID: \(userId)")
         return userId
     }
-
-    //database access helpers
-    func run(_ insert: SQLite.Insert) throws -> Int64 {
-        try db.run(insert)
+    // MARK: - Model Structs
+    
+    struct User: Codable {
+        let userId: Int64
+        let email: String
+        let password: String
+        let securityQuestion: String
+        let securityAnswer: String
+        let backgroundColor: String
+        let accentColor: String
+        
+        enum CodingKeys: String, CodingKey {
+            case userId = "user_id"
+            case email
+            case password
+            case securityQuestion = "security_question"
+            case securityAnswer = "security_answer"
+            case backgroundColor = "background_color"
+            case accentColor = "accent_color"
+        }
     }
-
-    func run(_ update: SQLite.Update) throws -> Int {
-        try db.run(update)
+    
+    struct Symptom: Codable {
+        let symptomId: Int64
+        let userId: Int64
+        let symptomName: String
+        let symptomStart: String
+        let symptomEnd: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case symptomId = "symptom_id"
+            case userId = "user_id"
+            case symptomName = "symptom_name"
+            case symptomStart = "symptom_start"
+            case symptomEnd = "symptom_end"
+        }
     }
-
-    func run(_ delete: SQLite.Delete) throws -> Int {
-        try db.run(delete)
+    
+    struct Medication: Codable {
+        let medicationId: Int64
+        let userId: Int64
+        let medicationCategory: String
+        let medicationName: String
+        let medicationStart: String
+        let medicationEnd: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case medicationId = "medication_id"
+            case userId = "user_id"
+            case medicationCategory = "medication_category"
+            case medicationName = "medication_name"
+            case medicationStart = "medication_start"
+            case medicationEnd = "medication_end"
+        }
     }
-
-    func pluck(_ query: SQLite.QueryType) throws -> SQLite.Row? {
-        try db.pluck(query)
-    }
-
-    func prepare(_ query: SQLite.QueryType) throws -> AnySequence<SQLite.Row> {
-        try db.prepare(query)
+    
+    struct Trigger: Codable {
+        let triggerId: Int64
+        let userId: Int64
+        let triggerName: String
+        let triggerStart: String
+        let triggerEnd: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case triggerId = "trigger_id"
+            case userId = "user_id"
+            case triggerName = "trigger_name"
+            case triggerStart = "trigger_start"
+            case triggerEnd = "trigger_end"
+        }
     }
 }
-
-//
-//  Database.swift
-//  learning_xcode
-//
-//  Created by Abigail Barnhardt on 8/24/25.
-//
-//
-//  Database.swift
-//  learning_xcode
-//
-//  Created by Abigail Barnhardt on 8/24/25.
-//
-//
-//  Database.swift
-//  learning_xcode
-//
-//  Created by Abigail Barnhardt on 8/24/25.
-//
-//
-//  Database.swift
-//  learning_xcode
-//
-//  Created by Abigail Barnhardt on 8/24/25.
-//
-//
-//  Database.swift
-//  learning_xcode
-//
-//  Created by Abigail Barnhardt on 8/24/25.
-//
-//
-//import Foundation
-//import Supabase
-//
-//enum DatabaseError: Error {
-//    case connectionFailed
-//    case insertFailed(String)
-//    case queryFailed(String)
-//    case userNotFound
-//}
-//
-//class Database {
-//    static let shared = Database()
-//    internal let client: SupabaseClient
-//    
-//    private init() {
-//        client = SupabaseClient(
-//            supabaseURL: URL(string: SupabaseConfig.supabaseURL)!,
-//            supabaseKey: SupabaseConfig.supabaseAnonKey
-//        )
-//    }
-//    
-//    // MARK: - Insert Structs
-//    
-//    struct UserInsert: Encodable {
-//        let email: String
-//        let password: String
-//        let security_question: String
-//        let security_answer: String
-//        let background_color: String
-//        let accent_color: String
-//    }
-//    
-//    struct MedicationInsert: Encodable {
-//        let user_id: Int64
-//        let medication_category: String
-//        let medication_name: String
-//        let medication_start: String
-//        let medication_end: String?
-//        
-//        init(user_id: Int64, medication_category: String, medication_name: String, medication_start: String, medication_end: String? = nil) {
-//            self.user_id = user_id
-//            self.medication_category = medication_category
-//            self.medication_name = medication_name
-//            self.medication_start = medication_start
-//            self.medication_end = medication_end
-//        }
-//    }
-//    
-//    struct SymptomInsert: Encodable {
-//        let user_id: Int64
-//        let symptom_name: String
-//        let symptom_start: String
-//        let symptom_end: String?
-//        
-//        init(user_id: Int64, symptom_name: String, symptom_start: String, symptom_end: String? = nil) {
-//            self.user_id = user_id
-//            self.symptom_name = symptom_name
-//            self.symptom_start = symptom_start
-//            self.symptom_end = symptom_end
-//        }
-//    }
-//    
-//    struct TriggerInsert: Encodable {
-//        let user_id: Int64
-//        let trigger_name: String
-//        let trigger_start: String
-//        let trigger_end: String?
-//        
-//        init(user_id: Int64, trigger_name: String, trigger_start: String, trigger_end: String? = nil) {
-//            self.user_id = user_id
-//            self.trigger_name = trigger_name
-//            self.trigger_start = trigger_start
-//            self.trigger_end = trigger_end
-//        }
-//    }
-//    
-//    // MARK: - Add User with All Related Data
-//    
-//    func addUser(
-//        security_question_string: String,
-//        security_answer_string: String,
-//        emailAddress: String,
-//        passwordHash: String,
-//        userBackground: String,
-//        userAccent: String,
-//        preventativeMedsCSV: String? = nil,
-//        emergencyMedsCSV: String? = nil,
-//        symptomsCSV: String? = nil,
-//        triggersCSV: String? = nil
-//    ) async throws -> Int64 {
-//        
-//        let userData = UserInsert(
-//            email: emailAddress,
-//            password: passwordHash,
-//            security_question: security_question_string,
-//            security_answer: security_answer_string,
-//            background_color: userBackground,
-//            accent_color: userAccent
-//        )
-//        
-//        let insertedUser: User = try await client
-//            .from("users")
-//            .insert(userData)
-//            .select()
-//            .single()
-//            .execute()
-//            .value
-//        
-//        let userId = insertedUser.userId
-//        
-//        if let preventative = preventativeMedsCSV, !preventative.isEmpty {
-//            let medsArray = preventative.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-//            for med in medsArray where !med.isEmpty {
-//                let medicationData = MedicationInsert(
-//                    user_id: userId,
-//                    medication_category: "preventative",
-//                    medication_name: med,
-//                    medication_start: ISO8601DateFormatter().string(from: Date())
-//                )
-//                try await client.from("medications").insert(medicationData).execute()
-//            }
-//        }
-//        
-//        if let emergency = emergencyMedsCSV, !emergency.isEmpty {
-//            let medsArray = emergency.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-//            for med in medsArray where !med.isEmpty {
-//                let medicationData = MedicationInsert(
-//                    user_id: userId,
-//                    medication_category: "emergency",
-//                    medication_name: med,
-//                    medication_start: ISO8601DateFormatter().string(from: Date())
-//                )
-//                try await client.from("medications").insert(medicationData).execute()
-//            }
-//        }
-//        
-//        if let triggersList = triggersCSV, !triggersList.isEmpty {
-//            let array = triggersList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-//            for trig in array where !trig.isEmpty {
-//                let triggerData = TriggerInsert(
-//                    user_id: userId,
-//                    trigger_name: trig,
-//                    trigger_start: ISO8601DateFormatter().string(from: Date())
-//                )
-//                try await client.from("triggers").insert(triggerData).execute()
-//            }
-//        }
-//        
-//        if let symptomsList = symptomsCSV, !symptomsList.isEmpty {
-//            let array = symptomsList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-//            for symptom in array where !symptom.isEmpty {
-//                let symptomData = SymptomInsert(
-//                    user_id: userId,
-//                    symptom_name: symptom,
-//                    symptom_start: ISO8601DateFormatter().string(from: Date())
-//                )
-//                try await client.from("symptoms").insert(symptomData).execute()
-//            }
-//        }
-//        
-//        return userId
-//    }
-//}
-//
-//// MARK: - Model Structs
-//
-//struct User: Codable {
-//    let userId: Int64
-//    let email: String
-//    let password: String
-//    let securityQuestion: String
-//    let securityAnswer: String
-//    let backgroundColor: String
-//    let accentColor: String
-//    
-//    enum CodingKeys: String, CodingKey {
-//        case userId = "user_id"
-//        case email
-//        case password
-//        case securityQuestion = "security_question"
-//        case securityAnswer = "security_answer"
-//        case backgroundColor = "background_color"
-//        case accentColor = "accent_color"
-//    }
-//}
-//
-//struct Symptom: Codable {
-//    let symptomId: Int64
-//    let userId: Int64
-//    let symptomName: String
-//    let symptomStart: String
-//    let symptomEnd: String?
-//    
-//    enum CodingKeys: String, CodingKey {
-//        case symptomId = "symptom_id"
-//        case userId = "user_id"
-//        case symptomName = "symptom_name"
-//        case symptomStart = "symptom_start"
-//        case symptomEnd = "symptom_end"
-//    }
-//}
-//
-//struct Medication: Codable {
-//    let medicationId: Int64
-//    let userId: Int64
-//    let medicationCategory: String
-//    let medicationName: String
-//    let medicationStart: String
-//    let medicationEnd: String?
-//    
-//    enum CodingKeys: String, CodingKey {
-//        case medicationId = "medication_id"
-//        case userId = "user_id"
-//        case medicationCategory = "medication_category"
-//        case medicationName = "medication_name"
-//        case medicationStart = "medication_start"
-//        case medicationEnd = "medication_end"
-//    }
-//}
-//
-//struct Trigger: Codable {
-//    let triggerId: Int64
-//    let userId: Int64
-//    let triggerName: String
-//    let triggerStart: String
-//    let triggerEnd: String?
-//    
-//    enum CodingKeys: String, CodingKey {
-//        case triggerId = "trigger_id"
-//        case userId = "user_id"
-//        case triggerName = "trigger_name"
-//        case triggerStart = "trigger_start"
-//        case triggerEnd = "trigger_end"
-//    }
-//}

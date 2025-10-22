@@ -3,7 +3,6 @@
 //  Trendy Headaches
 //
 //  Created by Abigail Barnhardt on 8/31/25.
-//
 
 import SwiftUI
 
@@ -69,8 +68,10 @@ struct ProfileView: View {
             //delete confirmation
             .alert("Are you sure you want to delete your account?", isPresented: $showDelete) {
                 Button("Delete", role: .destructive) {
-                    Database.shared.deleteUser(userID: userID)
-                    logOut = true
+                    Task {
+                        await Database.shared.deleteUser(userID: userID)
+                        logOut = true
+                    }
                 }
                 Button("Cancel", role: .cancel) {}
             }
@@ -79,8 +80,23 @@ struct ProfileView: View {
                 InitialView()
             }
             //get data on load
-            .onAppear {
-                Database.shared.loadData(userID: userID,  symps: &symps, triggs: &triggs,  prevMeds: &prevMeds, emergMeds: &emergMeds,  SQ: &sQ,  SA: &sA, newSQ: &newSQ, bg: &bg, accent: &accent, newBG: &newBG, newAccent: &newAcc, theme: &themeName,  newTN: &newTN)}
+            .task {
+                if let data = await Database.shared.loadData(userID: userID) {
+                    symps = data.symps
+                    triggs = data.triggs
+                    prevMeds = data.prevMeds
+                    emergMeds = data.emergMeds
+                    sQ = data.SQ
+                    sA = data.SA
+                    newSQ = data.SQ
+                    bg = data.bg
+                    accent = data.accent
+                    newBG = data.bg
+                    newAcc = data.accent
+                    themeName = data.theme
+                    newTN = data.theme.contains("Custom") ? "Custom" : data.theme
+                }
+            }
         }
     }
     
@@ -98,20 +114,44 @@ struct ProfileView: View {
                 //symptom editable list
                 sectionTitle("Symptoms", width: colWidth)
                 EditableList(items: $symps,  title: "Symptoms", bg: newBG, accent: newAcc,
-                     onAdd: { newSymptom in Database.shared.insertItem( table: Database.shared.symptoms, userID: userID, nameCol: Database.shared.symptom_name, name: newSymptom, startCol: Database.shared.symptom_start, endCol: Database.shared.symptom_end)},
+                     onAdd: { newSymptom in
+                    Task {
+                        await Database.shared.insertItem(tableName: "Symptoms", userID: userID, name: newSymptom)
+                    }
+                },
                              
-                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.symptoms, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.symptom_name)},
+                    onEdit: { oldValue, newValue in
+                    Task {
+                        await Database.shared.updateItem(tableName: "Symptoms", userID: userID, old: oldValue, new: newValue)
+                    }
+                },
                      
-                     onDelete: { value in Database.shared.endItem( table: Database.shared.symptoms, userID: userID, name: value, nameCol: Database.shared.symptom_name, endCol: Database.shared.symptom_end)} )
+                     onDelete: { value in
+                    Task {
+                        await Database.shared.endItem(tableName: "Symptoms", userID: userID, name: value)
+                    }
+                })
                 
                 //prev meds editable list
                 sectionTitle("Preventative Medications", width: colWidth)
                 EditableList(items: $prevMeds, title: "Preventative Medications", bg: newBG, accent: newAcc,
-                     onAdd: { newPrevMed in Database.shared.insertItem( table: Database.shared.medications, userID: userID, nameCol: Database.shared.medication_name, name: newPrevMed, startCol: Database.shared.medication_start, endCol: Database.shared.medication_end, medCat: "preventative" )},
+                     onAdd: { newPrevMed in
+                    Task {
+                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newPrevMed, medCat: "preventative")
+                    }
+                },
                              
-                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.medications, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.medication_name, medCat: "preventative")},
+                    onEdit: { oldValue, newValue in
+                    Task {
+                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue, medCat: "preventative")
+                    }
+                },
                              
-                    onDelete: { value in Database.shared.endItem( table: Database.shared.medications, userID: userID, name: value, nameCol: Database.shared.medication_name, endCol: Database.shared.medication_end, medCat: "preventative")})
+                    onDelete: { value in
+                    Task {
+                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "preventative")
+                    }
+                })
                 
                 //non-editable list fields
                 sectionTitle("Security Question", width: colWidth)
@@ -137,20 +177,44 @@ struct ProfileView: View {
                 //triggers editable list
                 sectionTitle("Triggers", width: colWidth)
                 EditableList(items: $triggs, title: "Triggers", bg: newBG, accent: newAcc,
-                     onAdd: { newTrigger in Database.shared.insertItem( table: Database.shared.triggers, userID: userID, nameCol: Database.shared.trigger_name, name: newTrigger, startCol: Database.shared.trigger_start, endCol: Database.shared.trigger_end)},
+                     onAdd: { newTrigger in
+                    Task {
+                        await Database.shared.insertItem(tableName: "Triggers", userID: userID, name: newTrigger)
+                    }
+                },
                              
-                     onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.triggers, userID: userID,  old: oldValue, new: newValue, nameCol: Database.shared.trigger_name)},
+                     onEdit: { oldValue, newValue in
+                    Task {
+                        await Database.shared.updateItem(tableName: "Triggers", userID: userID, old: oldValue, new: newValue)
+                    }
+                },
                      
-                     onDelete: { value in Database.shared.endItem( table: Database.shared.triggers, userID: userID, name: value, nameCol: Database.shared.trigger_name, endCol: Database.shared.trigger_end)} )
+                     onDelete: { value in
+                    Task {
+                        await Database.shared.endItem(tableName: "Triggers", userID: userID, name: value)
+                    }
+                })
                 
                 //emerg meds editable list
                 sectionTitle("Emergency Medications", width: colWidth)
                 EditableList( items: $emergMeds, title: "Emergency Medications", bg: newBG, accent: newAcc,
-                      onAdd: { newEmergencyMed in Database.shared.insertItem( table: Database.shared.medications, userID: userID, nameCol: Database.shared.medication_name, name: newEmergencyMed, startCol: Database.shared.medication_start, endCol: Database.shared.medication_end,  medCat: "emergency")},
+                      onAdd: { newEmergencyMed in
+                    Task {
+                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newEmergencyMed, medCat: "emergency")
+                    }
+                },
                               
-                    onEdit: { oldValue, newValue in Database.shared.updateItem( table: Database.shared.medications, userID: userID, old: oldValue, new: newValue, nameCol: Database.shared.medication_name, medCat: "emergency")},
+                    onEdit: { oldValue, newValue in
+                    Task {
+                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue, medCat: "emergency")
+                    }
+                },
                               
-                    onDelete: { value in Database.shared.endItem( table: Database.shared.medications, userID: userID, name: value, nameCol: Database.shared.medication_name, endCol: Database.shared.medication_end, medCat: "emergency")})
+                    onDelete: { value in
+                    Task {
+                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "emergency")
+                    }
+                })
                 
                 //non-edtiable list text field
                 sectionTitle("Security Answer", width: colWidth)
@@ -221,31 +285,33 @@ struct ProfileView: View {
     }
     
     private func saveProfileChanges() {
-        if sQ != newSQ {
-            Database.shared.updateUser(userID: userID, value: newSQ, col: "security_question")
+        Task {
+            if sQ != newSQ {
+                await Database.shared.updateUser(userID: userID, value: newSQ, col: "security_question")
+            }
+            
+            let normSA = Database.normalize(newSA)
+            let hashedSA = normSA
+            if hashedSA != sA {
+                await Database.shared.updateUser(userID: userID, value: hashedSA, col: "security_answer")
+            }
+            
+            if bg != newBG {
+                await Database.shared.updateUser(userID: userID, value: newBG, col: "background_color")
+                bg = newBG
+                themeName = Database.getThemeName(background: newBG, accent: newAcc)
+                newTN = themeName.contains("Custom") ? "Custom" : themeName
+            }
+            
+            if accent != newAcc {
+                await Database.shared.updateUser(userID: userID, value: newAcc, col: "accent_color")
+                accent = newAcc
+            }
+            isEditing = false
         }
-        
-        let normSA = Database.normalize(newSA)
-        let hashedSA = Database.hashString(normSA)
-        if hashedSA != sA {
-            Database.shared.updateUser(userID: userID, value: hashedSA, col: "security_answer")
-        }
-        
-        if bg != newBG {
-            Database.shared.updateUser(userID: userID, value: newBG, col: "background_color")
-            bg = newBG
-            themeName = Database.getThemeName(background: newBG, accent: newAcc)
-            newTN = themeName.contains("Custom") ? "Custom" : themeName
-        }
-        
-        if accent != newAcc {
-            Database.shared.updateUser(userID: userID, value: newAcc, col: "accent_color")
-            accent = newAcc
-        }
-        isEditing = false
     }
 }
 
 #Preview {
-    ProfileView(userID: 1, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ProfileView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

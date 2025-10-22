@@ -124,7 +124,7 @@ private extension CreateAccountView {
         checkEmail = Task {
             try? await Task.sleep(nanoseconds: 500_000_000)
             if !Task.isCancelled {
-                emailAvail = !Database.emailExists(email)
+                emailAvail = !(await Database.emailExists(email))
             }
         }
     }

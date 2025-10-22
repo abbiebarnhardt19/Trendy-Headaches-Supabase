@@ -46,7 +46,9 @@ struct CreateAccountView3: View {
                             
                             // Submit button
                             CustomButton(text: "Submit", bg: bg, accent: accent) {
-                                createAccount()
+                                Task {
+                                    await createAccount()
+                                }
                             }
                             .padding(.bottom, 40)
                         }
@@ -73,13 +75,14 @@ struct CreateAccountView3: View {
         }
     }
     
-    private func createAccount() {
+    private func createAccount() async {
         do{
-            try Database.createUser(email: email, pass: passOne,  SQ: SQ,  SA: SA,  bg: bg, accent: accent, symps: symps, prevMeds: prevMeds, emergMeds: emergMeds, triggs: triggs)
+            try await Database.createUser(email: email, pass: passOne,  SQ: SQ,  SA: SA,  bg: bg, accent: accent, symps: symps, prevMeds: prevMeds, emergMeds: emergMeds, triggs: triggs)
             created = true
         }
         catch{
             print("Failed to create account")
+            print("Error type: \(type(of: error))")
         }
     }
 }
