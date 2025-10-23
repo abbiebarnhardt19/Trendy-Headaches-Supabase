@@ -209,8 +209,6 @@ struct LogView: View {
                                 else{
                                     emergMedID=nil
                                 }
-                                print("stringDate: \(stringDate)")
-                                print("date: \(date)")
                                 await Database.shared.updateSymptomLog(logID: existingLog ?? 0, userID: userID, date: date, onsetTime: onset, severity: severity, symptomID: sympID, medTaken: medTaken, medicationID: emergMedID, medWorked: medEffective, symptomDescription: sympDesc, notes: notes, triggerIDs: triggIDs)
                                 
                                 listView = true
@@ -356,9 +354,6 @@ struct LogView: View {
             if medTakenName != ""{
                 emergMedID = (await Database.shared.getIDFromName(tableName: "Medications", names: [medTakenName ?? ""], userID: userID)).first
             }
-            
-            //convert the date from string format
-            let enteredDate = formatter.date(from: stringDate) ?? Date()
             
             //add log to database
             logID = await Database.shared.createLog(userID: userID,  date: date, symptom_onset: onset ?? "", symptom: sympID, severity: severity, med_taken: medTaken, med_taken_id: emergMedID, symptom_desc: sympDesc, notes: notes, submit: Date(), triggerIDs: triggIDs) ?? 0

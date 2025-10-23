@@ -44,21 +44,8 @@ extension Database {
     // Add user to the database (now uses the existing addUser function)
     static func createUser(email: String, pass: String, SQ: String, SA: String, bg: String, accent: String, symps: String, prevMeds: String, emergMeds: String, triggs: String) async throws {
         let normalizedEmail = Database.normalize(email)
-        //let hashedPassword = Database.hashString(pass)
-        //let hashedSecurityAnswer = Database.hashString(Database.normalize(SA))
         
-        _ = try await Database.shared.addUser(
-            security_question_string: SQ,
-            security_answer_string: SA,
-            emailAddress: normalizedEmail,
-            passwordHash: pass,
-            userBackground: bg,
-            userAccent: accent,
-            preventativeMedsCSV: prevMeds,
-            emergencyMedsCSV: emergMeds,
-            symptomsCSV: symps,
-            triggersCSV: triggs
-        )
+        _ = try await Database.shared.addUser( security_question_string: SQ, security_answer_string: SA, emailAddress: normalizedEmail, passwordHash: pass, userBackground: bg, userAccent: accent, preventativeMedsCSV: prevMeds, emergencyMedsCSV: emergMeds, symptomsCSV: symps, triggersCSV: triggs)
     }
     
     // Check if email and password combo is valid
@@ -93,18 +80,10 @@ extension Database {
                 return false
             }
             
-            //let hashedPassword = Database.hashString(password)
-            
-            struct PasswordUpdate: Encodable {
-                let password: String
-            }
-            
-            let updateData = PasswordUpdate(password: password)
-            
             try await Database.shared.client
                 .from("Users")
-                .update(updateData)
-                .eq("user_id", value: String(userId))
+                .update(["password": password])
+                .eq("user_id", value: Int(userId))
                 .execute()
             
             return true
@@ -120,7 +99,7 @@ extension Database {
             try await client
                 .from("Users")
                 .delete()
-                .eq("user_id", value: String(userID))
+                .eq("user_id", value: Int(userID))
                 .execute()
         } catch {
             print("Failed to delete user \(userID): \(error)")
@@ -199,32 +178,24 @@ extension Database {
     
     // Function for users adding a value to a category
     func insertItem(tableName: String, userID: Int64, name: String, medCat: String? = nil) async {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let dateString = dateFormatter.string(from: Date())
+        
         do {
             switch tableName.lowercased() {
-            case "Medications":
+            case "medications":
                 guard let category = medCat else { return }
-                let medicationData = MedicationInsert(
-                    user_id: userID,
-                    medication_category: category,
-                    medication_name: name,
-                    medication_start: ISO8601DateFormatter().string(from: Date())
-                )
+                let medicationData = MedicationInsert(user_id: userID, medication_category: category, medication_name: name, medication_start: dateString, medication_end: nil)
                 try await client.from("Medications").insert(medicationData).execute()
                 
-            case "Symptoms":
-                let symptomData = SymptomInsert(
-                    user_id: userID,
-                    symptom_name: name,
-                    symptom_start: ISO8601DateFormatter().string(from: Date())
-                )
+            case "symptoms":
+                let symptomData = SymptomInsert(user_id: userID, symptom_name: name, symptom_start: dateString, symptom_end: nil)
                 try await client.from("Symptoms").insert(symptomData).execute()
                 
-            case "Triggers":
-                let triggerData = TriggerInsert(
-                    user_id: userID,
-                    trigger_name: name,
-                    trigger_start: ISO8601DateFormatter().string(from: Date())
-                )
+            case "triggers":
+                let triggerData = TriggerInsert(user_id: userID, trigger_name: name, trigger_start: dateString, trigger_end: nil)
+    
                 try await client.from("Triggers").insert(triggerData).execute()
                 
             default:
@@ -240,48 +211,21 @@ extension Database {
         do {
             let nameColumn: String
             switch tableName.lowercased() {
-            case "Medications":
+            case "medications":
                 nameColumn = "medication_name"
-            case "Symptoms":
+            case "symptoms":
                 nameColumn = "symptom_name"
-            case "Triggers":
+            case "triggers":
                 nameColumn = "trigger_name"
             default:
                 print("Unknown table: \(tableName)")
                 return
             }
             
-            // Create encodable struct for update
-            struct GenericUpdate: Encodable {
-                private let data: [String: String]
-                
-                init(column: String, value: String) {
-                    self.data = [column: value]
-                }
-                
-                func encode(to encoder: Encoder) throws {
-                    var container = encoder.container(keyedBy: DynamicKey.self)
-                    for (key, value) in data {
-                        guard let dynamicKey = DynamicKey(stringValue: key) else { continue }
-                        try container.encode(value, forKey: dynamicKey)
-                    }
-                }
-                
-                struct DynamicKey: CodingKey {
-                    var stringValue: String
-                    var intValue: Int? { return nil }
-                    init?(stringValue: String) { self.stringValue = stringValue }
-                    init?(intValue: Int) { return nil }
-                }
-            }
-            
-            let updateData = GenericUpdate(column: nameColumn, value: new)
-            
-            // Build query
             var query = try client
                 .from(tableName)
-                .update(updateData)
-                .eq("user_id", value: String(userID))
+                .update([nameColumn: new])
+                .eq("user_id", value: Int(userID))
                 .eq(nameColumn, value: old)
             
             if let category = medCat {
@@ -301,13 +245,13 @@ extension Database {
             let endColumn: String
             
             switch tableName.lowercased() {
-            case "Medications":
+            case "medications":
                 nameColumn = "medication_name"
                 endColumn = "medication_end"
-            case "Symptoms":
+            case "symptoms":
                 nameColumn = "symptom_name"
                 endColumn = "symptom_end"
-            case "Triggers":
+            case "triggers":
                 nameColumn = "trigger_name"
                 endColumn = "trigger_end"
             default:
@@ -315,38 +259,14 @@ extension Database {
                 return
             }
             
-            let endDate = ISO8601DateFormatter().string(from: Date())
-            
-            // Create encodable struct for update
-            struct GenericUpdate: Encodable {
-                private let data: [String: String]
-                
-                init(column: String, value: String) {
-                    self.data = [column: value]
-                }
-                
-                func encode(to encoder: Encoder) throws {
-                    var container = encoder.container(keyedBy: DynamicKey.self)
-                    for (key, value) in data {
-                        guard let dynamicKey = DynamicKey(stringValue: key) else { continue }
-                        try container.encode(value, forKey: dynamicKey)
-                    }
-                }
-                
-                struct DynamicKey: CodingKey {
-                    var stringValue: String
-                    var intValue: Int? { return nil }
-                    init?(stringValue: String) { self.stringValue = stringValue }
-                    init?(intValue: Int) { return nil }
-                }
-            }
-            
-            let updateData = GenericUpdate(column: endColumn, value: endDate)
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd"
+            let endDate = dateFormatter.string(from: Date())
             
             var query = try client
                 .from(tableName)
-                .update(updateData)
-                .eq("user_id", value: String(userID))
+                .update([endColumn: endDate])
+                .eq("user_id", value: Int(userID))
                 .eq(nameColumn, value: name)
             
             if let category = medCat {
@@ -355,11 +275,7 @@ extension Database {
             
             try await query.execute()
             
-            if let category = medCat {
-                print("Ended \(name) (\(category)) at \(Date())")
-            } else {
-                print("Ended \(name) at \(Date())")
-            }
+            print("Ended \(name) at \(Date())")
         } catch {
             print("Failed to end \(name): \(error)")
         }
