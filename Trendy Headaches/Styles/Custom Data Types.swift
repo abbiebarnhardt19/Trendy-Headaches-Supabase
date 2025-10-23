@@ -290,3 +290,17 @@ struct SideEffect: Codable {
         case sideEffectSubmitTime = "side_effect_submit_time"
     }
 }
+
+struct LogInsert: Encodable {
+    let user_id: Int64
+    let date: String
+    let onset_time: String?
+    let severity_level: Int64
+    let symptom_id: Int64
+    let med_taken: Bool
+    let log_medication_id: Int64?
+    let med_worked: Bool?
+    let symptom_description: String
+    let notes: String
+    let submit_time: String
+}

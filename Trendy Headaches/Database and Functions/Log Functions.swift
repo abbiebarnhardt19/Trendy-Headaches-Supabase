@@ -14,35 +14,9 @@ extension Database {
     func createLog(userID: Int64, date: Date, symptom_onset: String?, symptom: Int64, severity: Int64, med_taken: Bool, med_taken_id: Int64?, symptom_desc: String, notes: String, submit: Date, triggerIDs: [Int64] = []) async -> Int64? {
         
         do {
-            struct LogInsert: Encodable {
-                let user_id: Int64
-                let date: String
-                let onset_time: String?
-                let severity_level: Int64
-                let symptom_id: Int64
-                let med_taken: Bool
-                let log_medication_id: Int64?
-                let med_worked: Bool?
-                let symptom_description: String
-                let notes: String
-                let submit_time: String
-            }
-            
             let dateFormatter = ISO8601DateFormatter()
             
-            let logData = LogInsert(
-                user_id: userID,
-                date: dateFormatter.string(from: date),
-                onset_time: symptom_onset,
-                severity_level: severity,
-                symptom_id: symptom,
-                med_taken: med_taken,
-                log_medication_id: med_taken_id,
-                med_worked: nil,
-                symptom_description: symptom_desc,
-                notes: notes,
-                submit_time: dateFormatter.string(from: submit)
-            )
+            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: date), onset_time: symptom_onset, severity_level: severity, symptom_id: symptom, med_taken: med_taken, log_medication_id: med_taken_id, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
             
             let insertedLog: Log = try await client
                 .from("Logs")
@@ -267,98 +241,67 @@ extension Database {
     
     // Get the details of the log for the popup
     func getLogDetails(logID: Int64) async -> (userID: Int64, date: Date, symptomName: String, symptomID: Int64, emergencyMedID: Int64?, emergencyMedName: String)? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
         do {
-            // Get the log
-            let logs: [Log] = try await client
+            let response = try await client
                 .from("Logs")
-                .select()
-                .eq("log_id", value: String(logID))
+                .select("""
+                    *,
+                    symptom:Symptoms!symptom_id(*),
+                    medication:Medications!log_medication_id(*)
+                """)
+                .eq("log_id", value: Int(logID))
+                .single()
                 .execute()
-                .value
             
-            guard let log = logs.first else { return nil }
+            let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
             
-            let userID = log.userId
-            let dateFormatter = ISO8601DateFormatter()
-            let date = dateFormatter.date(from: log.date) ?? Date()
-            let symptomID = log.symptomId
-            let emergencyMedID = log.logMedicationId
+            let uid = json["user_id"] as! Int64
+            let dt = dateFormatter.date(from: json["date"] as! String) ?? Date()
+            let sid = json["symptom_id"] as! Int64
+            let mid = json["log_medication_id"] as? Int64
             
-            // Get symptom name
-            var symptomName = ""
-            let symptoms: [Symptom] = try await client
-                .from("Symptoms")
-                .select()
-                .eq("symptom_id", value: String(symptomID))
-                .execute()
-                .value
-            if let symptom = symptoms.first {
-                symptomName = symptom.symptomName
-            }
+            let symptomDict = json["symptom"] as? [String: Any]
+            let sname = symptomDict?["symptom_name"] as? String ?? ""
             
-            // Get medication name
-            var emergencyMedName = ""
-            if let medID = emergencyMedID {
-                let medications: [Medication] = try await client
-                    .from("Medications")
-                    .select()
-                    .eq("medication_id", value: String(medID))
-                    .execute()
-                    .value
-                if let medication = medications.first {
-                    emergencyMedName = medication.medicationName
-                }
-            }
+            let medDict = json["medication"] as? [String: Any]
+            let mname = medDict?["medication_name"] as? String ?? ""
             
-            return (userID, date, symptomName, symptomID, emergencyMedID, emergencyMedName)
+            return (uid, dt, sname, sid, mid, mname)
         } catch {
             print("Database error while fetching log details: \(error)")
+            return nil
         }
-        return nil
     }
     
     // Get the id of an instance from its name and user
     func getIDFromName(tableName: String, names: [String], userID: Int64) async -> [Int64] {
-        let singular = String(tableName.dropLast().lowercased())
-        _ = "\(singular)_id"
-        let nameColumn = "\(singular)_name"
-        
+        let nameColumn = "\(String(tableName.dropLast().lowercased()))_name"
         var ids: [Int64] = []
         
         for name in names {
             do {
-                let result = try await client
+                let json = try await client
                     .from(tableName)
                     .select()
-                    .eq("user_id", value: String(userID))
+                    .eq("user_id", value: Int(userID))
                     .eq(nameColumn, value: name)
                     .execute()
                 
-                // Parse response based on table name
-                switch tableName {
-                case "Symptoms":
-                    let symptoms: [Symptom] = try JSONDecoder().decode([Symptom].self, from: result.data)
-                    if let symptom = symptoms.first {
-                        ids.append(symptom.symptomId)
+                let data = try JSONSerialization.jsonObject(with: json.data) as! [[String: Any]]
+                
+                if let first = data.first {
+                    let idKey = "\(String(tableName.dropLast().lowercased()))_id"
+                    if let id = first[idKey] as? Int64 {
+                        ids.append(id)
                     }
-                case "Medications":
-                    let medications: [Medication] = try JSONDecoder().decode([Medication].self, from: result.data)
-                    if let medication = medications.first {
-                        ids.append(medication.medicationId)
-                    }
-                case "Triggers":
-                    let triggers: [Trigger] = try JSONDecoder().decode([Trigger].self, from: result.data)
-                    if let trigger = triggers.first {
-                        ids.append(trigger.triggerId)
-                    }
-                default:
-                    print("Unknown table: \(tableName)")
                 }
             } catch {
                 print("Error querying \(tableName) for '\(name)': \(error)")
             }
         }
-        
         return ids
     }
     
@@ -421,7 +364,6 @@ extension Database {
                 
                 let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
                 let medDict = json["medication"] as? [String: Any]
-
                 let id = json["side_effect_id"] as! Int64
                 let uid = json["user_id"] as! Int64
                 let dt = dateFormatter.date(from: json["date"] as! String) ?? Date()
