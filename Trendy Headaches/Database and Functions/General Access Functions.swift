@@ -40,7 +40,6 @@ extension Database {
     
     // Get all values for a user from a table where userID is a foreign key
     func getListVals(userId: Int64, table: String, col: String, filterCol: String? = nil, filterVal: String? = nil) async throws -> [String] {
-        
         switch table.lowercased() {
         case "medications":
             let medications: [Medication] = try await fetchFilteredList(userId: userId, tableName: "Medications", filterCol: filterCol, filterVal: filterVal)
@@ -81,7 +80,7 @@ extension Database {
             return result
             
         default:
-            print("   ⚠️ Unknown table: \(table)")
+            print(" Unknown table: \(table)")
             return []
         }
     }
@@ -89,8 +88,6 @@ extension Database {
     // Helper function to fetch filtered lists
     private func fetchFilteredList<T: Codable>(userId: Int64, tableName: String, filterCol: String?, filterVal: String?) async throws -> [T] {
         let endColumnName = "\(tableName.dropLast().lowercased())_end"
-    
-
         var query = client
             .from(tableName)
             .select()
@@ -101,9 +98,7 @@ extension Database {
             query = query.eq(filterCol, value: filterVal)
         }
         
-        let response: [T] = try await query.execute().value
-        
-        return response
+        return try await query.execute().value
     }
     
 }

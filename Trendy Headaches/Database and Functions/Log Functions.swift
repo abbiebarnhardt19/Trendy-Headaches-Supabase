@@ -362,150 +362,80 @@ extension Database {
         return ids
     }
     
-    // Function to load in log for editing
     func getUnifiedLog(by logID: Int64, logType: String) async -> UnifiedLog? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
         do {
             if logType == "Symptom" {
-                let logs: [Log] = try await client
+                let response = try await client
                     .from("Logs")
-                    .select()
-                    .eq("log_id", value: String(logID))
+                    .select("""
+                        *,
+                        symptom:Symptoms!symptom_id(*),
+                        medication:Medications!log_medication_id(*),
+                        log_triggers:Log_Triggers!lt_log_id(trigger:Triggers!lt_trigger_id(*))
+                    """)
+                    .eq("log_id", value: Int(logID))
+                    .single()
                     .execute()
-                    .value
                 
-                guard let log = logs.first else { return nil }
+                let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
                 
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd"
-                let logDate = dateFormatter.date(from: log.date) ?? Date()
-                let submitDate = dateFormatter.date(from: log.submitTime) ?? Date()
+                let symptomDict = json["symptom"] as? [String: Any]
+                let medDict = json["medication"] as? [String: Any]
+                let logTriggers = json["log_triggers"] as? [[String: Any]] ?? []
                 
-                // Get symptom name
-                let symptomID = log.symptomId
-                var symptomName: String? = nil
-                let symptoms: [Symptom] = try await client
-                    .from("Symptoms")
-                    .select()
-                    .eq("symptom_id", value: String(symptomID))
-                    .execute()
-                    .value
-                if let symptom = symptoms.first {
-                    symptomName = symptom.symptomName
+                let triggerIDs = logTriggers.compactMap {
+                    ($0["trigger"] as? [String: Any])?["trigger_id"] as? Int64
+                }
+                let triggerNames = logTriggers.compactMap {
+                    ($0["trigger"] as? [String: Any])?["trigger_name"] as? String
                 }
                 
-                // Get medication info
-                var medicationID: Int64? = nil
-                var medicationName: String? = nil
-                if let mID = log.logMedicationId {
-                    medicationID = mID
-                    let medications: [Medication] = try await client
-                        .from("Medications")
-                        .select()
-                        .eq("medication_id", value: String(mID))
-                        .execute()
-                        .value
-                    if let medication = medications.first {
-                        medicationName = medication.medicationName
-                    }
-                }
-                
-                // Get triggers
-                var triggerIDs: [Int64] = []
-                var triggerNames: [String] = []
-                let logTriggers: [LogTrigger] = try await client
-                    .from("Log_Triggers")
-                    .select()
-                    .eq("lt_log_id", value: String(logID))
-                    .execute()
-                    .value
-                
-                for logTrigger in logTriggers {
-                    let tID = logTrigger.lt_trigger_id
-                    triggerIDs.append(tID)
-                    let triggers: [Trigger] = try await client
-                        .from("Triggers")
-                        .select()
-                        .eq("trigger_id", value: String(tID))
-                        .execute()
-                        .value
-                    if let trigger = triggers.first {
-                        triggerNames.append(trigger.triggerName)
-                    }
-                }
-                
-                return UnifiedLog(
-                    log_id: log.logId,
-                    user_id: log.userId,
-                    log_type: "Symptom",
-                    date: logDate,
-                    severity: log.severityLevel,
-                    submit_time: submitDate,
-                    symptom_id: symptomID,
-                    symptom_name: symptomName,
-                    onset_time: log.onsetTime,
-                    med_taken: log.medTaken,
-                    medication_id: medicationID,
-                    medication_name: medicationName,
-                    med_worked: log.medWorked,
-                    symptom_description: log.symptomDescription,
-                    notes: log.notes,
-                    trigger_ids: triggerIDs,
-                    trigger_names: triggerNames,
-                    side_effect_med: nil
-                )
+                let id = json["log_id"] as! Int64
+                let uid = json["user_id"] as! Int64
+                let dt = dateFormatter.date(from: json["date"] as! String) ?? Date()
+                let sev = json["severity_level"] as! Int64
+                let sub = dateFormatter.date(from: json["submit_time"] as! String) ?? Date()
+                let sid = json["symptom_id"] as? Int64
+                let sname = symptomDict?["symptom_name"] as? String
+                let onset = json["onset_time"] as? String
+                let taken = json["med_taken"] as? Bool
+                let mid = json["log_medication_id"] as? Int64
+                let mname = medDict?["medication_name"] as? String
+                let worked = json["med_worked"] as? Bool
+                let desc = json["symptom_description"] as? String
+                let note = json["notes"] as? String
+                let tids = triggerIDs.isEmpty ? nil : triggerIDs
+                let tnames = triggerNames.isEmpty ? nil : triggerNames
+
+                return UnifiedLog( log_id: id, user_id: uid, log_type: "Symptom", date: dt, severity: sev,  submit_time: sub, symptom_id: sid, symptom_name: sname, onset_time: onset, med_taken: taken, medication_id: mid, medication_name: mname, med_worked: worked, symptom_description: desc, notes: note, trigger_ids: tids, trigger_names: tnames, side_effect_med: nil)
             } else {
-                let sideEffects: [SideEffect] = try await client
+                let response = try await client
                     .from("Side_Effects")
-                    .select()
-                    .eq("side_effect_id", value: String(logID))
+                    .select("*, medication:Medications!medication_id(*)")
+                    .eq("side_effect_id", value: Int(logID))
+                    .single()
                     .execute()
-                    .value
                 
-                guard let sideEffect = sideEffects.first else { return nil }
-                
-                let dateFormatter = ISO8601DateFormatter()
-                let sideEffectDate = dateFormatter.date(from: sideEffect.date) ?? Date()
-                let submitDate = dateFormatter.date(from: sideEffect.sideEffectSubmitTime) ?? Date()
-                
-                let medicationID = sideEffect.medicationId
-                var medicationName: String? = nil
-                
-                if let medID = medicationID {
-                    let medications: [Medication] = try await client
-                        .from("Medications")
-                        .select()
-                        .eq("medication_id", value: String(medID))
-                        .execute()
-                        .value
-                    if let medication = medications.first {
-                        medicationName = medication.medicationName
-                    }
-                }
-                
-                return UnifiedLog(
-                    log_id: sideEffect.sideEffectId,
-                    user_id: sideEffect.userId,
-                    log_type: "SideEffect",
-                    date: sideEffectDate,
-                    severity: sideEffect.sideEffectSeverity,
-                    submit_time: submitDate,
-                    symptom_id: nil,
-                    symptom_name: nil,
-                    onset_time: nil,
-                    med_taken: nil,
-                    medication_id: medicationID,
-                    medication_name: medicationName,
-                    med_worked: nil,
-                    symptom_description: nil,
-                    notes: nil,
-                    trigger_ids: nil,
-                    trigger_names: nil,
-                    side_effect_med: sideEffect.sideEffectName
-                )
+                let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
+                let medDict = json["medication"] as? [String: Any]
+
+                let id = json["side_effect_id"] as! Int64
+                let uid = json["user_id"] as! Int64
+                let dt = dateFormatter.date(from: json["date"] as! String) ?? Date()
+                let sev = json["side_effect_severity"] as! Int64
+                let sub = dateFormatter.date(from: json["side_effect_submit_time"] as! String) ?? Date()
+                let mid = json["medication_id"] as? Int64
+                let mname = medDict?["medication_name"] as? String
+                let sename = json["side_effect_name"] as? String
+
+                return UnifiedLog(log_id: id, user_id: uid, log_type: "SideEffect", date: dt, severity: sev, submit_time: sub, symptom_id: nil, symptom_name: nil, onset_time: nil, med_taken: nil, medication_id: mid, medication_name: mname, med_worked: nil, symptom_description: nil, notes: nil, trigger_ids: nil, trigger_names: nil, side_effect_med: sename)
             }
         } catch {
             print("Error fetching \(logType) log \(logID): \(error)")
+            return nil
         }
-        return nil
     }
 }

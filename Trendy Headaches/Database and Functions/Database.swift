@@ -55,7 +55,7 @@ class Database {
         if let preventative = preventativeMedsCSV, !preventative.isEmpty {
             let medsArray = preventative.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
-                let medicationData = MedicationInsert(user_id: userId, medication_category: "preventative", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()))
+                let medicationData = MedicationInsert(user_id: userId, medication_category: "preventative", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil)
                 do {
                     try await client.from("Medications").insert(medicationData).execute()
                 } catch let error as PostgrestError {
@@ -72,7 +72,7 @@ class Database {
         if let emergency = emergencyMedsCSV, !emergency.isEmpty {
             let medsArray = emergency.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
-                let medicationData = MedicationInsert(user_id: userId, medication_category: "emergency", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()))
+                let medicationData = MedicationInsert(user_id: userId, medication_category: "emergency", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil)
                 do {
                     try await client.from("Medications").insert(medicationData).execute()
                 } catch let error as PostgrestError {
@@ -90,7 +90,7 @@ class Database {
             let array = triggersList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for trig in array where !trig.isEmpty {
                 let triggerData = TriggerInsert(user_id: userId, trigger_name: trig,
-                    trigger_start: ISO8601DateFormatter().string(from: Date()))
+                                                trigger_start: ISO8601DateFormatter().string(from: Date()), trigger_end: nil)
                 do {
                     try await client.from("Triggers").insert(triggerData).execute()
                 } catch let error as PostgrestError {
@@ -107,7 +107,7 @@ class Database {
         if let symptomsList = symptomsCSV, !symptomsList.isEmpty {
             let array = symptomsList.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for symptom in array where !symptom.isEmpty {
-                let symptomData = SymptomInsert( user_id: userId, symptom_name: symptom, symptom_start: ISO8601DateFormatter().string(from: Date()))
+                let symptomData = SymptomInsert( user_id: userId, symptom_name: symptom, symptom_start: ISO8601DateFormatter().string(from: Date()), symptom_end: nil)
                 do {
                     try await client.from("Symptoms").insert(symptomData).execute()
                 } catch let error as PostgrestError {

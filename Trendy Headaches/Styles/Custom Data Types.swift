@@ -230,3 +230,63 @@ struct TriggerInsert: Encodable {
     let trigger_name, trigger_start: String
     let trigger_end: String?
 }
+
+struct Log: Codable {
+    let logId: Int64
+    let userId: Int64
+    let date: String
+    let onsetTime: String?
+    let severityLevel: Int64
+    let symptomId: Int64
+    let medTaken: Bool
+    let logMedicationId: Int64?
+    let medWorked: Bool?
+    let symptomDescription: String
+    let notes: String
+    let submitTime: String
+    
+    enum CodingKeys: String, CodingKey {
+        case logId = "log_id"
+        case userId = "user_id"
+        case date
+        case onsetTime = "onset_time"
+        case severityLevel = "severity_level"
+        case symptomId = "symptom_id"
+        case medTaken = "med_taken"
+        case logMedicationId = "log_medication_id"
+        case medWorked = "med_worked"
+        case symptomDescription = "symptom_description"
+        case notes
+        case submitTime = "submit_time"
+    }
+}
+
+struct LogTrigger: Codable {
+    let lt_log_id: Int64
+    let lt_trigger_id: Int64
+    
+    enum CodingKeys: String, CodingKey {
+        case lt_log_id = "lt_log_id"
+        case lt_trigger_id = "lt_trigger_id"
+    }
+}
+
+struct SideEffect: Codable {
+    let sideEffectId: Int64
+    let userId: Int64
+    let medicationId: Int64?
+    let sideEffectName: String
+    let sideEffectSeverity: Int64
+    let date: String
+    let sideEffectSubmitTime: String
+    
+    enum CodingKeys: String, CodingKey {
+        case sideEffectId = "side_effect_id"
+        case userId = "user_id"
+        case medicationId = "medication_id"
+        case sideEffectName = "side_effect_name"
+        case sideEffectSeverity = "side_effect_severity"
+        case date
+        case sideEffectSubmitTime = "side_effect_submit_time"
+    }
+}
