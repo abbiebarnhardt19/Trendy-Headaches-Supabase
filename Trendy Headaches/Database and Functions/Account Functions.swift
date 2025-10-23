@@ -168,62 +168,18 @@ extension Database {
     
     // Function to load the data for the profile page
     func loadData(userID: Int64) async -> (symps: [String], triggs: [String], prevMeds: [String], emergMeds: [String], SQ: String, SA: String, bg: String, accent: String, theme: String)? {
-        print("🧪 INLINE TEST START")
-
-        do {
-            print("Testing Symptoms with different approaches...")
-            
-            // Test 1: Direct query, no filters
-            let test1: [Symptom] = try await client
-                .from("Symptoms")
-                .select()
-                .execute()
-                .value
-            print("Test 1 - All symptoms: \(test1.count)")
-            
-            // Test 2: Filter by user_id as Int
-            let test2: [Symptom] = try await client
-                .from("Symptoms")
-                .select()
-                .eq("user_id", value: 9)
-                .execute()
-                .value
-            print("Test 2 - user_id=9 (as Int): \(test2.count)")
-            
-            // Test 3: Filter by user_id as String
-            let test3: [Symptom] = try await client
-                .from("Symptoms")
-                .select()
-                .eq("user_id", value: "9")
-                .execute()
-                .value
-            print("Test 3 - user_id='9' (as String): \(test3.count)")
-            
-        } catch {
-            print("Test error: \(error)")
-        }
-        print("🧪 INLINE TEST END")
-        print("🚀 loadData called with userID: \(userID)")
         
         do {
-            print("📋 About to fetch symptoms...")
             var symps = try await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
-            print("   Symptoms result: \(symps)")
             symps = Database.deleteDups(list: symps)
             
-            print("📋 About to fetch triggers...")
             var triggs = try await Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
-            print("   Triggers result: \(triggs)")
             triggs = Database.deleteDups(list: triggs)
             
-            print("📋 About to fetch preventative meds...")
             var prevMeds = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
-            print("   Preventative meds result: \(prevMeds)")
             prevMeds = Database.deleteDups(list: prevMeds)
             
-            print("📋 About to fetch emergency meds...")
             var emergMeds = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "emergency")
-            print("   Emergency meds result: \(emergMeds)")
             emergMeds = Database.deleteDups(list: emergMeds)
             
             let SQ = try await Database.shared.getSingleVal(userId: userID, col: "security_question") ?? "None set"
@@ -234,10 +190,9 @@ extension Database {
             
             let theme = Database.getThemeName(background: bg, accent: accent)
             
-            print("✅ loadData completed successfully")
             return (symps, triggs, prevMeds, emergMeds, SQ, SA, bg, accent, theme)
         } catch {
-            print("❌ ERROR in loadData: \(error)")
+            print("ERROR in loadData: \(error)")
             return nil
         }
     }

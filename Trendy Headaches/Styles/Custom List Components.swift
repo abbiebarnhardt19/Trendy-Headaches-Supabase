@@ -238,7 +238,7 @@ struct ScrollableLogTable: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(hex: bg).opacity(0.5), lineWidth: 1) )
-            .frame(height: min(height, headerHeight + CGFloat(list.count) * rowHeight))
+            .frame(height: min(height, headerHeight + CGFloat(list.count) * rowHeight+10))
             .frame(width: tableWidth)
         }
 

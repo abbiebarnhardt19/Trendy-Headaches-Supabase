@@ -10,88 +10,244 @@ import Supabase
 extension Database {
     
     // Get all the logs for a user and sort them
+//    func getLogList(userID: Int64) async -> [UnifiedLog] {
+//        var unifiedLogs: [UnifiedLog] = []
+//        
+//        do {
+//            // Fetch symptom logs
+//            let symptomLogs: [Log] = try await client
+//                .from("Logs")
+//                .select()
+//                .eq("user_id", value: Int(userID))
+//                .execute()
+//                .value
+//            
+//            for log in symptomLogs {
+//                // Fetch symptom name via ID
+//                var symptomName: String? = nil
+//                let symptoms: [Symptom] = try await client
+//                    .from("Symptoms")
+//                    .select()
+//                    .eq("symptom_id", value: Int(log.symptomId))
+//                    .execute()
+//                    .value
+//                if let symptom = symptoms.first {
+//                    symptomName = symptom.symptomName
+//                }
+//                
+//                // Fetch medication name (if any)
+//                var medicationName: String? = nil
+//                if let medId = log.logMedicationId {
+//                    let medications: [Medication] = try await client
+//                        .from("Medications")
+//                        .select()
+//                        .eq("medication_id", value: Int(medId))
+//                        .execute()
+//                        .value
+//                    if let medication = medications.first {
+//                        medicationName = medication.medicationName
+//                    }
+//                }
+//                
+//                // Fetch triggers
+//                var triggerNames: [String] = []
+//                let logTriggers: [LogTrigger] = try await client
+//                    .from("Log_Triggers")
+//                    .select()
+//                    .eq("lt_log_id", value: Int(log.logId))
+//                    .execute()
+//                    .value
+//                
+//                for logTrigger in logTriggers {
+//                    let triggers: [Trigger] = try await client
+//                        .from("Triggers")
+//                        .select()
+//                        .eq("trigger_id", value: Int(logTrigger.lt_trigger_id))
+//                        .execute()
+//                        .value
+//                    if let trigger = triggers.first {
+//                        triggerNames.append(trigger.triggerName)
+//                    }
+//                }
+//                
+//                // Parse date from ISO8601 string
+//                let dateFormatter = ISO8601DateFormatter()
+//                let logDate = dateFormatter.date(from: log.date) ?? Date()
+//                let submitDate = dateFormatter.date(from: log.submitTime) ?? Date()
+//                
+//                // Create Symptom log
+//                let unifiedLog = UnifiedLog(
+//                    log_id: log.logId,
+//                    user_id: log.userId,
+//                    log_type: "Symptom",
+//                    date: logDate,
+//                    severity: log.severityLevel,
+//                    submit_time: submitDate,
+//                    symptom_id: log.symptomId,
+//                    symptom_name: symptomName,
+//                    onset_time: log.onsetTime,
+//                    med_taken: log.medTaken,
+//                    medication_id: log.logMedicationId,
+//                    medication_name: medicationName,
+//                    med_worked: log.medWorked,
+//                    symptom_description: log.symptomDescription,
+//                    notes: log.notes,
+//                    trigger_ids: nil,
+//                    trigger_names: triggerNames,
+//                    side_effect_med: nil
+//                )
+//                
+//                unifiedLogs.append(unifiedLog)
+//            }
+//            
+//            // Fetch side effect logs
+//            let sideEffectLogs: [SideEffect] = try await client
+//                .from("Side_Effects")
+//                .select()
+//                .eq("user_id", value: Int(userID))
+//                .execute()
+//                .value
+//            
+//            for sideEffect in sideEffectLogs {
+//                // Fetch medication name
+//                var medicationName: String? = nil
+//                if let medId = sideEffect.medicationId {
+//                    let medications: [Medication] = try await client
+//                        .from("Medications")
+//                        .select()
+//                        .eq("medication_id", value: Int(medId))
+//                        .execute()
+//                        .value
+//                    if let medication = medications.first {
+//                        medicationName = medication.medicationName
+//                    }
+//                }
+//                
+//                // Parse date from ISO8601 string
+//                let dateFormatter = ISO8601DateFormatter()
+//                let sideEffectDate = dateFormatter.date(from: sideEffect.date) ?? Date()
+//                let submitDate = dateFormatter.date(from: sideEffect.sideEffectSubmitTime) ?? Date()
+//                
+//                // Create SideEffect log
+//                let unifiedLog = UnifiedLog(
+//                    log_id: sideEffect.sideEffectId,
+//                    user_id: sideEffect.userId,
+//                    log_type: "Side Effect",
+//                    date: sideEffectDate,
+//                    severity: sideEffect.sideEffectSeverity,
+//                    submit_time: submitDate,
+//                    symptom_id: nil,
+//                    symptom_name: sideEffect.sideEffectName,
+//                    onset_time: nil,
+//                    med_taken: nil,
+//                    medication_id: nil,
+//                    medication_name: nil,
+//                    med_worked: nil,
+//                    symptom_description: nil,
+//                    notes: nil,
+//                    trigger_ids: nil,
+//                    trigger_names: nil,
+//                    side_effect_med: medicationName
+//                )
+//                
+//                unifiedLogs.append(unifiedLog)
+//            }
+//            
+//            // Sort logs
+//            unifiedLogs.sort {
+//                if $0.date == $1.date {
+//                    return $0.submit_time > $1.submit_time
+//                }
+//                return $0.date > $1.date
+//            }
+//            
+//        } catch {
+//            print("Error fetching unified logs: \(error)")
+//        }
+//        
+//        return unifiedLogs
+//    }
+    
     func getLogList(userID: Int64) async -> [UnifiedLog] {
         var unifiedLogs: [UnifiedLog] = []
         
         do {
-            // Fetch symptom logs
-            let symptomLogs: [Log] = try await client
+            // Fetch symptom logs with all related data in ONE query
+            let response = try await client
                 .from("Logs")
-                .select()
-                .eq("user_id", value: String(userID))
+                .select("""
+                    *,
+                    symptom:Symptoms!symptom_id(*),
+                    medication:Medications!log_medication_id(*),
+                    log_triggers:Log_Triggers!lt_log_id(
+                        trigger:Triggers!lt_trigger_id(*)
+                    )
+                """)
+                .eq("user_id", value: Int(userID))
                 .execute()
-                .value
             
-            for log in symptomLogs {
-                // Fetch symptom name via ID
+            // Decode the response manually since it has nested data
+            let json = try JSONSerialization.jsonObject(with: response.data) as! [[String: Any]]
+            
+            for logData in json {
+                // Parse basic log data
+                let logId = logData["log_id"] as! Int64
+                let userId = logData["user_id"] as! Int64
+                let date = logData["date"] as! String
+                let onsetTime = logData["onset_time"] as? String
+                let severityLevel = logData["severity_level"] as! Int64
+                let symptomId = logData["symptom_id"] as! Int64
+                let medTaken = logData["med_taken"] as! Bool
+                let logMedicationId = logData["log_medication_id"] as? Int64
+                let medWorked = logData["med_worked"] as? Bool
+                let symptomDescription = logData["symptom_description"] as! String
+                let notes = logData["notes"] as! String
+                let submitTime = logData["submit_time"] as! String
+                
+                // Get symptom name from joined data
                 var symptomName: String? = nil
-                let symptoms: [Symptom] = try await client
-                    .from("Symptoms")
-                    .select()
-                    .eq("symptom_id", value: String(log.symptomId))
-                    .execute()
-                    .value
-                if let symptom = symptoms.first {
-                    symptomName = symptom.symptomName
+                if let symptomDict = logData["symptom"] as? [String: Any] {
+                    symptomName = symptomDict["symptom_name"] as? String
                 }
                 
-                // Fetch medication name (if any)
+                // Get medication name from joined data
                 var medicationName: String? = nil
-                if let medId = log.logMedicationId {
-                    let medications: [Medication] = try await client
-                        .from("Medications")
-                        .select()
-                        .eq("medication_id", value: String(medId))
-                        .execute()
-                        .value
-                    if let medication = medications.first {
-                        medicationName = medication.medicationName
-                    }
+                if let medDict = logData["medication"] as? [String: Any] {
+                    medicationName = medDict["medication_name"] as? String
                 }
                 
-                // Fetch triggers
+                // Get trigger names from joined data
                 var triggerNames: [String] = []
-                let logTriggers: [LogTrigger] = try await client
-                    .from("Log_Triggers")
-                    .select()
-                    .eq("log_id", value: String(log.logId))
-                    .execute()
-                    .value
-                
-                for logTrigger in logTriggers {
-                    let triggers: [Trigger] = try await client
-                        .from("Triggers")
-                        .select()
-                        .eq("trigger_id", value: String(logTrigger.triggerId))
-                        .execute()
-                        .value
-                    if let trigger = triggers.first {
-                        triggerNames.append(trigger.triggerName)
+                if let logTriggers = logData["log_triggers"] as? [[String: Any]] {
+                    for ltDict in logTriggers {
+                        if let triggerDict = ltDict["trigger"] as? [String: Any],
+                           let triggerName = triggerDict["trigger_name"] as? String {
+                            triggerNames.append(triggerName)
+                        }
                     }
                 }
                 
-                // Parse date from ISO8601 string
+                // Parse dates
                 let dateFormatter = ISO8601DateFormatter()
-                let logDate = dateFormatter.date(from: log.date) ?? Date()
-                let submitDate = dateFormatter.date(from: log.submitTime) ?? Date()
+                let logDate = dateFormatter.date(from: date) ?? Date()
+                let submitDate = dateFormatter.date(from: submitTime) ?? Date()
                 
-                // Create Symptom log
                 let unifiedLog = UnifiedLog(
-                    log_id: log.logId,
-                    user_id: log.userId,
+                    log_id: logId,
+                    user_id: userId,
                     log_type: "Symptom",
                     date: logDate,
-                    severity: log.severityLevel,
+                    severity: severityLevel,
                     submit_time: submitDate,
-                    symptom_id: log.symptomId,
+                    symptom_id: symptomId,
                     symptom_name: symptomName,
-                    onset_time: log.onsetTime,
-                    med_taken: log.medTaken,
-                    medication_id: log.logMedicationId,
+                    onset_time: onsetTime,
+                    med_taken: medTaken,
+                    medication_id: logMedicationId,
                     medication_name: medicationName,
-                    med_worked: log.medWorked,
-                    symptom_description: log.symptomDescription,
-                    notes: log.notes,
+                    med_worked: medWorked,
+                    symptom_description: symptomDescription,
+                    notes: notes,
                     trigger_ids: nil,
                     trigger_names: triggerNames,
                     side_effect_med: nil
@@ -100,47 +256,50 @@ extension Database {
                 unifiedLogs.append(unifiedLog)
             }
             
-            // Fetch side effect logs
-            let sideEffectLogs: [SideEffect] = try await client
+            // Fetch side effect logs with medication in ONE query
+            let sideEffectResponse = try await client
                 .from("Side_Effects")
-                .select()
-                .eq("user_id", value: String(userID))
+                .select("""
+                    *,
+                    medication:Medications!medication_id(*)
+                """)
+                .eq("user_id", value: Int(userID))
                 .execute()
-                .value
             
-            for sideEffect in sideEffectLogs {
-                // Fetch medication name
+            let sideEffectJson = try JSONSerialization.jsonObject(with: sideEffectResponse.data) as! [[String: Any]]
+            
+            for seData in sideEffectJson {
+                let sideEffectId = seData["side_effect_id"] as! Int64
+                let userId = seData["user_id"] as! Int64
+                let medicationId = seData["medication_id"] as? Int64
+                let sideEffectName = seData["side_effect_name"] as! String
+                let sideEffectSeverity = seData["side_effect_severity"] as! Int64
+                let date = seData["date"] as! String
+                let sideEffectSubmitTime = seData["side_effect_submit_time"] as! String
+                
+                // Get medication name from joined data
                 var medicationName: String? = nil
-                if let medId = sideEffect.medicationId {
-                    let medications: [Medication] = try await client
-                        .from("Medications")
-                        .select()
-                        .eq("medication_id", value: String(medId))
-                        .execute()
-                        .value
-                    if let medication = medications.first {
-                        medicationName = medication.medicationName
-                    }
+                if let medDict = seData["medication"] as? [String: Any] {
+                    medicationName = medDict["medication_name"] as? String
                 }
                 
-                // Parse date from ISO8601 string
+                // Parse dates
                 let dateFormatter = ISO8601DateFormatter()
-                let sideEffectDate = dateFormatter.date(from: sideEffect.date) ?? Date()
-                let submitDate = dateFormatter.date(from: sideEffect.sideEffectSubmitTime) ?? Date()
+                let sideEffectDate = dateFormatter.date(from: date) ?? Date()
+                let submitDate = dateFormatter.date(from: sideEffectSubmitTime) ?? Date()
                 
-                // Create SideEffect log
                 let unifiedLog = UnifiedLog(
-                    log_id: sideEffect.sideEffectId,
-                    user_id: sideEffect.userId,
+                    log_id: sideEffectId,
+                    user_id: userId,
                     log_type: "Side Effect",
                     date: sideEffectDate,
-                    severity: sideEffect.sideEffectSeverity,
+                    severity: sideEffectSeverity,
                     submit_time: submitDate,
                     symptom_id: nil,
-                    symptom_name: sideEffect.sideEffectName,
+                    symptom_name: sideEffectName,
                     onset_time: nil,
                     med_taken: nil,
-                    medication_id: nil,
+                    medication_id: medicationId,
                     medication_name: nil,
                     med_worked: nil,
                     symptom_description: nil,
@@ -164,7 +323,6 @@ extension Database {
         } catch {
             print("Error fetching unified logs: \(error)")
         }
-        
         return unifiedLogs
     }
     
@@ -175,13 +333,13 @@ extension Database {
                 try await client
                     .from("Logs")
                     .delete()
-                    .eq("log_id", value: String(logID))
+                    .eq("log_id", value: Int(logID))
                     .execute()
             } else {
                 try await client
                     .from("Side_Effects")
                     .delete()
-                    .eq("side_effect_id", value: String(logID))
+                    .eq("side_effect_id", value: Int(logID))
                     .execute()
             }
         } catch {
@@ -220,12 +378,12 @@ extension Database {
     }
 
     struct LogTrigger: Codable {
-        let logId: Int64
-        let triggerId: Int64
+        let lt_log_id: Int64
+        let lt_trigger_id: Int64
         
         enum CodingKeys: String, CodingKey {
-            case logId = "log_id"
-            case triggerId = "trigger_id"
+            case lt_log_id = "lt_log_id"
+            case lt_trigger_id = "lt_trigger_id"
         }
     }
 

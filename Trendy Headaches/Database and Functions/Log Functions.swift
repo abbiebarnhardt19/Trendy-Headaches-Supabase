@@ -57,11 +57,11 @@ extension Database {
             // Associate triggers in junction table
             for trigID in triggerIDs {
                 struct LogTriggerInsert: Encodable {
-                    let log_id: Int64
-                    let trigger_id: Int64
+                    let lt_log_id: Int64  // Changed from log_id
+                    let lt_trigger_id: Int64  // Changed from trigger_id
                 }
                 
-                let linkData = LogTriggerInsert(log_id: logID, trigger_id: trigID)
+                let linkData = LogTriggerInsert(lt_log_id: logID, lt_trigger_id: trigID)
                 try await client.from("Log_Triggers").insert(linkData).execute()
             }
             
@@ -312,7 +312,7 @@ extension Database {
     
     // Get the id of an instance from its name and user
     func getIDFromName(tableName: String, names: [String], userID: Int64) async -> [Int64] {
-        let singular = String(tableName.dropLast())
+        let singular = String(tableName.dropLast().lowercased())
         _ = "\(singular)_id"
         let nameColumn = "\(singular)_name"
         
@@ -407,17 +407,17 @@ extension Database {
                 let logTriggers: [LogTrigger] = try await client
                     .from("Log_Triggers")
                     .select()
-                    .eq("log_id", value: String(logID))
+                    .eq("lt_log_id", value: String(logID))
                     .execute()
                     .value
                 
                 for logTrigger in logTriggers {
-                    let tID = logTrigger.triggerId
+                    let tID = logTrigger.lt_trigger_id
                     triggerIDs.append(tID)
                     let triggers: [Trigger] = try await client
                         .from("Triggers")
                         .select()
-                        .eq("trigger_id", value: String(tID))
+                        .eq("lt_trigger_id", value: String(tID))
                         .execute()
                         .value
                     if let trigger = triggers.first {

@@ -579,7 +579,7 @@ struct LogView: View {
                                 
                                 await Database.shared.updateSymptomLog(logID: existingLog ?? 0, userID: userID, date: date, onsetTime: onset, severity: severity, symptomID: sympID, medTaken: medTaken, medicationID: emergMedID, medWorked: medEffective, symptomDescription: sympDesc, notes: notes, triggerIDs: triggIDs)
                                 
-                                listView = true  // trigger navigation after update completes
+                                listView = true
                             }
                         }
                     }

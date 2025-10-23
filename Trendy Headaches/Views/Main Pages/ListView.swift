@@ -55,17 +55,28 @@ struct ListView: View {
     
     //call this when any filter values change
     func filterLogs() {
+        
         logList = allLogs.filter { log in
-            guard logTypeFilter.contains(log.log_type) else { return false }
+            guard logTypeFilter.contains(log.log_type) else {
+                return false
+            }
+            if log.date < startDate {
+                return false
+            }
+            if log.date > endDate {
+                return false
+            }
             
-            if log.date < startDate { return false }
-            if log.date > endDate { return false }
+            if log.severity < sevStart {
+                return false
+            }
+            if log.severity > sevEnd {
+                return false
+            }
             
-            if log.severity < sevStart { return false }
-            if log.severity > sevEnd { return false }
-            
-            guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
-            
+            guard selectedSymps.contains(log.symptom_name ?? "") else {
+                return false
+            }
             return true
         }
     }
@@ -144,22 +155,25 @@ struct ListView: View {
         //load in user logs
         .task {
             allLogs = await Database.shared.getLogList(userID: userID)
+            
             logList = allLogs
             
             if let earliest = allLogs.map({ $0.date }).min() {
                 startDate = earliest
                 stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
             }
+            endDate = Date()
+            stringEndDate = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
             
-            sympOptions = Array(Set( allLogs.compactMap { log in
-                        if let symptom = log.symptom_name, !symptom.isEmpty {
-                            return symptom
-                        } else {
-                            return nil
-                        }
-                    }))
+            sympOptions = Array(Set(allLogs.compactMap { log in
+                if let symptom = log.symptom_name, !symptom.isEmpty {
+                    return symptom
+                } else {
+                    return nil
+                }
+            }))
             .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-
+            
             selectedSymps = sympOptions
         }
         //update filters when values change
@@ -172,7 +186,26 @@ struct ListView: View {
         .onChange(of: deleteCount) {
             Task {
                 allLogs = await Database.shared.getLogList(userID: userID)
-                filterLogs()
+                
+                logList = allLogs
+                
+                if let earliest = allLogs.map({ $0.date }).min() {
+                    startDate = earliest
+                    stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
+                }
+                endDate = Date()
+                stringEndDate = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+                
+                sympOptions = Array(Set(allLogs.compactMap { log in
+                    if let symptom = log.symptom_name, !symptom.isEmpty {
+                        return symptom
+                    } else {
+                        return nil
+                    }
+                }))
+                .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+                
+                selectedSymps = sympOptions
             }
         }
         .navigationBarBackButtonHidden(true)
