@@ -156,48 +156,55 @@ extension Database {
     // Function to update the rest of the log
     func updateSymptomLog(logID: Int64, userID: Int64, date: Date?, onsetTime: String?, severity: Int64?, symptomID: Int64?, medTaken: Bool?, medicationID: Int64?, medWorked: Bool?, symptomDescription: String?, notes: String?, triggerIDs: [Int64]?) async {
         do {
-            // Build update data dynamically
-            var updateDict: [String: Any] = [:]
+            // Create a struct for the update
+            struct LogUpdate: Encodable {
+                var date: String?
+                var onset_time: String?
+                var severity_level: Int64?
+                var symptom_id: Int64?
+                var med_taken: Bool?
+                var log_medication_id: Int64?
+                var med_worked: Bool?
+                var symptom_description: String?
+                var notes: String?
+            }
+            
+            var update = LogUpdate()
             
             if let newDate = date {
-                updateDict["date"] = ISO8601DateFormatter().string(from: newDate)
+                update.date = ISO8601DateFormatter().string(from: newDate)
             }
             if let newOnset = onsetTime {
-                updateDict["onset_time"] = newOnset
+                update.onset_time = newOnset
             }
             if let newSeverity = severity {
-                updateDict["severity_level"] = newSeverity
+                update.severity_level = newSeverity
             }
             if let newSymptomID = symptomID {
-                updateDict["symptom_id"] = newSymptomID
+                update.symptom_id = newSymptomID
             }
             if let newMedTaken = medTaken {
-                updateDict["med_taken"] = newMedTaken
+                update.med_taken = newMedTaken
             }
             if let newMedicationID = medicationID {
-                updateDict["log_medication_id"] = newMedicationID
+                update.log_medication_id = newMedicationID
             }
             if let newMedWorked = medWorked {
-                updateDict["med_worked"] = newMedWorked
+                update.med_worked = newMedWorked
             }
             if let newSymptomDesc = symptomDescription {
-                updateDict["symptom_description"] = newSymptomDesc
+                update.symptom_description = newSymptomDesc
             }
             if let newNotes = notes {
-                updateDict["notes"] = newNotes
+                update.notes = newNotes
             }
             
-            // Perform update only if there's something to update
-            if !updateDict.isEmpty {
-                let jsonData = try JSONSerialization.data(withJSONObject: updateDict)
-                let jsonString = String(data: jsonData, encoding: .utf8)!
-                
-                try await client
-                    .from("Logs")
-                    .update(jsonString)
-                    .eq("log_id", value: String(logID))
-                    .execute()
-            }
+            // Perform the update
+            try await client
+                .from("Logs")
+                .update(update)
+                .eq("log_id", value: Int(logID))  // Changed from String
+                .execute()
             
             // Update triggers separately if needed
             if let newTriggerIDs = triggerIDs {
@@ -205,17 +212,17 @@ extension Database {
                 try await client
                     .from("Log_Triggers")
                     .delete()
-                    .eq("log_id", value: String(logID))
+                    .eq("lt_log_id", value: Int(logID))
                     .execute()
                 
                 // Insert new trigger links
                 for tID in newTriggerIDs {
                     struct LogTriggerInsert: Encodable {
-                        let log_id: Int64
-                        let trigger_id: Int64
+                        let lt_log_id: Int64
+                        let lt_trigger_id: Int64
                     }
                     
-                    let linkData = LogTriggerInsert(log_id: logID, trigger_id: tID)
+                    let linkData = LogTriggerInsert(lt_log_id: logID, lt_trigger_id: tID)
                     try await client.from("Log_Triggers").insert(linkData).execute()
                 }
             }
@@ -368,7 +375,8 @@ extension Database {
                 
                 guard let log = logs.first else { return nil }
                 
-                let dateFormatter = ISO8601DateFormatter()
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
                 let logDate = dateFormatter.date(from: log.date) ?? Date()
                 let submitDate = dateFormatter.date(from: log.submitTime) ?? Date()
                 
@@ -417,7 +425,7 @@ extension Database {
                     let triggers: [Trigger] = try await client
                         .from("Triggers")
                         .select()
-                        .eq("lt_trigger_id", value: String(tID))
+                        .eq("trigger_id", value: String(tID))
                         .execute()
                         .value
                     if let trigger = triggers.first {
