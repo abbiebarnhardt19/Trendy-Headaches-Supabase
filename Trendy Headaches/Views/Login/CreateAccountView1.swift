@@ -24,30 +24,31 @@ struct CreateAccountView: View {
         !email.isEmpty &&  !pass_one.isEmpty &&  !pass_two.isEmpty &&  !SQ.isEmpty &&  !SA.isEmpty &&  pass_one == pass_two && Database.passwordValid(pass_one) &&  emailAvail  }
     
     var body: some View {
-       
-        
-        NavigationStack {
-            
-            ZStack {
-                Color(hex: bg).ignoresSafeArea()
-                    .zIndex(-10)
-                Create1BGComps(bg: bg, accent: accent)
-                    .zIndex(15)
-                ScrollView {
-                    VStack(spacing: spacing) {
-                        Spacer()
-                        header
-                        emailSection
-                        passwordSection
-                        confirmPasswordSection
-                        securitySection
-                        continueButton
-                        Spacer()
+        GeometryReader { geometry in
+            NavigationStack {
+                ZStack {
+                    Color(hex: bg).ignoresSafeArea()
+                        .zIndex(0)
+                    Create1BGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height)
+                        .zIndex(2)
+                        .ignoresSafeArea(.keyboard)
+                    ScrollView {
+                        VStack(spacing: spacing) {
+                            Spacer()
+                            header
+                            emailSection
+                            passwordSection
+                            confirmPasswordSection
+                            securitySection
+                            continueButton
+                            Spacer()
+                        }
                     }
+                    .zIndex(1)
                 }
-                .zIndex(5)
             }
         }
+        .ignoresSafeArea(.keyboard)
     }
 }
 

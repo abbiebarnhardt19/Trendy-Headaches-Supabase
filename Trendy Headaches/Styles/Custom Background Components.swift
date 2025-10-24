@@ -69,26 +69,25 @@ struct ProfileBGComps: View {
 struct Create1BGComps: View {
     var bg: String
     var accent: String
+    var fixedHeight: CGFloat
 
-    @State var width = UIScreen.main.bounds.width
-    @State var height = UIScreen.main.bounds.height
+    let width = UIScreen.main.bounds.width
     
 
     var body: some View {
         
-        let contentHeight = (width * 0.125) + 5 * (width*0.55 + height * 0.6) + (UIScreen.main.bounds.height * 0.015) * 5 + height * 0.06
+        let contentHeight = (width * 0.125) + 5 * (width*0.55 + fixedHeight * 0.6) + (fixedHeight * 0.015) * 5 + fixedHeight * 0.06
         
-        let blobHeight = max((height - contentHeight)/2, height * 0.1)
+        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.1)
         
         ZStack {
-
             
-            // Top blob - positioned so only blobHeight is visible from top
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height/2 + blobHeight/2 - 50, width: width, height: blobHeight)
+            // Top blob
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.1, width: width, height: blobHeight)
                 .zIndex(5)
             
-            // Bottom blob - positioned so only blobHeight is visible from bottom
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height/2 - blobHeight/2 + 30, width: width, height: blobHeight)
+            // Bottom blob
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2  + fixedHeight * 0.08, width: width, height: blobHeight)
                 .zIndex(5)
         }
     }
