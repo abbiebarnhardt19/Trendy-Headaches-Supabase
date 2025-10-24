@@ -17,17 +17,24 @@ struct CreateAccountView: View {
     
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
+    private let spacing = UIScreen.main.bounds.height * 0.015
     
     // Computed property: form validation
     private var formIsValid: Bool {
         !email.isEmpty &&  !pass_one.isEmpty &&  !pass_two.isEmpty &&  !SQ.isEmpty &&  !SA.isEmpty &&  pass_one == pass_two && Database.passwordValid(pass_one) &&  emailAvail  }
     
     var body: some View {
+       
+        
         NavigationStack {
+            
             ZStack {
+                Color(hex: bg).ignoresSafeArea()
+                    .zIndex(-10)
                 Create1BGComps(bg: bg, accent: accent)
+                    .zIndex(15)
                 ScrollView {
-                    VStack(spacing: 12) {
+                    VStack(spacing: spacing) {
                         Spacer()
                         header
                         emailSection
@@ -38,6 +45,7 @@ struct CreateAccountView: View {
                         Spacer()
                     }
                 }
+                .zIndex(5)
             }
         }
     }
@@ -46,11 +54,11 @@ struct CreateAccountView: View {
 // MARK: - Subviews
 private extension CreateAccountView {
     var header: some View {
-        CustomText(text: "Create Account", color: accent, textAlign: .center, textSize: screenWidth*0.125)
+        CustomText(text: "Create Account", color: accent, textAlign: .center, textSize: screenWidth*0.11)
     }
     
     var emailSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: spacing) {
             fieldLabel("Email")
             CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.065)
                 .onChange(of: email) {
@@ -64,7 +72,7 @@ private extension CreateAccountView {
     }
     
     var passwordSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: spacing) {
             fieldLabel("Password")
             CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.065, secure: true)
             
@@ -75,7 +83,7 @@ private extension CreateAccountView {
     }
     
     var confirmPasswordSection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: spacing) {
             fieldLabel("Confirm Password")
             CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth-50, height: screenHeight * 0.065, secure: true)
             
@@ -86,7 +94,7 @@ private extension CreateAccountView {
     }
     
     var securitySection: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: spacing) {
             fieldLabel("Security Question")
             CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SQ, width: screenWidth-50, height: screenHeight * 0.065)
             
@@ -101,7 +109,7 @@ private extension CreateAccountView {
             dest: CreateAccountView2(email: email, passOne: pass_one,  SQ: SQ, SA: SA),  bg: bg, accent: accent, width: 150, height: screenHeight * 0.06, textSize: screenWidth * 0.055)
         .disabled(!formIsValid)
         .opacity(formIsValid ? 1 : 0.5)
-        .padding(.bottom, 45)
+        .padding(.bottom, 55)
     }
     
     func fieldLabel(_ text: String) -> some View {

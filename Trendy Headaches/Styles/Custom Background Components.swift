@@ -76,19 +76,19 @@ struct Create1BGComps: View {
 
     var body: some View {
         
-        let contentHeight = (width * 0.125) + 5 * (width*0.55 + height * 0.6) + 15 * 5 + height * 0.06
+        let contentHeight = (width * 0.125) + 5 * (width*0.55 + height * 0.6) + (UIScreen.main.bounds.height * 0.015) * 5 + height * 0.06
         
         let blobHeight = max((height - contentHeight)/2, height * 0.1)
         
         ZStack {
-            Color(hex: bg).ignoresSafeArea()
+
             
             // Top blob - positioned so only blobHeight is visible from top
             WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height/2 + blobHeight/2 - 50, width: width, height: blobHeight)
                 .zIndex(5)
             
             // Bottom blob - positioned so only blobHeight is visible from bottom
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height/2 - blobHeight/2 + 20, width: width, height: blobHeight)
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height/2 - blobHeight/2 + 30, width: width, height: blobHeight)
                 .zIndex(5)
         }
     }
