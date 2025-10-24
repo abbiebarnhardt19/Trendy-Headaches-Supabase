@@ -23,18 +23,16 @@ struct CreateAccountView: View {
         NavigationStack {
             ZStack {
                 Create1BGComps(bg: bg, accent: accent)
-                
                 ScrollView {
-                    ZStack {
-                        VStack(spacing: 5) {
-                            header
-                            emailSection
-                            passwordSection
-                            confirmPasswordSection
-                            securitySection
-                            continueButton
-                        }
-                        .padding(.top, 10)
+                    VStack(spacing: 5) {
+                        Spacer()
+                        header
+                        emailSection
+                        passwordSection
+                        confirmPasswordSection
+                        securitySection
+                        continueButton
+                        Spacer()
                     }
                 }
             }

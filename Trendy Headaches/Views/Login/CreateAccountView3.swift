@@ -19,6 +19,8 @@ struct CreateAccountView3: View {
     
     // Layout constants
     private let screenWidth = UIScreen.main.bounds.width
+    private let screenHeight = UIScreen.main.bounds.height
+
     private let leadPadd = CGFloat(20)
     
     var body: some View {
@@ -29,7 +31,7 @@ struct CreateAccountView3: View {
                 ScrollView {
                     ZStack {
                         VStack(spacing: 15) {
-                            // Header
+                            Spacer()
                             CustomText(text: "One Last Step", color: accent, textAlign: .center, textSize: 50)
                                 .padding(.top, 15)
                             
@@ -55,7 +57,6 @@ struct CreateAccountView3: View {
                         .zIndex(1)
                         .padding()
                     }
-                    
                     .navigationDestination(isPresented: $created) {
                         LoginView(bg: bg, accent: accent)
                     }

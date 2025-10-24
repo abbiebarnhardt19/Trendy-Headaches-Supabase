@@ -12,7 +12,7 @@ struct AnalyticsBGComps: View {
     var accent: String
 
     var body: some View {
-            Color(hex: bg).ignoresSafeArea()
+        Color(hex: bg).ignoresSafeArea()
 
         SameAmplitudeBlob(waves: 10, amp: 20, accent: accent,  x: UIScreen.main.bounds.height * 0.425, y: -UIScreen.main.bounds.width * 0.32, rotation:295, width: UIScreen.main.bounds.width)
             .zIndex(5)
@@ -77,7 +77,7 @@ struct Create1BGComps: View {
             Color(hex: bg).ignoresSafeArea()
             WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height * 0.65, width: width, height: height * 0.35)
                     .zIndex(5)
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.5, width: width, height: 80)
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.5, width: width, height:  height * 0.1)
                 .zIndex(1)
         }
     }
@@ -108,14 +108,16 @@ struct Create3BGComps: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.5, width: width, height: height * 0.2)
-
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height * 0.55, width: width, height: height * 0.2)
-
+            Color(hex: bg).ignoresSafeArea()
+                .zIndex(-1)
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.85, width: width, height: height * 0.2)
+                .zIndex(5)
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height * 0.18, width: width, height: height * 0.2)
+                .zIndex(5)
         }
-        .zIndex(5)
     }
 }
+
 
 struct Forgot1BGComps: View {
     var bg: String
