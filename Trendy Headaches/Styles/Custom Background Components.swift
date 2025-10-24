@@ -72,13 +72,24 @@ struct Create1BGComps: View {
 
     @State var width = UIScreen.main.bounds.width
     @State var height = UIScreen.main.bounds.height
+    
+
     var body: some View {
+        
+        let contentHeight = (width * 0.125) + 5 * (width*0.55 + height * 0.6) + 15 * 5 + height * 0.06
+        
+        let blobHeight = max((height - contentHeight)/2, height * 0.1)
+        
         ZStack {
             Color(hex: bg).ignoresSafeArea()
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height * 0.65, width: width, height: height * 0.35)
-                    .zIndex(5)
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.5, width: width, height:  height * 0.1)
-                .zIndex(1)
+            
+            // Top blob - positioned so only blobHeight is visible from top
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height/2 + blobHeight/2 - 50, width: width, height: blobHeight)
+                .zIndex(5)
+            
+            // Bottom blob - positioned so only blobHeight is visible from bottom
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height/2 - blobHeight/2 + 20, width: width, height: blobHeight)
+                .zIndex(5)
         }
     }
 }
@@ -190,8 +201,8 @@ struct LoginBGComps: View {
     var body: some View {
         ZStack {
             Color(hex: bg).ignoresSafeArea()
-            SameAmplitudeBlob(waves: 4, amp: 20, accent: accent, x: 0, y:  -height * 0.4, rotation: 0, width:width, height:220)
-            SameAmplitudeBlob(waves: 5, amp: 16, accent: accent, x: 0, y: -height * 0.4, rotation: 180, width:width, height:220)
+            SameAmplitudeBlob(waves: 4, amp: 20, accent: accent, x: 0, y:  -height * 0.425, rotation: 0, width:width, height:height * 0.25)
+            SameAmplitudeBlob(waves: 5, amp: 16, accent: accent, x: 0, y: -height * 0.375, rotation: 180, width:width, height:height * 0.25)
         }
     }
 }

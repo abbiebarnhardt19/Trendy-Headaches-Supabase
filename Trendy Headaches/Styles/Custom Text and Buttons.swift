@@ -13,8 +13,8 @@ struct CustomTextField: View {
     let placeholder: String
     @Binding var text: String
     var width: CGFloat? = 350
-    var height: CGFloat? = 55
-    var corner: CGFloat? = 30
+    var height: CGFloat? = 50
+    var corner: CGFloat? = 25
     var textSize: CGFloat? = 22
     var multiline: Bool = false
     var secure: Bool = false
@@ -37,7 +37,7 @@ struct CustomTextField: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 5)
+        .padding(.vertical, 2)
         .frame(width: width ?? UIScreen.main.bounds.width-50, height: height ?? (multiline ? nil : 55))
         .background(Color(hex: accent))
         .foregroundColor(Color(hex: bg))
@@ -107,17 +107,19 @@ struct CustomNavButton<Destination: View>: View {
     var bg: String
     var accent: String
     var width: CGFloat?
+    var height: CGFloat? = 55
+    var textSize: CGFloat? = 20
 
     var body: some View {
         NavigationLink {
             dest
         } label: {
             Text(label)
-                .frame(width: width ?? 180, height: 55)
+                .frame(width: width ?? 180, height: height ?? 55)
                 .background(Color(hex: accent))
                 .foregroundColor(Color(hex: bg))
                 .cornerRadius(30)
-                .font(.system(size: 20, design: .serif))
+                .font(.system(size: textSize ?? 20, design: .serif))
         }
         .buttonStyle(.plain)
         .padding(.vertical, 7)

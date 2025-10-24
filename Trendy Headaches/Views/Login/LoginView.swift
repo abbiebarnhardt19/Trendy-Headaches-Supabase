@@ -109,38 +109,36 @@ struct LoginView: SwiftUI.View {
     @State private var userId: Int64? = nil
     
     //  Layout
-    private let leadPadd: CGFloat = 15
+    private let leadPadd: CGFloat = 25
+    private let screenHeight: CGFloat = UIScreen.main.bounds.height
+    private let screenWidth: CGFloat = UIScreen.main.bounds.width
     
     var body: some SwiftUI.View {
         NavigationStack {
             ZStack {
                 LoginBGComps(bg: bg, accent: accent)
                 //  Content
-                VStack(spacing: 15) {
-                    HStack{
-                        CustomText(text: "Log In",  color: accent, width: 170, textAlign: .center,  textSize: 50 )
-                        Spacer()
-                    }
+                VStack(spacing: 10) {
+                        CustomText(text: "Log In",  color: accent, width: 150, textAlign: .leading,  textSize: 55)
                     
                     // Email
                     CustomText(text: "Email", color: accent)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, leadPadd)
                     
-                    CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email)
+                    CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth - 50)
                     
                     // Password
                     CustomText(text: "Password", color: accent)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, leadPadd)
                     
-                    CustomTextField(bg: bg, accent: accent, placeholder: "", text: $password, secure: true)
+                    CustomTextField(bg: bg, accent: accent, placeholder: "", text: $password, width: screenWidth - 50, secure: true)
                     
                     // Forgot Password Link
                     CustomLink(destination: ForgotPasswordView1(), text: "Forgot Password?", accent: accent)
                         .frame(maxWidth: .infinity, alignment: .trailing)
                         .padding(.trailing, leadPadd)
-                        .padding(.top, 5)
                     
                     // Login Button
                     CustomButton(text: "Log In", bg: bg, accent: accent) {
@@ -151,7 +149,6 @@ struct LoginView: SwiftUI.View {
                             loggedIn = userId != nil
                         }
                     }
-                    .padding(.top, 10)
                     
                     // Error Message
                     if let error = error {

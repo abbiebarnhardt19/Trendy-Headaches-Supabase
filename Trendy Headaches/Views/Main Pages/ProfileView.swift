@@ -313,5 +313,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ProfileView(userID: 10, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }
