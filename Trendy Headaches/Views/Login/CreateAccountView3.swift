@@ -25,16 +25,19 @@ struct CreateAccountView3: View {
     private let leadPadd = CGFloat(20)
     
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color(hex: bg).ignoresSafeArea()
-                    .zIndex(-1)
-                Create3BGComps(bg: bg, accent: accent, fixedHeight: screenHeight)
-                    .zIndex(1)
-                    .ignoresSafeArea(.keyboard)  // ← Add this
-                
-                ScrollView {
-                    ZStack {
+        GeometryReader { geometry in
+            let topInsert = geometry.safeAreaInsets.top
+            let bottomInsert = geometry.safeAreaInsets.bottom
+            
+            NavigationStack {
+                ZStack {
+                    Color(hex: bg).ignoresSafeArea()
+                        .zIndex(0)
+                    Create1BGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height, topInsert: topInsert, bottomInsert: bottomInsert)
+                        .zIndex(2)
+                        .ignoresSafeArea(.keyboard)
+                    
+                    ScrollView {
                         VStack(spacing: spacing) {
                             Spacer()
                             CustomText(text: "One Last Step", color: accent, textAlign: .center, textSize: screenWidth*0.11)
@@ -58,15 +61,18 @@ struct CreateAccountView3: View {
                             .padding(.bottom, 40)
                             Spacer()
                         }
-                        .zIndex(0)
+                        .padding(.top, topInsert - 40)
                     }
+                    .zIndex(1)
                     .navigationDestination(isPresented: $created) {
                         LoginView(bg: bg, accent: accent)
                     }
                 }
+                .ignoresSafeArea(edges: .top)
+                .toolbarBackground(.hidden, for: .navigationBar)
             }
-            .ignoresSafeArea(.keyboard)
         }
+        .ignoresSafeArea(.keyboard)
     }
     
     @ViewBuilder
@@ -78,7 +84,7 @@ struct CreateAccountView3: View {
             .frame(width: screenWidth)
             
             HStack{
-                CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: screenHeight * 0.065)
+                CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
             }
             .frame(width: screenWidth)
         }

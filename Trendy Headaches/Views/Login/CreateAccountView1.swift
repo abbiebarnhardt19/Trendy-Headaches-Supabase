@@ -67,7 +67,7 @@ private extension CreateAccountView {
     var emailSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Email")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.065)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
                 .onChange(of: email) {
                     debounceEmailCheck()
                 }
@@ -81,7 +81,7 @@ private extension CreateAccountView {
     var passwordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.065, secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2, secure: true)
             
             if !Database.passwordValid(pass_one) && !pass_one.isEmpty {
                 CustomWarningText(text: "8+ chars: uppercase, lowercase, number, & symbol")
@@ -92,7 +92,7 @@ private extension CreateAccountView {
     var confirmPasswordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Confirm Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth-50, height: screenHeight * 0.065, secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2,  secure: true)
             
             if !pass_two.isEmpty && pass_two != pass_one {
                 CustomWarningText(text: "Passwords do not match.")
@@ -103,10 +103,10 @@ private extension CreateAccountView {
     var securitySection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Security Question")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SQ, width: screenWidth-50, height: screenHeight * 0.065)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SQ, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
             
             fieldLabel("Security Question Answer")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SA, width: screenWidth-50, height: screenHeight * 0.065)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SA, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
         }
     }
     
