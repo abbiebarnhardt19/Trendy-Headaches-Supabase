@@ -66,29 +66,55 @@ struct ProfileBGComps: View {
     }
 }
 
+//struct Create1BGComps: View {
+//    var bg: String
+//    var accent: String
+//    var fixedHeight: CGFloat
+//    var topInsert: CGFloat
+//
+//    let width = UIScreen.main.bounds.width
+//
+//    var body: some View {
+//        
+//        let header = width * 0.11
+//        let label = width * 0.055
+//        let field = fixedHeight * 0.065
+//        let button = fixedHeight * 0.06
+//        let spacing = fixedHeight * 0.012
+//        let bottomPadding = 55.0
+//        
+//        let contentHeight = topInsert + header + spacing +
+//                           5 * (label + spacing + field + spacing) +
+//                           button + bottomPadding + spacing * 2
+//        
+//        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.15)
+//        
+//        ZStack {
+//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.12, width: width, height: blobHeight)
+//            
+//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2 + fixedHeight * 0.18, width: width, height: blobHeight)
+//        }
+//    }
+//}
 struct Create1BGComps: View {
     var bg: String
     var accent: String
     var fixedHeight: CGFloat
+    var topInsert: CGFloat
+    var bottomInsert: CGFloat
 
     let width = UIScreen.main.bounds.width
-    
 
     var body: some View {
         
-        let contentHeight = (width * 0.125) + 5 * (width*0.55 + fixedHeight * 0.6) + (fixedHeight * 0.015) * 5 + fixedHeight * 0.06
-        
-        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.1)
+        let blobHeight = fixedHeight * 0.1
         
         ZStack {
+            // Top blob - stays the same
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 - blobHeight/2, width: width, height: blobHeight)
             
-            // Top blob
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.1, width: width, height: blobHeight)
-                .zIndex(5)
-            
-            // Bottom blob
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2  + fixedHeight * 0.08, width: width, height: blobHeight)
-                .zIndex(5)
+            // Bottom blob - use fixed offset plus bottom inset adjustment
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 + blobHeight/2  + bottomInsert, width: width, height: blobHeight)
         }
     }
 }
@@ -112,18 +138,19 @@ struct Create2BGComps: View {
 struct Create3BGComps: View {
     var bg: String
     var accent: String
+    var fixedHeight: CGFloat
     
-    @State var width = UIScreen.main.bounds.width
-    @State var height = UIScreen.main.bounds.height
+    let width = UIScreen.main.bounds.width
 
     var body: some View {
+        
+        let contentHeight = (width*0.11 + fixedHeight * 0.016) + ( width*0.05 + fixedHeight*0.025) + 4 * ((width*0.055)+(fixedHeight*0.065)+(fixedHeight * 0.025)) + (fixedHeight * 0.06)
+        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.08)
+        
         ZStack(alignment: .top) {
-            Color(hex: bg).ignoresSafeArea()
-                .zIndex(-1)
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: height * 0.85, width: width, height: height * 0.2)
-                .zIndex(5)
-            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -height * 0.18, width: width, height: height * 0.2)
-                .zIndex(5)
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.13, width: width, height: blobHeight)
+            
+            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2  + fixedHeight * 0.11, width: width, height: blobHeight)
         }
     }
 }

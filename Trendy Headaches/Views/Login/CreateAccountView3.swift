@@ -20,23 +20,26 @@ struct CreateAccountView3: View {
     // Layout constants
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
+    private let spacing = UIScreen.main.bounds.height * 0.0275
 
     private let leadPadd = CGFloat(20)
     
     var body: some View {
         NavigationStack {
             ZStack {
-                Create3BGComps(bg: bg, accent: accent)
+                Color(hex: bg).ignoresSafeArea()
+                    .zIndex(-1)
+                Create3BGComps(bg: bg, accent: accent, fixedHeight: screenHeight)
+                    .zIndex(1)
+                    .ignoresSafeArea(.keyboard)  // ← Add this
                 
                 ScrollView {
                     ZStack {
-                        VStack(spacing: 15) {
+                        VStack(spacing: spacing) {
                             Spacer()
-                            CustomText(text: "One Last Step", color: accent, textAlign: .center, textSize: 50)
-                                .padding(.top, 15)
+                            CustomText(text: "One Last Step", color: accent, textAlign: .center, textSize: screenWidth*0.11)
                             
-                            CustomText(text: "Add multiple items by separating them with commas.", color: accent,  width: screenWidth - 30, textAlign: .center, multiAlign: .center,  textSize: 18)
-                            .padding(.bottom, 20)
+                            CustomText(text: "Add multiple items by separating them with commas.", color: accent,  width: screenWidth - 30, textAlign: .center, multiAlign: .center,  textSize: screenWidth*0.05)
                             
                             // Input fields
                             Group {
@@ -47,32 +50,37 @@ struct CreateAccountView3: View {
                             }
                             
                             // Submit button
-                            CustomButton(text: "Submit", bg: bg, accent: accent) {
+                            CustomButton(text: "Submit", bg: bg, accent: accent, height: screenHeight * 0.06, width: 150,  textSize: screenWidth * 0.055) {
                                 Task {
                                     await createAccount()
                                 }
                             }
                             .padding(.bottom, 40)
+                            Spacer()
                         }
-                        .zIndex(1)
-                        .padding()
+                        .zIndex(0)
                     }
                     .navigationDestination(isPresented: $created) {
                         LoginView(bg: bg, accent: accent)
                     }
                 }
             }
-           
+            .ignoresSafeArea(.keyboard)
         }
     }
     
     @ViewBuilder
     private func labeledField(_ label: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            CustomText(text: label, color: accent)
-                .padding(.leading, leadPadd)
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: text)
-                .padding(.leading, leadPadd-10)
+            HStack{
+            CustomText(text: label, color: accent, width: screenWidth-50, textSize:  screenWidth*0.055)
+            }
+            .frame(width: screenWidth)
+            
+            HStack{
+                CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: screenHeight * 0.065)
+            }
+            .frame(width: screenWidth)
         }
     }
     

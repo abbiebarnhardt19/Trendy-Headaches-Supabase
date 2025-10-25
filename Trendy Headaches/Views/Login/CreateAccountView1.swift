@@ -17,7 +17,7 @@ struct CreateAccountView: View {
     
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
-    private let spacing = UIScreen.main.bounds.height * 0.015
+    private let spacing = UIScreen.main.bounds.height * 0.012
     
     // Computed property: form validation
     private var formIsValid: Bool {
@@ -25,13 +25,16 @@ struct CreateAccountView: View {
     
     var body: some View {
         GeometryReader { geometry in
+            let topInsert = geometry.safeAreaInsets.top
+            let bottomInsert = geometry.safeAreaInsets.bottom  // ← Add this
             NavigationStack {
                 ZStack {
                     Color(hex: bg).ignoresSafeArea()
                         .zIndex(0)
-                    Create1BGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height)
+                    Create1BGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height, topInsert: topInsert, bottomInsert: bottomInsert)  // ← Pass it
                         .zIndex(2)
                         .ignoresSafeArea(.keyboard)
+                    
                     ScrollView {
                         VStack(spacing: spacing) {
                             Spacer()
@@ -43,9 +46,12 @@ struct CreateAccountView: View {
                             continueButton
                             Spacer()
                         }
+                        .padding(.top, topInsert - 30)
                     }
                     .zIndex(1)
                 }
+                .ignoresSafeArea(edges: .top)
+                .toolbarBackground(.hidden, for: .navigationBar)
             }
         }
         .ignoresSafeArea(.keyboard)
