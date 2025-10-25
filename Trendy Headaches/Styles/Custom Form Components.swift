@@ -81,9 +81,10 @@ struct DateTextField: View {
     @State var width: CGFloat = 220
     @State var specialCase: Bool = false
     @State var label: String = "Date:"
-    @State var textSize: CGFloat = 22
+    @State var textSize: CGFloat = 20
     @State var iconSize: CGFloat = 25
     @State var bold: Bool = true
+    @State var fieldHeight: CGFloat
     
     @State private var showDatePicker: Bool = false
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -102,7 +103,7 @@ struct DateTextField: View {
                     CustomText(text: label, color: accent, bold: bold, textSize: 24)
                         .frame(width: 62, height: 45, alignment: .center)
                     
-                    CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,  width: width, textSize: textSize, botPad: 0)
+                    CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,   width: width, height: fieldHeight, textSize: textSize, botPad: 0)
                 }
                 //put the calendar button over the text field
                 .overlay(
@@ -124,7 +125,6 @@ struct DateTextField: View {
                     .datePickerStyle(GraphicalDatePickerStyle())
                     .frame(width: screenWidth * (specialCase ? 0.6 : 0.85),  height: screenWidth * (specialCase ? 0.7: 0.85))
                     .scaleEffect(specialCase ? 0.75 : 1.0)
-
                     .background(Color(hex: accent))
                     .accentColor(Color(hex: bg))
                     .tint(Color(hex: bg))
@@ -163,7 +163,6 @@ struct SingleCheckbox: View {
                     .foregroundColor(Color(hex: color))
             }
             .padding(.trailing, 30)
-            .padding(.bottom, 10)
         }
         .buttonStyle(.plain)
         .frame(width: UIScreen.main.bounds.width - 40)
@@ -228,14 +227,13 @@ struct Slider: View {
             HStack(spacing: 0) {
                 ForEach(steps, id: \.self) { stepValue in
                     CustomText(text: "\(Int(stepValue))",  color: color, textAlign: .center,  textSize: 18)
-                    .frame(width: 35)
+                    .frame(width: width / 10)
                 }
             }
             .padding(.horizontal, 10)
         }
         .frame(width: width)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.bottom, 15)
     }
 }
 
@@ -244,16 +242,17 @@ struct MultipleChoice: View {
     @Binding var selected: String?
     var accent: String
     var width: CGFloat
+    var textSize: CGFloat?
 
     let circleWidth: CGFloat = 20
-    let spacing: CGFloat = 8
+    let spacing: CGFloat = 20
 
     var body: some View {
         let rows = computeRows()
         
         VStack(alignment: .leading, spacing: 12) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
-                HStack(spacing: 12) {
+                HStack(spacing: 20) {
                     ForEach(rows[rowIndex], id: \.self) { option in
                         HStack(spacing: 8) {
                             Circle()
@@ -262,10 +261,12 @@ struct MultipleChoice: View {
                                     .fill(selected == option ? Color(hex: accent) : Color.clear))
                                 .frame(width: circleWidth, height: circleWidth)
                             
-                            CustomText(text: option, color: accent, textSize: 20)
+                            CustomText(text: option, color: accent, textSize: textSize ?? 20)
                                 .lineLimit(1)
                                 .truncationMode(.tail)
-                                .fixedSize(horizontal: true, vertical: false)
+                                .if(option.count <= 15) { view in
+                                    view.fixedSize(horizontal: true, vertical: false)
+                                }
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -273,12 +274,11 @@ struct MultipleChoice: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: width, alignment: .leading)
             }
         }
         .frame(width: width, alignment: .leading)
-        .padding(.bottom, 10)
-        .padding(.leading, 5)
+        .padding(.leading, 2)
         .onAppear {
             if options.count == 1 {
                 selected = options[0]
@@ -289,30 +289,38 @@ struct MultipleChoice: View {
     private func computeRows() -> [[String]] {
         var rows: [[String]] = [[]]
         var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        let font = UIFont.systemFont(ofSize: textSize ?? 20, weight: .regular)
         let itemSpacing: CGFloat = 12
         
         for option in options {
             let textWidth = option.width(usingFont: font)
-            // Circle + gap + text (removed trailing padding from calculation)
-            let itemWidth = circleWidth + 8 + textWidth
+            // For options > 10 chars, cap the width to prevent overflow
+            let maxTextWidth = option.count > 10 ? width - circleWidth - 8 - 50 : textWidth
+            let itemWidth = circleWidth + 8 + min(textWidth, maxTextWidth)
             
-            // Calculate what the new width would be if we add this item
             let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
             
-            // Allow going significantly over to pack more items
-            if newRowWidth > width * 1.3 && !rows[rows.count - 1].isEmpty {
-                // Start a new row
+            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
                 rows.append([option])
                 currentRowWidth = itemWidth
             } else {
-                // Add to current row
                 rows[rows.count - 1].append(option)
                 currentRowWidth = newRowWidth
             }
         }
         
         return rows
+    }
+}
+
+// Helper extension for conditional view modifier
+extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
     }
 }
 
@@ -401,7 +409,9 @@ struct MultipleCheckboxWrapped: View {
                             )
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .fixedSize(horizontal: true, vertical: false)
+                            .if(option.count <= 15) { view in
+                                view.fixedSize(horizontal: true, vertical: false)
+                            }
                             .padding(.leading, 4)
                         }
                         .contentShape(Rectangle())
@@ -418,7 +428,7 @@ struct MultipleCheckboxWrapped: View {
                         .padding(.horizontal, 4)
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: width, alignment: .leading)
             }
         }
         .frame(width: width, alignment: .leading)
@@ -432,19 +442,16 @@ struct MultipleCheckboxWrapped: View {
         
         for option in options {
             let textWidth = option.width(usingFont: font)
-            // Much tighter calculation: Circle + small gap + text only
-            let itemWidth = itemHeight + 4 + textWidth
+            // For options > 10 chars, cap the width to prevent overflow
+            let maxTextWidth = option.count > 10 ? width - itemHeight - 4 - 50 : textWidth
+            let itemWidth = itemHeight + 4 + min(textWidth, maxTextWidth)
             
-            // Calculate what the new width would be if we add this item
             let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
             
-            // Allow going significantly over to pack more items
-            if newRowWidth > width * 1.3 && !rows[rows.count - 1].isEmpty {
-                // Start a new row
+            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
                 rows.append([option])
                 currentRowWidth = itemWidth
             } else {
-                // Add to current row
                 rows[rows.count - 1].append(option)
                 currentRowWidth = newRowWidth
             }

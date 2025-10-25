@@ -67,10 +67,10 @@ struct filterPopUp: View {
             // MARK: Date
             sectionButton(title: "Date", section: .date) {
                 VStack {
-                        DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "Start:", textSize: 21,  iconSize: 30,  bold: false)
+                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "Start:", textSize: 21,  iconSize: 30,  bold: false, fieldHeight: 50)
                         .padding(.top, 10)
 
-                        DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "End:",  textSize: 21, iconSize: 30,  bold: false)
+                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "End:",  textSize: 21, iconSize: 30,  bold: false, fieldHeight: 50)
                 }
                 .padding(.leading, 5)
             }

@@ -17,7 +17,7 @@ struct LogView: View {
     @Binding var accent: String
     
     // Layout
-    private let leadPadd: CGFloat = 40
+    private let leadPadd: CGFloat = 60
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
     @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
     
@@ -91,10 +91,7 @@ struct LogView: View {
         
         NavigationStack {
             ZStack {
-                
                 LogBGComps(bg: bg, accent: accent)
-                
-                
                 if showPopup, !oldLogIDs.isEmpty {
                     EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
                     .zIndex(5)
@@ -145,10 +142,11 @@ struct LogView: View {
     //header and toggle
     private var headerSection: some View {
         HStack {
-            CustomText(text: showSymptomView ? "Symptom Log" : "Side Effect Log", color: accent, textAlign: .center,  textSize: 43)
+            CustomText(text: showSymptomView ? "Symptom Log" : "Side Effect Log", color: accent, textAlign: .center,  textSize: screenWidth * 0.1)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
             .padding(.trailing, 10)
+            .padding(.top, 5)
             
             CustomToggle(color: accent, feature: $showSymptomView)
                 .padding(.trailing, leadPadd)
@@ -159,34 +157,33 @@ struct LogView: View {
     //symptom log view
     private var symptomLogView: some View {
         ZStack(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 17) {
                 dateField(label: "Date:", date: $date, text: $stringDate)
                 
-                CustomText(text: "Symptom*", color: accent, bold: true, textSize: 24)
-                MultipleChoice(options: $sympOptions, selected: $symp, accent: accent, width: screenWidth - 140 )
+                CustomText(text: "Symptom*", color: accent, bold: true, textSize: screenWidth * 0.06)
+                MultipleChoice(options: $sympOptions, selected: $symp, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
                 
-                CustomText(text: "Symptom Severity*", color: accent, bold: true, textSize: 24)
+                CustomText(text: "Symptom Severity*", color: accent, bold: true, textSize: screenWidth * 0.06)
                 Slider(value: $severity, range: 1...10, step: 1, color: accent, width: screenWidth - 50)
                 
-                CustomText(text: "Symptom Onset", color: accent, bold: true, textSize: 24)
-                MultipleChoice(options: $onsetOptions, selected: $onset, accent: accent, width: screenWidth - 140 )
+                CustomText(text: "Symptom Onset", color: accent, bold: true, textSize: screenWidth * 0.06)
+                MultipleChoice(options: $onsetOptions, selected: $onset, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
                 
-                
-                SingleCheckbox(text: "Emergency Med Taken?", color: accent, isOn: $medTaken)
+                SingleCheckbox(text: "Emergency Med Taken?", color: accent, isOn: $medTaken, textSize: screenWidth * 0.06)
                 
                 if medTaken{
-                    CustomText(text: "Emergency Med Name*", color: accent, bold: true, textSize: 24)
-                    MultipleChoice(options: $emergMedOptions, selected: $medTakenName, accent: accent, width: screenWidth - 140 )
+                    CustomText(text: "Emergency Med Name*", color: accent, bold: true, textSize: screenWidth * 0.06)
+                    MultipleChoice(options: $emergMedOptions, selected: $medTakenName, accent: accent, width: screenWidth - 60,  textSize: screenHeight * 0.05 / 2.2)
                         
                     
                     if existingLog != nil{
-                        SingleCheckbox(text: "Emergency Med Effective?", color: accent, isOn: $medEffective )
+                        SingleCheckbox(text: "Emergency Med Effective?", color: accent, isOn: $medEffective, textSize: screenWidth * 0.06)
                     }
                 }
                 
-                CustomText(text: "Triggers Present", color: accent, bold: true, textSize: 24)
+                CustomText(text: "Triggers Present", color: accent, bold: true, textSize: screenWidth * 0.06)
                 
-                MultipleCheckboxWrapped(options: $triggOptions, selected: $selectedTriggs, accent: bg,  bg: accent, width: screenWidth-140, textSize: 20)
+                MultipleCheckboxWrapped(options: $triggOptions, selected: $selectedTriggs, accent: bg,  bg: accent, width: screenWidth-60, textSize: screenHeight * 0.05 / 2.2)
                     .padding(.leading, 5)
                 
                 textFieldSection(title: "Symptom Description", text: $sympDesc)
@@ -198,7 +195,7 @@ struct LogView: View {
                     
                     let buttonText = existingLog != nil ? "Submit" : "Save"
 
-                    CustomButton(text: buttonText, bg: bg, accent: accent, height: 50, width: 150) {
+                    CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                         if existingLog == nil{
                             submitSymptomLog()
                         }
@@ -243,31 +240,29 @@ struct LogView: View {
             Slider(value: $sideEffectSev, range: 1...10, step: 1, color: accent, width: screenWidth - 50)
             
             CustomText(text: "Medication*", color: accent, bold: true, textSize: 24)
-            MultipleChoice(options: $medOptions, selected: $selectedMed, accent: accent, width: screenWidth - 140 )
+            MultipleChoice(options: $medOptions, selected: $selectedMed, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
             
-            HStack{
+            HStack {
                 Spacer()
                 
                 let buttonText = existingLog != nil ? "Submit" : "Save"
-
-                CustomButton(text: buttonText, bg: bg, accent: accent, height: 50, width: 150) {
-                    if existingLog == nil{
+                
+                CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
+                    if existingLog == nil {
                         submitSideEffectLog()
-                    }
-                    else{
+                    } else {
                         Task {
                             await Database.shared.updateSideEffectLog(logID: existingLog ?? 0, userID: userID, date: date, sideEffectName: sideEffectName, sideEffectSeverity: sideEffectSev, medicationID: medID)
                             listView = true
                         }
-                    }// call your function first
-                    listView = true  // then trigger navigation
+                    }
                 }
                 .disabled(!formValid)
                 .padding(.trailing, 40)
-                // Navigation destination
                 .navigationDestination(isPresented: $listView) {
                     ListView(userID: userID, bg: $bg, accent: $accent)
                 }
+                
                 Spacer()
             }
         }
@@ -278,15 +273,15 @@ struct LogView: View {
     //date field, which is reused for both views
     private func dateField(label: String, date: Binding<Date>, text: Binding<String>) -> some View {
         HStack {
-            DateTextField(date: date, textValue: text, bg: $bg, accent: $accent, label: label)
+            DateTextField(date: date, textValue: text, bg: $bg, accent: $accent, label: label, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50))
         }
     }
     
     //text field, which is reused in both views
     private func textFieldSection(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading) {
-            CustomText(text: title, color: accent, bold: true, textSize: 24)
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth - 50, height: 45, textSize: 20, multiline: true)
+            CustomText(text: title, color: accent, bold: true, textSize: screenWidth * 0.06)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: min(screenHeight * 0.065, 50), textSize: screenHeight * 0.055 / 2.2, multiline: true, botPad: 0)
                 .padding(.trailing, leadPadd + 20)
         }
     }
