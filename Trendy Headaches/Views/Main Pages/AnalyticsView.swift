@@ -150,6 +150,7 @@ struct AnalyticsView: View {
     @State var logs: [UnifiedLog] = []
     @State var allLogs: [UnifiedLog] = []
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
+    @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
     @State private var hideCalendar: Bool = true
     @State private var hideSeverity: Bool = true
     @State private var hideFreqChart: Bool = false
@@ -229,7 +230,7 @@ struct AnalyticsView: View {
                             .padding(.bottom, 12)
                     }
 
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2))
+                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2), width: screenWidth, height: screenHeight)
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
@@ -262,5 +263,5 @@ struct AnalyticsView: View {
 }
 
 #Preview {
-    AnalyticsView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    AnalyticsView(userID:11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

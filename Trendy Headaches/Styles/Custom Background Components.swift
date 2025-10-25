@@ -96,7 +96,7 @@ struct ProfileBGComps: View {
 //        }
 //    }
 //}
-struct Create1BGComps: View {
+struct CreateBGComps: View {
     var bg: String
     var accent: String
     var fixedHeight: CGFloat
@@ -134,27 +134,6 @@ struct Create2BGComps: View {
         }
     }
 }
-
-//struct Create3BGComps: View {
-//    var bg: String
-//    var accent: String
-//    var fixedHeight: CGFloat
-//    
-//    let width = UIScreen.main.bounds.width
-//
-//    var body: some View {
-//        
-//        let contentHeight = (width*0.11 + fixedHeight * 0.016) + ( width*0.05 + fixedHeight*0.025) + 4 * ((width*0.055)+(fixedHeight*0.065)+(fixedHeight * 0.025)) + (fixedHeight * 0.06)
-//        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.08)
-//        
-//        ZStack(alignment: .top) {
-//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.13, width: width, height: blobHeight)
-//            
-//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2  + fixedHeight * 0.11, width: width, height: blobHeight)
-//        }
-//    }
-//}
-
 
 struct Forgot1BGComps: View {
     var bg: String
@@ -194,7 +173,7 @@ struct Forgot3BGComps: View {
 
     var body: some View {
         ZStack {
-            Color(hex: bg).ignoresSafeArea()
+            
             SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.39, y: 0, rotation: 270, width: height * 0.25, height: width)
             SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.39, y: 0, rotation: 90, width: height * 0.25, height: width)
         }

@@ -19,6 +19,7 @@ struct LogView: View {
     // Layout
     private let leadPadd: CGFloat = 40
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
+    @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
     
     // Shared State
     @State private var showSymptomView = true
@@ -124,7 +125,7 @@ struct LogView: View {
                 }
                 .padding(.leading, leadPadd)
                 
-                VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
+                VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0), width: screenWidth, height: screenHeight) }
                     .zIndex(1)
                     .ignoresSafeArea(edges: .bottom)
             }
@@ -380,5 +381,5 @@ struct LogView: View {
 }
 
 #Preview {
-    LogView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    LogView(userID: 11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

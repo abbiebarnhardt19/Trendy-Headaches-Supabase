@@ -33,7 +33,7 @@ struct CreateAccountView3: View {
                 ZStack {
                     Color(hex: bg).ignoresSafeArea()
                         .zIndex(0)
-                    Create1BGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height, topInsert: topInsert, bottomInsert: bottomInsert)
+                    CreateBGComps(bg: bg, accent: accent, fixedHeight: geometry.size.height, topInsert: topInsert, bottomInsert: bottomInsert)
                         .zIndex(2)
                         .ignoresSafeArea(.keyboard)
                     

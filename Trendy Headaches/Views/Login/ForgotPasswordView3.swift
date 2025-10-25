@@ -135,16 +135,18 @@ struct ForgotPasswordView3: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Color(hex: bg).ignoresSafeArea()
+                    .zIndex(-1)
                 Forgot3BGComps(bg: bg, accent: accent)
+                    .zIndex(1)
 
                 ScrollView {
                     VStack{
                         HStack {
                             Spacer()
                             CustomText( text: "Last Step", color: accent, width: 100, textAlign: .trailing, textSize: 50)
-                                .padding(.top, 40)
-                                .padding(.bottom, 5)
-                                .padding(.trailing, 15)
+                                .padding(.top, 35)
+                                .padding(.trailing, 30)
                         }
                         
                         CustomText(text: "New Password", color: accent)
@@ -193,6 +195,7 @@ struct ForgotPasswordView3: View {
                         }
                     }
                     .frame(height: UIScreen.main.bounds.height)
+                    .zIndex(0)
                 }
                 .task {
                     if let currentUser = await Database.shared.userFromEmail(email: email) {

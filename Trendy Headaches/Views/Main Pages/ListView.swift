@@ -132,7 +132,7 @@ struct ListView: View {
                             .padding(.trailing, 10)
                             .padding(.bottom, UIScreen.main.bounds.height * 0.06)
                     }
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
+                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1), width: screenWidth, height: screenHeight)
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(1)
@@ -213,5 +213,5 @@ struct ListView: View {
 }
 
 #Preview {
-    ListView(userID: 9, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ListView(userID: 11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

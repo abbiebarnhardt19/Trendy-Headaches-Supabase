@@ -12,6 +12,8 @@ struct NavBarView: View {
     @Binding var bg: String
     @Binding var accent: String
     @Binding var selected: Int
+    @State var width: CGFloat
+    @State var height: CGFloat
     
     struct NavItem {
         let icon: String
@@ -48,10 +50,10 @@ struct NavBarView: View {
                     NavigationLink(destination: item.destination) {
                         VStack(spacing: 2) {
                             Image(systemName: item.icon)
-                                .font(.system(size: 22))
+                                .font(.system(size: width * 0.04))
                             CustomText(text: item.label, color: accent, textAlign: .center, multiAlign: .center, textSize: 15)
                         }
-                        .frame(width: 70, height: 70)
+                        .frame(width: width/5, height: height * 0.1)
                         .background(
                             ZStack {
                                 if selected == index {
@@ -76,7 +78,7 @@ struct NavBarView: View {
             .foregroundColor(Color(hex: accent))
         }
         .frame(maxWidth: UIScreen.main.bounds.width)
-        .frame(height: 80)
+        .frame(height: height * 0.075)
         .ignoresSafeArea(edges: .bottom)
     }
 }

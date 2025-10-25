@@ -38,6 +38,7 @@ struct ProfileView: View {
     private let themeOptions = ["Classic Light", "Light Pink", "Light Yellow", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
     private let buttonNames = ["Edit Profile", "Data Policy", "Sign Out", "Delete Account"]
     private let screenWidth = UIScreen.main.bounds.width
+    private let screenHeight = UIScreen.main.bounds.height
     
     // MARK: - Body
     var body: some View {
@@ -60,7 +61,7 @@ struct ProfileView: View {
                 // Bottom Nav Bar
                 VStack {
                     Spacer()
-                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3))
+                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3), width: screenWidth, height: screenHeight)
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(1)
@@ -313,5 +314,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(userID: 10, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ProfileView(userID: 11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }
