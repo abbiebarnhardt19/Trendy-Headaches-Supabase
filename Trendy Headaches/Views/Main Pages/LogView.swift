@@ -157,7 +157,13 @@ struct LogView: View {
     private var symptomLogView: some View {
         ZStack(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 17) {
-                DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent,  textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
+                DateTextField(
+                    date: $date,
+                    textValue: $stringDate,
+                    bg: $bg,
+                    accent: $accent,
+                    width: screenWidth * 0.8,
+                    bold: true)
                 
                 CustomText(text: "Symptom*", color: accent, bold: true, textSize: screenWidth * 0.06)
                 MultipleChoice(options: $sympOptions, selected: $symp, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
@@ -232,7 +238,13 @@ struct LogView: View {
     //side effect log
     private var sideEffectLogView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
+            DateTextField(
+                date: $date,
+                textValue: $stringDate,
+                bg: $bg,
+                accent: $accent,
+                width: screenWidth * 0.7,
+                bold: true)
             
             textFieldSection(title: "Side Effect*", text: $sideEffectName)
             
