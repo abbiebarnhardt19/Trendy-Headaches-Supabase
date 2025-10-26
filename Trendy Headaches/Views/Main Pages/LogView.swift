@@ -157,13 +157,7 @@ struct LogView: View {
     private var symptomLogView: some View {
         ZStack(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 17) {
-                DateTextField(
-                    date: $date,
-                    textValue: $stringDate,
-                    bg: $bg,
-                    accent: $accent,
-                    width: screenWidth * 0.8,
-                    bold: true)
+                DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, width: screenWidth * 0.8, bold: true)
                 
                 CustomText(text: "Symptom*", color: accent, bold: true, textSize: screenWidth * 0.06)
                 MultipleChoice(options: $sympOptions, selected: $symp, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)

@@ -49,10 +49,10 @@ struct analyticsFilter: View {
             // MARK: Date
             sectionButton(title: "Date", section: .date) {
                 VStack {
-                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 155, label: "Start:", bold: false)
+                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 250, label: "Start:")
                         .padding(.top, 10)
-                    
-                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 155, label: "End:", bold: false)
+
+                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 250, label: "End:")
                 }
                 .padding(.leading, 5)
             }

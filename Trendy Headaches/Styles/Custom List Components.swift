@@ -51,7 +51,7 @@ struct filterPopUp: View {
     }
 
     @State private var expandedSection: FilterSection = .none
-    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 250), .logType: (100, 160),  .date: (55, 230),  .severity: (90, 190),  .symptoms: (120, 300)]
+    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 250), .logType: (100, 160),  .date: (55, 280),  .severity: (90, 190),  .symptoms: (120, 300)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -72,10 +72,10 @@ struct filterPopUp: View {
             // MARK: Date
             sectionButton(title: "Date", section: .date) {
                 VStack {
-                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 210, label: "Start:",  bold: false)
+                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 250, label: "Start:")
                         .padding(.top, 10)
 
-                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 210, label: "End:", bold: false)
+                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 250, label: "End:")
                 }
                 .padding(.leading, 5)
             }

@@ -72,78 +72,6 @@ struct ColorTextField: View {
     }
 }
 
-//calender dropdown in text field
-//struct DateTextField: View {
-//    @Binding var date: Date
-//    @Binding var textValue: String
-//    @Binding var bg: String
-//    @Binding var accent: String
-//    @State var width: CGFloat = 220
-//    @State var specialCase: Bool = false
-//    @State var label: String = "Date:"
-//    @State var textSize: CGFloat = 20
-//    @State var iconSize: CGFloat = 25
-//    @State var bold: Bool = true
-//    @State var fieldHeight: CGFloat
-//    @State var labelHeight: CGFloat = 24
-//    
-//    @State private var showDatePicker: Bool = false
-//    @State private var screenWidth = UIScreen.main.bounds.width
-//    
-//    private var formatter: DateFormatter {
-//        let f = DateFormatter()
-//        f.dateStyle = .short
-//        return f
-//    }
-//    
-//    var body: some View {
-//        VStack(spacing: 0) {
-//            ZStack(alignment: .topLeading) {
-//                // TextField with button overlay
-//                HStack{
-//                    CustomText(text: label, color: accent, bold: bold, textSize: labelHeight)
-//                        .frame(width: 62, height: 45, alignment: .center)
-//                    
-//                    CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,  width: width, height: fieldHeight, textSize: textSize, botPad: 0)
-//                }
-//                //put the calendar button over the text field
-//                .overlay(
-//                    HStack {
-//                        Spacer()
-//                        Button(action: {
-//                            withAnimation { showDatePicker.toggle() } }){
-//                            Image(systemName: "calendar")
-//                                .foregroundColor(Color(hex: bg))
-//                                .font(.system(size: iconSize))
-//                                .padding(.trailing, 15)
-//                        }
-//                    })
-//                .buttonStyle(PlainButtonStyle())
-//                
-//                // Calendar dropdown
-//                if showDatePicker {
-//                    DatePicker(" ", selection: $date, in: ...Date(), displayedComponents: .date )
-//                    .datePickerStyle(GraphicalDatePickerStyle())
-//                    .frame(width: screenWidth * (specialCase ? 0.6 : 0.85),  height: screenWidth * (specialCase ? 0.7: 0.85))
-//                    .scaleEffect(specialCase ? 0.75 : 1.0)
-//                    .background(Color(hex: accent))
-//                    .accentColor(Color(hex: bg))
-//                    .tint(Color(hex: bg))
-//                    .cornerRadius(20)
-//                    .padding()
-//                    .padding(.bottom, 45)
-//                    .offset(y: 60)
-//                    .colorScheme(Color.isHexDark(accent) ? .dark : .light)
-//                    .transition(.move(edge: .top).combined(with: .opacity))
-//                    .onChange(of: date) {
-//                        textValue = formatter.string(from: date)
-//                        withAnimation { showDatePicker = false }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
 // DateTextField with Custom Calendar
 struct DateTextField: View {
     @Binding var date: Date
@@ -152,7 +80,7 @@ struct DateTextField: View {
     @Binding var accent: String
     @State var width: CGFloat = 220
     @State var label: String = "Date:"
-    @State var bold: Bool = true
+    @State var bold: Bool = false
     
     @State private var showDatePicker: Bool = false
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -188,13 +116,7 @@ struct DateTextField: View {
             .buttonStyle(PlainButtonStyle())
             
             if showDatePicker {
-                CustomCalendarView(
-                    selectedDate: $date,
-                    isPresented: $showDatePicker,
-                    bg: bg,
-                    accent: accent,
-                    width: width
-                )
+                CustomCalendarView( selectedDate: $date, isPresented: $showDatePicker, bg: bg, accent: accent, width: width)
                 .frame(width: width)
                 .background(Color(hex: accent))
                 .cornerRadius(20)
@@ -211,7 +133,7 @@ struct DateTextField: View {
         }
     }
 }
-// Custom Calendar View
+
 // Custom Calendar View
 struct CustomCalendarView: View {
     @Binding var selectedDate: Date
@@ -224,6 +146,10 @@ struct CustomCalendarView: View {
     
     private let calendar = Calendar.current
     private let daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    
+    // Calculate proportional spacing based on width
+    private var spacing: CGFloat { width * 0.02 }
+    private var cellHeight: CGFloat { (width - (spacing * 8)) / 7 }
     
     private var monthYearFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -258,65 +184,57 @@ struct CustomCalendarView: View {
     }
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: spacing) {
             // Month/Year header with navigation
             HStack {
                 Button(action: { changeMonth(by: -1) }) {
                     Image(systemName: "chevron.left")
                         .foregroundColor(Color(hex: bg))
-                        .font(.system(size: 18, weight: .semibold))
-                        .frame(width: 44, height: 44)
+                        .font(.system(size: width * 0.05, weight: .semibold))
+                        .frame(width: width * 0.12, height: width * 0.12)
                         .background(Color(hex: accent))
                 }
                 
                 let month = monthYearFormatter.string(from: currentMonth)
-                CustomText(text: month, color: bg, textAlign: .center, textSize: width * 0.07)
-                
+                let font = UIFont.systemFont(ofSize: width * 0.07, weight: .regular)
+                CustomText(text: month, color: bg, width: month.width(usingFont: font), textSize: width * 0.07)
                 
                 Button(action: { changeMonth(by: 1) }) {
                     Image(systemName: "chevron.right")
                         .foregroundColor(Color(hex: bg))
-                        .font(.system(size: 18, weight: .semibold))
-                        .frame(width: 44, height: 44)
+                        .font(.system(size: width * 0.05, weight: .semibold))
+                        .frame(width: width * 0.12, height: width * 0.12)
                         .background(Color(hex: accent))
                 }
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.horizontal, width * 0.02)
+            .padding(.top, width * 0.02)
             
             // Days of week
             HStack(spacing: 0) {
                 ForEach(daysOfWeek, id: \.self) { day in
-                    CustomText(text: day, color: bg, textAlign: .center, textSize: width * 0.04)
+                    CustomText(text: day, color: bg, textAlign:.center, textSize: width * 0.045)
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, width * 0.02)
             
             // Calendar grid
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 7), spacing: 8) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: spacing), count: 7), spacing: spacing) {
                 ForEach(0..<daysInMonth.count, id: \.self) { index in
                     if let date = daysInMonth[index] {
-                        PickerDayCell(
-                            date: date,
-                            isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
-                            isToday: calendar.isDateInToday(date),
-                            isFutureDate: date > Date(),
-                            bg: bg,
-                            accent: accent,
-                            width: width
-                        ) {
+                        PickerDayCell(date: date, isSelected: calendar.isDate(date, inSameDayAs: selectedDate), isToday: calendar.isDateInToday(date), isFutureDate: date > Date(), bg: bg,  accent: accent, width: width, cellHeight: cellHeight ) {
                             selectedDate = date
                         }
                     } else {
                         Rectangle()
                             .fill(Color(hex: accent))
-                            .frame(height: 36)
+                            .frame(height: cellHeight)
                     }
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 12)
+            .padding(.horizontal, width * 0.02)
+            .padding(.bottom, width * 0.03)
         }
         .background(Color(hex: accent))
         .onAppear {
@@ -342,6 +260,7 @@ struct PickerDayCell: View {
     let bg: String
     let accent: String
     let width: CGFloat
+    let cellHeight: CGFloat
     let action: () -> Void
     
     private var dayNumber: String {
@@ -358,23 +277,18 @@ struct PickerDayCell: View {
         }) {
             ZStack {
                 if isSelected {
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: width * 0.08)
                         .fill(Color(hex: bg))
                 } else {
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: width * 0.04)
                         .fill(Color(hex: accent))
                 }
                 
-                CustomText(
-                    text: dayNumber,
-                    color: isSelected ? accent : bg,
-                    textAlign: .center, bold: (isSelected || isToday),
-                    textSize: width * 0.06
-                )
+                CustomText(text: dayNumber, color: isSelected ? accent : bg, textAlign: .center, bold: isToday ? true : isSelected ? true : false, textSize: width * 0.06)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .opacity(isFutureDate ? 0.7 : 1.0)
             }
-            .frame(height: 36)
+            .frame(height: cellHeight)
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(PlainButtonStyle())
