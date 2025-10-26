@@ -79,6 +79,25 @@ extension Database {
             }
             return result
             
+        case "side_effects":
+            let side_effects: [SideEffect] = try await client
+                .from("Side_Effects")
+                .select()
+                .eq("user_id", value: Int(userId))
+                .execute()
+                .value
+            
+            let result = side_effects.compactMap { side_effect in
+                switch col {
+                case "side_effect_name":
+                    return side_effect.sideEffectName
+                default:
+                    return nil
+                }
+            }
+            // Remove duplicates and sort
+            return Array(Set(result)).sorted()
+            
         default:
             print(" Unknown table: \(table)")
             return []

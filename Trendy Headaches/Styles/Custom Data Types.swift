@@ -286,7 +286,7 @@ struct SideEffect: Codable {
         case medicationId = "medication_id"
         case sideEffectName = "side_effect_name"
         case sideEffectSeverity = "side_effect_severity"
-        case date
+        case date = "side_effect_date"
         case sideEffectSubmitTime = "side_effect_submit_time"
     }
 }

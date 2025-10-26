@@ -116,7 +116,7 @@ struct ListView: View {
                             Spacer()
                             filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
                                 .padding(.trailing, 45)
-                                .padding(.bottom, 130)
+                                .padding(.bottom, UIScreen.main.bounds.height * 0.1 + 70)
                         }
                     }
                     .transition(.move(edge: .bottom))
@@ -130,7 +130,7 @@ struct ListView: View {
                         Spacer()
                         FilterDropDown(accent: accent, popUp: $showFilter)
                             .padding(.trailing, 10)
-                            .padding(.bottom, UIScreen.main.bounds.height * 0.06)
+                            .padding(.bottom, UIScreen.main.bounds.height * 0.1)
                     }
                     NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1), width: screenWidth, height: screenHeight)
                 }
@@ -165,16 +165,16 @@ struct ListView: View {
             endDate = Date()
             stringEndDate = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
             
-            sympOptions = Array(Set(allLogs.compactMap { log in
-                if let symptom = log.symptom_name, !symptom.isEmpty {
-                    return symptom
-                } else {
-                    return nil
+            Task {
+                do {
+                    sympOptions = try await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
+                    let sideEffectOptions = try await Database.shared.getListVals(userId: userID, table: "Side_Effects", col: "side_effect_name")
+                    sympOptions = Array(Set(sympOptions + sideEffectOptions)).sorted()
+                    selectedSymps = sympOptions
+                } catch {
+                    print("Error fetching symptom options: \(error)")
                 }
-            }))
-            .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-            
-            selectedSymps = sympOptions
+            }
         }
         //update filters when values change
         .onChange(of: startDate) {  filterLogs() }

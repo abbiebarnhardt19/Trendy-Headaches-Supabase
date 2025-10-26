@@ -42,35 +42,40 @@ struct filterPopUp: View {
 
     @State private var expandedWidth: CGFloat = 215
     @State private var unexpandedWidth: CGFloat = 255
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
 
     enum FilterSection {
         case none, columns, logType, date, severity, symptoms
     }
 
     @State private var expandedSection: FilterSection = .none
-    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 315), .logType: (100, 140),  .date: (55, 270),  .severity: (90, 190),  .symptoms: (120, 300)]
+    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 250), .logType: (100, 160),  .date: (55, 230),  .severity: (90, 190),  .symptoms: (120, 300)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             // MARK: Columns
                 sectionButton(title: "Columns", section: .columns) {
-                    MultipleCheckboxWrapped(options: $colOptions, selected: $selectedCols, accent: accent, bg: bg, width: expandedWidth)
+                    MultipleCheckboxWrapped(options: $colOptions, selected: $selectedCols, accent: accent, bg: bg, width: (dropdownWidths[.columns]?.expanded ?? 250) - 30, textSize: screenWidth * 0.045)
                     .padding(.top, 10)
+                    .padding(.leading, 5)
                 }
             
             // MARK: Log Type
             sectionButton(title: "Log Type", section: .logType) {
-                MultipleCheckboxWrapped(options: $typeOptions, selected: $type, accent: bg, bg: accent, width: expandedWidth)
+                MultipleCheckboxWrapped(options: $typeOptions, selected: $type, accent: accent, bg: bg, width: (dropdownWidths[.logType]?.expanded ?? 250) - 20, textSize: screenWidth * 0.045)
                 .padding(.top, 10)
+                .padding(.leading, 2)
             }
 
             // MARK: Date
             sectionButton(title: "Date", section: .date) {
                 VStack {
-                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "Start:", textSize: 21,  iconSize: 30,  bold: false, fieldHeight: 50)
+                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "Start:", textSize: screenHeight * 0.065 / 2.2,  iconSize: screenHeight * 0.075 / 2,  bold: false, fieldHeight: min(screenHeight * 0.065, 75), labelHeight: screenWidth * 0.06)
                         .padding(.top, 10)
 
-                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "End:",  textSize: 21, iconSize: 30,  bold: false, fieldHeight: 50)
+                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 155, specialCase: true, label: "End:",  textSize: screenHeight * 0.065 / 2.2, iconSize: screenHeight * 0.075 / 2,  bold: false, fieldHeight: min(screenHeight * 0.065, 75), labelHeight: screenWidth * 0.06)
                 }
                 .padding(.leading, 5)
             }
@@ -79,13 +84,15 @@ struct filterPopUp: View {
             sectionButton(title: "Severity", section: .severity) {
                 HStack {
                     CustomTextField(bg: accent,  accent: bg, placeholder: "", text: Binding(get: { String(sevStart) }, set: { sevStart = Int64($0) ?? 0 }),
-                        width: 65, align: .center)
+                        width: min(screenWidth * 0.15, 65), height: min(screenHeight * 0.05, 45), textSize: screenHeight * 0.045 / 2.2, align: .center)
                     .padding(.top, 10)
                     
-                    CustomText(text: " to ", color: bg, width: 30)
-                        .padding(.top, 10)
+                    VStack(alignment: .center){
+                        CustomText(text: " to ", color: bg, width: 30)
+                    }
+                    .frame(height: min(screenHeight * 0.055, 45))
                     
-                    CustomTextField(bg: accent, accent: bg, placeholder: "", text: Binding(get: { String(sevEnd) }, set: { sevEnd = Int64($0) ?? 0 }), width: 65,  align: .center)
+                    CustomTextField(bg: accent, accent: bg, placeholder: "", text: Binding(get: { String(sevEnd) }, set: { sevEnd = Int64($0) ?? 0 }), width: min(screenWidth * 0.15, 65), height: min(screenHeight * 0.05, 45), textSize: screenHeight * 0.045 / 2.2, align: .center)
                     .padding(.top, 10)
                 }
                 .padding(.leading, 10)
@@ -93,8 +100,9 @@ struct filterPopUp: View {
 
             // MARK: Symptoms
             sectionButton(title: "Symptoms", section: .symptoms) {
-                MultipleCheckboxWrapped(options: $sympOptions, selected: $selectedSymps, accent: accent, bg: bg, width: expandedWidth )
+                MultipleCheckboxWrapped(options: $sympOptions, selected: $selectedSymps, accent: accent, bg: bg, width: (dropdownWidths[.symptoms]?.expanded ?? 250) - 30 , textSize: screenWidth * 0.045)
                 .padding(.top, 10)
+                .padding(.leading, 5)
             }
         }
         .padding(10)
@@ -114,7 +122,7 @@ struct filterPopUp: View {
         @ViewBuilder content: () -> Content
     ) -> some View {
         let widths = dropdownWidths[section] ?? (300, 300)
-        let expandedWidth = widths.expanded
+        let sectionExpandedWidth = widths.expanded  // ← Renamed to avoid shadowing
         let isExpanded = expandedSection == section
         
         let currentWidth: CGFloat = {
@@ -145,7 +153,8 @@ struct filterPopUp: View {
                 
             if isExpanded {
                 content()
-                    .frame(width: expandedWidth, alignment: .leading)
+                    .frame(width: sectionExpandedWidth, alignment: .leading)
+                    .clipped()
             }
         }
         .frame(width: isExpanded ? currentWidth : 160, alignment: .leading)
@@ -178,8 +187,10 @@ struct ScrollableLogTable: View {
     private let rowHeight: CGFloat = 31
 
     let columnMaxWidths: [String: CGFloat] = [ "Em. Med. Taken?": 170, "Em. Med. Name": 150,  "Em. Med. Worked?": 180]
-    let columnMinWidths: [String: CGFloat] = [ "Log Type": 115,
-        "Date": 70,  "Symptom": 110, "Sev.": 62, "Onset": 120 ]
+    let columnMinWidths: [String: CGFloat] = [ "Log Type": 100,
+        "Date": 70,  "Symptom": 110, "Sev.": 70, "Onset": 120 ]
+    
+    let screenWidth = UIScreen.main.bounds.width
 
     private var dateFormatter: DateFormatter {
         let f = DateFormatter()
@@ -203,7 +214,7 @@ struct ScrollableLogTable: View {
         let rawWidth = CGFloat(maxCount) * charWidth + padding
 
         let maxWidth = columnMaxWidths[column] ?? .infinity
-        let minWidth = columnMinWidths[column] ?? 60
+        let minWidth = columnMinWidths[column] ?? 70
         
         return min(max(rawWidth, minWidth), maxWidth)
     }
@@ -238,7 +249,7 @@ struct ScrollableLogTable: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(hex: bg).opacity(0.5), lineWidth: 1) )
-            .frame(height: min(height, headerHeight + CGFloat(list.count) * rowHeight+20))
+            .frame(height: min(height, headerHeight + CGFloat(list.count) * rowHeight+5))
             .frame(width: tableWidth)
         }
 
@@ -277,46 +288,57 @@ struct ScrollableLogTable: View {
     }
 
     // MARK: - Header
+    // MARK: - Header
     private var headerRow: some View {
         HStack(spacing: 0) {
-            ForEach(selectedCols, id: \.self) { column in
+            ForEach(selectedCols.indices, id: \.self) { index in
+                let column = selectedCols[index]
+                let isLastColumn = index == selectedCols.count - 1
+                
                 ZStack(alignment: .trailing) {
-                    CustomText(text: column, color: bg,  textAlign: .center, multiAlign: .center, bold: true, textSize: 18)
-                    .frame(width: effectiveWidth(for: column), height: headerHeight)
-                    .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
+                    CustomText(text: column, color: bg,  textAlign: .center, multiAlign: .center, bold: true, textSize: screenWidth * 0.045)
+                        .frame(width: effectiveWidth(for: column), height: headerHeight)
+                        .padding(.trailing, isLastColumn ? 5 : 0)  // ← Add this
+                        .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
 
                     //for resizing
-                    Rectangle()
-                        .fill(Color.clear)
-                        .frame(width: 10)
-                        .contentShape(Rectangle())
-                        .gesture(DragGesture(minimumDistance: 1)
-                            .onChanged { value in
-                                if activeColumn != column {
-                                    activeColumn = column
+                    if !isLastColumn {  // ← Only show resize handle if not last column
+                        Rectangle()
+                            .fill(Color.clear)
+                            .frame(width: 10)
+                            .contentShape(Rectangle())
+                            .gesture(DragGesture(minimumDistance: 1)
+                                .onChanged { value in
+                                    if activeColumn != column {
+                                        activeColumn = column
+                                        dragOffset = 0
+                                    }
+                                    dragOffset = value.translation.width
+                                }
+                                .onEnded { value in
+                                    if let col = activeColumn {
+                                        let minWidth = columnMinWidths[col] ?? 60
+                                        let maxWidth = columnMaxWidths[col] ?? .infinity
+                                        let newWidth = (columnWidths[col] ?? autoWidth(for: col)) + value.translation.width
+                                        columnWidths[col] = min(max(newWidth, minWidth), maxWidth)
+                                    }
+                                    activeColumn = nil
                                     dragOffset = 0
+                                })
+                            .onTapGesture(count: 2) {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    columnWidths[column] = defaultWidths[column]
                                 }
-                                dragOffset = value.translation.width
                             }
-                            .onEnded { value in
-                                if let col = activeColumn {
-                                    let minWidth = columnMinWidths[col] ?? 60
-                                    let maxWidth = columnMaxWidths[col] ?? .infinity
-                                    let newWidth = (columnWidths[col] ?? autoWidth(for: col)) + value.translation.width
-                                    columnWidths[col] = min(max(newWidth, minWidth), maxWidth)
-                                }
-                                activeColumn = nil
-                                dragOffset = 0
-                            })
-                    .onTapGesture(count: 2) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            columnWidths[column] = defaultWidths[column]
-                        }
                     }
                 }
-                Rectangle()
-                    .fill(Color(hex: bg).opacity(0.4))
-                    .frame(width: 2)
+                
+                // Divider for all but the last column
+                if !isLastColumn {
+                    Rectangle()
+                        .fill(Color(hex: bg).opacity(0.4))
+                        .frame(width: 2)
+                }
             }
         }
         .background(Color(hex: accent))
@@ -331,7 +353,7 @@ struct ScrollableLogTable: View {
                 let column = selectedCols[index]
                 let isLastColumn = index == selectedCols.count - 1
 
-                CustomText(text: value(for: column, in: log), color: bg,  textAlign: .center, textSize: 16)
+                CustomText(text: value(for: column, in: log), color: bg,  textAlign: .center, textSize: screenWidth * 0.04)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .frame(width: effectiveWidth(for: column), height: rowHeight)
@@ -342,6 +364,7 @@ struct ScrollableLogTable: View {
                     Rectangle()
                         .fill(Color(hex: bg).opacity(0.3))
                         .frame(width: 2)
+                    
                 } else {
                     // Add right padding space for last column
                     Spacer(minLength: 5)

@@ -85,6 +85,7 @@ struct DateTextField: View {
     @State var iconSize: CGFloat = 25
     @State var bold: Bool = true
     @State var fieldHeight: CGFloat
+    @State var labelHeight: CGFloat = 24
     
     @State private var showDatePicker: Bool = false
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -100,7 +101,7 @@ struct DateTextField: View {
             ZStack(alignment: .topLeading) {
                 // TextField with button overlay
                 HStack{
-                    CustomText(text: label, color: accent, bold: bold, textSize: 24)
+                    CustomText(text: label, color: accent, bold: bold, textSize: labelHeight)
                         .frame(width: 62, height: 45, alignment: .center)
                     
                     CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,   width: width, height: fieldHeight, textSize: textSize, botPad: 0)

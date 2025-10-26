@@ -273,7 +273,7 @@ struct LogView: View {
     //date field, which is reused for both views
     private func dateField(label: String, date: Binding<Date>, text: Binding<String>) -> some View {
         HStack {
-            DateTextField(date: date, textValue: text, bg: $bg, accent: $accent, label: label, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50))
+            DateTextField(date: date, textValue: text, bg: $bg, accent: $accent, label: label, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
         }
     }
     

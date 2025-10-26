@@ -30,9 +30,9 @@ struct ListBGComps: View {
         ZStack {
             Color(hex: bg).ignoresSafeArea()
             
-            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.1, y: -UIScreen.main.bounds.height * 0.47, rotation: 0, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.15)
+            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.1, y: -UIScreen.main.bounds.height * 0.47, rotation: 0, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.12)
             
-            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.08, y: -UIScreen.main.bounds.height * 0.335, rotation: 180, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.125)
+            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.08, y: -UIScreen.main.bounds.height * 0.335, rotation: 180, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.1)
         }
     }
 }
@@ -66,36 +66,6 @@ struct ProfileBGComps: View {
     }
 }
 
-//struct Create1BGComps: View {
-//    var bg: String
-//    var accent: String
-//    var fixedHeight: CGFloat
-//    var topInsert: CGFloat
-//
-//    let width = UIScreen.main.bounds.width
-//
-//    var body: some View {
-//        
-//        let header = width * 0.11
-//        let label = width * 0.055
-//        let field = fixedHeight * 0.065
-//        let button = fixedHeight * 0.06
-//        let spacing = fixedHeight * 0.012
-//        let bottomPadding = 55.0
-//        
-//        let contentHeight = topInsert + header + spacing +
-//                           5 * (label + spacing + field + spacing) +
-//                           button + bottomPadding + spacing * 2
-//        
-//        let blobHeight = max((fixedHeight - contentHeight)/2, fixedHeight * 0.15)
-//        
-//        ZStack {
-//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: -fixedHeight/2 + blobHeight/2 - fixedHeight * 0.12, width: width, height: blobHeight)
-//            
-//            WavyTopBottomRectangle(waves: 6, amp: 8, accent: accent, x: 0, y: fixedHeight/2 - blobHeight/2 + fixedHeight * 0.18, width: width, height: blobHeight)
-//        }
-//    }
-//}
 struct CreateBGComps: View {
     var bg: String
     var accent: String

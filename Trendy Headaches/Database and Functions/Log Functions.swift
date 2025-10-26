@@ -51,22 +51,22 @@ extension Database {
         do {
             struct SideEffectInsert: Encodable {
                 let user_id: Int64
-                let date: String
+                let side_effect_date: String
                 let side_effect_submit_time: String
                 let side_effect_name: String
                 let side_effect_severity: Int64
-                let medication_id: Int64
+                let side_effect_medication_id: Int64
             }
             
             let dateFormatter = ISO8601DateFormatter()
             
             let sideEffectData = SideEffectInsert(
                 user_id: userID,
-                date: dateFormatter.string(from: date),
+                side_effect_date: dateFormatter.string(from: date),
                 side_effect_submit_time: dateFormatter.string(from: submit_time),
                 side_effect_name: side_effect,
                 side_effect_severity: side_effect_severity,
-                medication_id: medication_id
+                side_effect_medication_id: medication_id
             )
             
             let insertedSideEffect: SideEffect = try await client
@@ -363,10 +363,10 @@ extension Database {
                     .execute()
                 
                 let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
-                let medDict = json["medication"] as? [String: Any]
+                let medDict = json["side_effect_medication"] as? [String: Any]
                 let id = json["side_effect_id"] as! Int64
                 let uid = json["user_id"] as! Int64
-                let dt = dateFormatter.date(from: json["date"] as! String) ?? Date()
+                let dt = dateFormatter.date(from: json["side_effect_date"] as! String) ?? Date()
                 let sev = json["side_effect_severity"] as! Int64
                 let sub = dateFormatter.date(from: json["side_effect_submit_time"] as! String) ?? Date()
                 let mid = json["medication_id"] as? Int64
