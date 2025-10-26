@@ -12,8 +12,9 @@ struct NavBarView: View {
     @Binding var bg: String
     @Binding var accent: String
     @Binding var selected: Int
-    @State var width: CGFloat
-    @State var height: CGFloat
+    
+    let width = UIScreen.main.bounds.width
+    let height = UIScreen.main.bounds.height
     
     struct NavItem {
         let icon: String

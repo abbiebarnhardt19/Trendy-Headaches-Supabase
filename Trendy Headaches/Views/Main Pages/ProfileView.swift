@@ -61,7 +61,7 @@ struct ProfileView: View {
                 // Bottom Nav Bar
                 VStack {
                     Spacer()
-                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3), width: screenWidth, height: screenHeight)
+                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3))
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(1)

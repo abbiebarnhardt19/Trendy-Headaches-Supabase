@@ -181,19 +181,34 @@ struct AnalyticsView: View {
                 AnalyticsBGComps(bg: bg, accent: accent)
                 ScrollView{
                     VStack(spacing: 0) {
-                        HStack{
-                            Spacer()
-                            CustomText(text: "Analytics", color: accent, width: 220, textSize: 53)
+                        VStack{
+                            HStack{
+                                Spacer()
+                                let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
+                                CustomText(text: "Analytics", color: accent, width: "Analytics".width(usingFont: font), textSize: screenWidth * 0.1)
+                                FilterDropDown(accent: accent, bg: bg, popUp: $showFilter, width: screenWidth * 0.12)
+                            }
+
+                            
+                            HStack{
+                                if showFilter{
+                                    Spacer()
+                                    analyticsFilter(accent: accent, bg: bg, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                                        .padding(.trailing, screenWidth * 0.14 / 3.5)
+                                }
+                            }
                         }
                         .frame(width: screenWidth)
-                        .padding(.vertical, 25)
+                        .padding(.top, 25)
+                        .padding(.bottom, 15)
                         .padding(.trailing, 20)
+                    
 
                         if !hideCalendar{
                             CalendarView(logs: logs, hideChart: $hideCalendar, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: logs))
                         }
                         else{
-                            HiddenChart(bg: bg, accent: accent, chart: "Calendar", width: screenWidth,  hideChart: $hideCalendar)
+                            HiddenChart(bg: bg, accent: accent, chart: "Calendar",  hideChart: $hideCalendar)
                         }
                         
                         if !hideSeverity{
@@ -201,37 +216,23 @@ struct AnalyticsView: View {
                                 .padding(.bottom, 10)
                         }
                         else{
-                            HiddenChart(bg: bg, accent: accent, chart: "Log Severity", width: screenWidth,  hideChart: $hideSeverity)
+                            HiddenChart(bg: bg, accent: accent, chart: "Log Severity",  hideChart: $hideSeverity)
                         }
                         
                         if !hideFreqChart{
                             CustomStackedBarChart(logList: logs, accent: accent, bg: bg, hideChart: $hideFreqChart)
                         }
                         else{
-                            HiddenChart(bg: bg, accent: accent, chart: "Logs by Symptom", width: screenWidth,  hideChart: $hideFreqChart)
+                            HiddenChart(bg: bg, accent: accent, chart: "Logs by Symptom",  hideChart: $hideFreqChart)
                         }
                     }
-                    .padding(.bottom, 150)
+                    .padding(.bottom, 170)
                 }
     
                 VStack {
                     Spacer()
-                    HStack{
-                        if showFilter{
-                            analyticsFilter(accent: accent, bg: bg, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                .padding(.leading, 30)
-                            Spacer()
-                        }
-                    }
-                    HStack{
-                       
-                        FilterDropDown(accent: accent, popUp: $showFilter, width: CGFloat(60))
-                            .padding(.leading, 30)
-                            .padding(.bottom, UIScreen.main.bounds.height * 0.1)
-                        Spacer()
-                    }
 
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2), width: screenWidth, height: screenHeight)
+                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2))
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)

@@ -51,7 +51,9 @@ struct ListView: View {
     //size variables
     var screenWidth: CGFloat = UIScreen.main.bounds.width
     var screenHeight: CGFloat = UIScreen.main.bounds.height
-    var popupHeight: CGFloat = UIScreen.main.bounds.height-150 - 170 - 60
+    
+    //substract the blobs + header
+    
     
     //call this when any filter values change
     func filterLogs() {
@@ -82,24 +84,39 @@ struct ListView: View {
     }
 
     var body: some View {
+        
         NavigationStack {
             ZStack {
                 ListBGComps(bg: bg, accent: accent)
                 
                 VStack {
                     //page label
-                    HStack{
-                        CustomText(text: "Log List", color: accent, width:210, textAlign: .leading,  multiAlign: .leading,  textSize: 53)
-                            .frame(height: 80)
-                            .padding(.leading, UIScreen.main.bounds.width * 0.15)
-                        Spacer()
+                    VStack{
+                        HStack{
+                            FilterDropDown(accent: accent, bg: bg, popUp: $showFilter, width: screenWidth * 0.12)
+                                .padding(.trailing, 5)
+                            let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
+                            CustomText(text: "Log List", color: accent, width: "Log List".width(usingFont: font), textSize: screenWidth * 0.1)
+                            
+                            Spacer()
+                        }
+
+                        HStack{
+                            if showFilter{
+                                    filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                                Spacer()
+                            }
+                        }
                     }
-                    .padding(.top, 10)
+                    .frame(width: screenWidth)
+                    .padding(.top, 25)
+                    .padding(.bottom, 15)
+                    .padding(.leading, 40)
                     
                     //table
                     HStack{
                         Spacer()
-                        ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: bg, accent: accent, height: popupHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
+                        ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: bg, accent: accent, height: screenHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
                             selectLog = id
                             selectTable = table
                         })
@@ -107,32 +124,11 @@ struct ListView: View {
                     }
                     Spacer()
                 }
-                
-                //filter dropdowns
-                if showFilter {
-                    VStack {
-                        Spacer()
-                        HStack {
-                            Spacer()
-                            filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                .padding(.trailing, 40)
-                                .padding(.bottom, UIScreen.main.bounds.height * 0.1 + screenWidth * 0.175 + 10)
-                        }
-                    }
-                    .transition(.move(edge: .bottom))
-                    .zIndex(10)
-                }
 
                 //nav bar
                 VStack {
                     Spacer()
-                    HStack{
-                        Spacer()
-                        FilterDropDown(accent: accent, popUp: $showFilter, width: screenWidth * 0.14)
-                            .padding(.trailing, 10)
-                            .padding(.bottom, UIScreen.main.bounds.height * 0.1)
-                    }
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1), width: screenWidth, height: screenHeight)
+                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(1)

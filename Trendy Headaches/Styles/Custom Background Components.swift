@@ -24,15 +24,21 @@ struct AnalyticsBGComps: View {
 struct ListBGComps: View {
     var bg: String
     var accent: String
-    var screenWidth: CGFloat = UIScreen.main.bounds.width
+    
+    let screenWidth: CGFloat = UIScreen.main.bounds.width
+    let screenHeight: CGFloat = UIScreen.main.bounds.height
 
     var body: some View {
         ZStack {
             Color(hex: bg).ignoresSafeArea()
             
-            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.1, y: -UIScreen.main.bounds.height * 0.47, rotation: 0, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.12)
+            SameAmplitudeBlob(waves: 10, amp: 20, accent: accent,  x: UIScreen.main.bounds.height * 0.425, y: -UIScreen.main.bounds.width * 0.32, rotation:295, width: UIScreen.main.bounds.width)
+                .zIndex(5)
+                .scaleEffect(x: -1, y: 1)
             
-            SameAmplitudeBlob(waves: 6, amp: 15, accent: accent, x: -UIScreen.main.bounds.width * 0.08, y: -UIScreen.main.bounds.height * 0.335, rotation: 180, width:UIScreen.main.bounds.width+70, height:UIScreen.main.bounds.height*0.1)
+            SameAmplitudeBlob(waves: 10, amp: 20, accent: accent,  x: UIScreen.main.bounds.height * 0.29, y: -UIScreen.main.bounds.width * 0.3, rotation:117, width: UIScreen.main.bounds.width)
+                .zIndex(5)
+                .scaleEffect(x: -1, y: 1)
         }
     }
 }

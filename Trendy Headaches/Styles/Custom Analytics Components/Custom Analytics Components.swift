@@ -11,14 +11,16 @@ struct HiddenChart: View {
     var bg: String
     var accent: String
     var chart: String
-    var width: CGFloat
     @Binding var hideChart: Bool
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
     
     var body: some View {
         HStack {
-            CustomButton( text: "Show \(chart) Visual",  bg: bg,  accent: accent,  height: 50, width: UIScreen.main.bounds.width -  30,   corner: 30, bold: false,  textSize: 22, action: { hideChart.toggle() } )
+            CustomButton( text: "Show \(chart) Visual",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  30,   corner: 30, bold: false,  textSize: screenWidth * 0.06, action: { hideChart.toggle() } )
         }
-        .frame(width: width)
+        .frame(width: screenWidth)
     }
 }
 
