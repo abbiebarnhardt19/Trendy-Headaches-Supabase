@@ -45,7 +45,7 @@ struct TooltipOverlay: View {
         let percent = total > 0 ? Double(sym.count) / Double(total) * 100 : 0
 
         // chart metrics
-        let (yAx, pad, space): (CGFloat, CGFloat, CGFloat) = (15, 20, 10)
+        let (yAx, pad, space): (CGFloat, CGFloat, CGFloat) = (15, 0, 0)
         let bars = CGFloat(max(1, data.count))
         let barW = (chartWidth - yAx - pad - space * (bars - 1)) / bars
         let usedW = barW.isFinite && barW > 0 ? barW : (chartWidth - yAx - space * 11 - 20) / 12
@@ -124,17 +124,23 @@ struct CustomStackedBarChart: View {
     @State var yearOff: Int = 0
     @State private var selMon: Date? = nil
     @State private var selSymp: String? = nil
-    @State private var width = UIScreen.main.bounds.width - 30
+    
+    // Make width responsive
+    private var screenWidth: CGFloat { UIScreen.main.bounds.width }
+    private var width: CGFloat { screenWidth - 30 }
+    private var horizontalPadding: CGFloat { min(20, screenWidth * 0.05) }
 
     //get all the month data
     private var data: [(month: Date, symptoms: [(symptom: String, count: Int)])] {
-            let cal = Calendar.current
-            let startMon = cal.date(byAdding: .month, value: -11, to: cal.date(from: cal.dateComponents([.year, .month], from: Date()))!)!
-            let months = (0..<12).compactMap { cal.date(byAdding: .month, value: $0, to: startMon) }
-            let logsByMonth = Dictionary(grouping: logList.filter { $0.date >= startMon }) {
-                cal.date(from: cal.dateComponents([.year, .month], from: $0.date))!
+        let cal = Calendar.current
+        // Use yearOff to shift the date range
+        let baseDate = cal.date(byAdding: .year, value: yearOff, to: Date())!
+        let startMon = cal.date(byAdding: .month, value: -11, to: cal.date(from: cal.dateComponents([.year, .month], from: baseDate))!)!
+        let months = (0..<12).compactMap { cal.date(byAdding: .month, value: $0, to: startMon) }
+        let logsByMonth = Dictionary(grouping: logList.filter { $0.date >= startMon && $0.date <= baseDate }) {
+            cal.date(from: cal.dateComponents([.year, .month], from: $0.date))!
         }
-    
+
         return months.map { month in
             (month, logsByMonth[month]?.reduce(into: [String: Int]()) { $0[$1.symptom_name ?? "Unknown", default: 0] += 1 }
                     .map { ($0.key, $0.value) } ?? [])
@@ -163,29 +169,35 @@ struct CustomStackedBarChart: View {
         let yMax = ((maxCount + yStep - 1) / yStep) * yStep
         let yVals = Array(stride(from: 0, through: yMax, by: yStep))
 
+        // Make spacing and widths responsive
         let yAxWid: CGFloat = 15
-        let barSpac: CGFloat = 10
-        let barWidth = (width - yAxWid - barSpac * 11 - 20) / 12
+        let leftPadding: CGFloat = min(10, screenWidth * 0.025)
+        let rightPadding: CGFloat = min(10, screenWidth * 0.025)
+        let barSpac: CGFloat = max(4, min(10, screenWidth * 0.02)) // Scale spacing down on small screens
+        let availableWidth = width - yAxWid - leftPadding - rightPadding - (barSpac * 11)
+        let barWidth = max(15, availableWidth / 12) // Minimum bar width of 15
 
         VStack(alignment: .leading, spacing: 10) {
             // Buttons
             HStack {
-                HStack{
-                    CustomButton(systemImage: "chevron.left", bg: bg,  accent: accent, height: 15, width: 12, botPad: 0) { yearOff -= 1}
+                HStack(spacing: 0) {
+                    CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12, botPad: 0) { yearOff -= 1}
                     
-                    CustomText(text:"Logs by Symptom", color:bg, width:150, textAlign:.center, textSize:18)
+                    let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+                    let title = "Logs by Symptom"
+                    CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
                     
-                    CustomButton(systemImage: "chevron.right", bg: bg,  accent: accent, height: 15, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
+                    CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
                 }
                 .padding(.bottom, 10)
                 
                 Spacer()
                 
-                CustomButton(text:"Key", bg: accent, accent: bg, height: 25, width: 45, textSize: 12){showKey.toggle()}
+                CustomButton(text:"Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showKey.toggle()}
                 
-                CustomButton(text:"Hide", bg: accent, accent: bg, height: 25, width: 45, textSize: 12){hideChart.toggle()}
+                CustomButton(text:"Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){hideChart.toggle()}
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, horizontalPadding)
             
             // Chart area with Y-axis and bars
             ZStack(alignment:.topLeading) {
@@ -193,17 +205,20 @@ struct CustomStackedBarChart: View {
                     // Y-axis
                     VStack(spacing:0) {
                         ForEach(yVals.reversed(), id:\.self) { value in
-                            CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .trailing, textSize:10)
-                                .padding(.trailing,7)
+                            CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
                                 .frame(height:1)
-                                .offset(y:-3)
+                                .offset(x:5, y:-3)
+                            
                             if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
                         }
                     }
                     .frame(height: chartHeight, alignment:.top)
                     
+                    Spacer()
+                        .frame(width: leftPadding)
+                    
                     ZStack(alignment:.topLeading) {
-                        //bars
+                        //grid lines
                         VStack(spacing:0) {
                             ForEach(yVals.reversed(), id:\.self) { value in
                                 Rectangle().fill(Color(hex:bg).opacity(0.3)).frame(height:1)
@@ -221,62 +236,67 @@ struct CustomStackedBarChart: View {
                                         VStack(spacing: 0) {
                                             let popGap: CGFloat = 8
 
-                                        ForEach(sympOrder, id: \.self) { symp in
-                                            if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
-                                                let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
-                                                let isSel = selMon == monData.month && selSymp == s.symptom
-                                                let topPad: CGFloat = isSel ? popGap / 2 : 0
-                                                let botPad: CGFloat = isSel ? popGap / 2 : 0
+                                            ForEach(sympOrder, id: \.self) { symp in
+                                                if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
+                                                    let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
+                                                    let isSel = selMon == monData.month && selSymp == s.symptom
+                                                    let topPad: CGFloat = isSel ? popGap / 2 : 0
+                                                    let botPad: CGFloat = isSel ? popGap / 2 : 0
 
-                                                Rectangle()
-                                                    .fill(colorMap[s.symptom] ?? .gray)
-                                                    .frame(height: segHeight)
-                                                    .padding(.top, topPad)
-                                                    .padding(.bottom, botPad)
-                                                    .onTapGesture {
-                                                        withAnimation(.spring()) {
-                                                            if selMon == monData.month && selSymp == s.symptom {
-                                                                selMon = nil
-                                                                selSymp = nil
-                                                            } else {
-                                                                selMon = monData.month
-                                                                selSymp = s.symptom
+                                                    Rectangle()
+                                                        .fill(colorMap[s.symptom] ?? .gray)
+                                                        .frame(height: segHeight)
+                                                        .padding(.top, topPad)
+                                                        .padding(.bottom, botPad)
+                                                        .onTapGesture {
+                                                            withAnimation(.spring()) {
+                                                                if selMon == monData.month && selSymp == s.symptom {
+                                                                    selMon = nil
+                                                                    selSymp = nil
+                                                                } else {
+                                                                    selMon = monData.month
+                                                                    selSymp = s.symptom
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
                                             }
+                                            .clipShape(RoundedRectangle(cornerRadius:8))
                                         }
-                                        .clipShape(RoundedRectangle(cornerRadius:8))
-                                    }
-                                    .frame(width:barWidth,height:chartHeight)
+                                        .frame(width:barWidth,height:chartHeight)
                                     
-                                    CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize:8)
+                                    CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
                                         .fixedSize()
                                         .padding(.top,5)
                                 }
                             }
                         }
+                        .frame(maxWidth: availableWidth + (barSpac * 11))
                     }
+                    
+                    Spacer()
+                        .frame(width: rightPadding)
                 }
                 
                 // popup if segment is selected
                 if let selMon, let selSymp {
-                    TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
+                    TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
+                        .offset(x: yAxWid + leftPadding)
                 }
             }
             .frame(height:chartHeight+30)
             
             //symptom legend
             if showKey {
-                BarSymptomKey(sympOrder: sympOrder, colorMap: colorMap, bg: bg, width: width - 50)
-                    .padding(.leading, 25)
+                BarSymptomKey(sympOrder: sympOrder, colorMap: colorMap, bg: bg, width: width - (horizontalPadding * 2))
+                    .padding(.horizontal, horizontalPadding)
                     .padding(.bottom, 5)
             }
         }
         .padding(.vertical,10)
         .background(Color(hex:accent))
-        .cornerRadius(30)
+        .cornerRadius(20)
         .frame(width:width)
         .padding(.bottom, 10)
     }
@@ -317,7 +337,7 @@ struct BarSymptomKey: View {
                                     ? String(symptom.capitalizedWords.prefix(10)) + "…"
                                     : symptom.capitalizedWords,
                                 color: bg,
-                                textSize: 12
+                                textSize: 14
                             )
                             .lineLimit(1)
                             .truncationMode(.tail)
@@ -334,7 +354,7 @@ struct BarSymptomKey: View {
     private func computeRows() -> [[String]] {
         var rows: [[String]] = [[]]
         var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        let font = UIFont.systemFont(ofSize: 14, weight: .regular)
         let itemSpacing: CGFloat = 10
         
         for symptom in sympOrder {
@@ -349,7 +369,7 @@ struct BarSymptomKey: View {
             let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
             
             // Allow going significantly over to pack more items
-            if newRowWidth > width * 1.3 && !rows[rows.count - 1].isEmpty {
+            if newRowWidth > width  && !rows[rows.count - 1].isEmpty {
                 // Start a new row
                 rows.append([symptom])
                 currentRowWidth = itemWidth

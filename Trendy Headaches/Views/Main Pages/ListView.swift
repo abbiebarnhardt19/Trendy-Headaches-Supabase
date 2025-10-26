@@ -88,7 +88,7 @@ struct ListView: View {
         NavigationStack {
             ZStack {
                 ListBGComps(bg: bg, accent: accent)
-            
+                
                 let maxTableHeight = screenHeight * 0.62
                 
                 VStack {
@@ -101,13 +101,6 @@ struct ListView: View {
                             CustomText(text: "Log List", color: accent, width: "Log List".width(usingFont: font), textSize: screenWidth * 0.1)
                             
                             Spacer()
-                        }
-
-                        HStack{
-                            if showFilter{
-                                    filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                Spacer()
-                            }
                         }
                     }
                     .frame(width: screenWidth)
@@ -126,6 +119,28 @@ struct ListView: View {
                     }
                     Spacer()
                 }
+                
+                // Filter popup as overlay
+                if showFilter {
+                    VStack {
+                        HStack {
+                            filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                                .padding(.leading, 38)
+                                .padding(.top, 90)
+                            Spacer()
+                        }
+                        Spacer()
+                    }
+                    .zIndex(1000)
+                }
+
+                //nav bar
+                VStack {
+                    Spacer()
+                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
+                }
+                .ignoresSafeArea(edges: .bottom)
+                .zIndex(1)
 
                 //nav bar
                 VStack {

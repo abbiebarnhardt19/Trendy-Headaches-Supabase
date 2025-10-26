@@ -62,7 +62,7 @@ struct SeverityPieChart: View {
         let sliceColors = baseColor.generateColors(from: baseColor, count: counts.count)
         
         ZStack {
-            RoundedRectangle(cornerRadius: 30)
+            RoundedRectangle(cornerRadius: 20)
                 .fill(Color(hex: accent))
                 .frame(width: UIScreen.main.bounds.width - 30, height: chartSize + 70)
             

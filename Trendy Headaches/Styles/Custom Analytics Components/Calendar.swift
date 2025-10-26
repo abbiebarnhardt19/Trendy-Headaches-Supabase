@@ -28,30 +28,34 @@ struct CalendarView: View {
             CalendarGrid
             if showKey {
                 SeverityKeyBar(accent: bg, width: width, height: 20)
-                SymptomKey(sympIcon: sympIcon, accent: bg, width: width)
+                SymptomKey(symptomToIcon: sympIcon, accent: bg, width: width)
             }
         }
         .frame(width: width)
         .padding()
         .background(Color(hex: accent))
-        .cornerRadius(30)
+        .cornerRadius(20)
         .padding(.bottom, 10)
     }
 
     //calendar parts
     private var TopBar: some View {
         HStack(spacing: 8) {
-            CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 15, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
+            CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
             
-            CustomText(text: monthYearString(for: currentMonth), color: bg, width: textWidth(for: monthYearString(for: currentMonth), fontSize: 18), textAlign: .center, textSize: 18)
+            let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+            let title = monthYearString(for: currentMonth)
+            CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, textSize: 19)
                 .padding(.bottom, 9)
             
-            CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 15, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
+            CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
+
+            
             
             Spacer()
             
-            CustomButton(text: "Key", bg: accent, accent: bg, height: 25, width: 45, textSize: 12) { showKey.toggle() }
-            CustomButton(text: "Hide", bg: accent, accent: bg, height: 25, width: 45, textSize: 12) { hideChart.toggle() }
+            CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showKey.toggle() }
+            CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { hideChart.toggle() }
         }
         .frame(height: 20)
     }
@@ -123,18 +127,91 @@ struct LogIcon: View {
 }
 
 //make a key for mapping the shapes to the symptoms
+//struct SymptomKey: View {
+//    let sympIcon: [String: String]
+//    var accent: String
+//    var width: CGFloat
+//    var itemHeight: CGFloat = 13
+//
+//    var body: some View {
+//        genSympKey(from: sympIcon, accent: accent, width: width, itemHeight: itemHeight)
+//            .frame(width: width, alignment: .leading)
+//            .padding(.bottom, 10)
+//    }
+//}
+
 struct SymptomKey: View {
-    let sympIcon: [String: String]
+    var symptomToIcon: [String: String]
     var accent: String
     var width: CGFloat
     var itemHeight: CGFloat = 13
-
+    
     var body: some View {
-        genSympKey(from: sympIcon, accent: accent, width: width, itemHeight: itemHeight)
-            .frame(width: width, alignment: .leading)
-            .padding(.bottom, 10)
+        let rows = computeRows()
+        
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(0..<rows.count, id: \.self) { rowIndex in
+                HStack(spacing: 10) {
+                    ForEach(rows[rowIndex], id: \.0) { item in
+                        HStack(spacing: 4) {
+                            Image(systemName: item.1)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: itemHeight, height: itemHeight)
+                                .foregroundColor(Color(hex: accent))
+                            CustomText(
+                                text: String(item.0.prefix(12)),
+                                color: accent,
+                                textSize: 12
+                            )
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize(horizontal: true, vertical: false)
+                        }
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 4)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .frame(width: width, alignment: .leading)
+    }
+    
+    private func computeRows() -> [[(String, String)]] {
+        var rows: [[(String, String)]] = [[]]
+        var currentRowWidth: CGFloat = 0
+        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        let itemSpacing: CGFloat = 10
+        let horizontalPadding: CGFloat = 8
+        let iconTextGap: CGFloat = 4
+        
+        for symptom in symptomToIcon.keys.sorted() {
+            let iconName = symptomToIcon[symptom] ?? "questionmark.square.fill"
+            let displayText = String(symptom.prefix(12))
+            let textWidth = displayText.width(usingFont: font)
+            // icon + gap + text + padding
+            let itemWidth = itemHeight + iconTextGap + textWidth + horizontalPadding
+            
+            // Calculate what the new width would be if we add this item
+            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
+            
+            // Wrap to new row if needed
+            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
+                // Start a new row
+                rows.append([(symptom, iconName)])
+                currentRowWidth = itemWidth
+            } else {
+                // Add to current row
+                rows[rows.count - 1].append((symptom, iconName))
+                currentRowWidth = newRowWidth
+            }
+        }
+        
+        return rows
     }
 }
+
 
 //making the color key
 struct SeverityKeyBar: View {
@@ -162,6 +239,6 @@ struct SeverityKeyBar: View {
             }
         }
         .frame(width: width)
-        .padding(.bottom, 30)
+        .padding(.vertical, 10)
     }
 }
