@@ -88,6 +88,8 @@ struct ListView: View {
         NavigationStack {
             ZStack {
                 ListBGComps(bg: bg, accent: accent)
+            
+                let maxTableHeight = screenHeight * 0.62
                 
                 VStack {
                     //page label
@@ -116,7 +118,7 @@ struct ListView: View {
                     //table
                     HStack{
                         Spacer()
-                        ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: bg, accent: accent, height: screenHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
+                        ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: bg, accent: accent, height: maxTableHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
                             selectLog = id
                             selectTable = table
                         })
