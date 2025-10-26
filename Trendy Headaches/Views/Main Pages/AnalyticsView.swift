@@ -214,20 +214,21 @@ struct AnalyticsView: View {
                     .padding(.bottom, 150)
                 }
     
-                // Nav bar overlay at bottom
                 VStack {
                     Spacer()
                     HStack{
                         if showFilter{
-                            Spacer()
                             analyticsFilter(accent: accent, bg: bg, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                .padding(.trailing, 20)
+                                .padding(.leading, 30)
+                            Spacer()
                         }
                     }
                     HStack{
+                       
+                        FilterDropDown(accent: accent, popUp: $showFilter, width: CGFloat(60))
+                            .padding(.leading, 30)
+                            .padding(.bottom, UIScreen.main.bounds.height * 0.1)
                         Spacer()
-                        FilterDropDown(accent: bg, popUp: $showFilter, width: CGFloat(60))
-                            .padding(.bottom, 12)
                     }
 
                     NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2), width: screenWidth, height: screenHeight)

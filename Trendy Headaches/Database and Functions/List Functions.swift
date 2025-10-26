@@ -58,7 +58,7 @@ extension Database {
         } catch {
             print("Error fetching unified logs: \(error)")
         }
-        return unifiedLogs
+        return unifiedLogs.sorted { $0.date > $1.date }
     }
     
     // Function to delete log based on log id and table

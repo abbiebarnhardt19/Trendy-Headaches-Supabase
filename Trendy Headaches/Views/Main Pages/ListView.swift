@@ -128,7 +128,7 @@ struct ListView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                        FilterDropDown(accent: accent, popUp: $showFilter, width: screenWidth * 0.175)
+                        FilterDropDown(accent: accent, popUp: $showFilter, width: screenWidth * 0.14)
                             .padding(.trailing, 10)
                             .padding(.bottom, UIScreen.main.bounds.height * 0.1)
                     }
