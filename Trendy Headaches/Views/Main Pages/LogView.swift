@@ -46,7 +46,6 @@ struct LogView: View {
     @State private var emergMedID: Int64? = nil
     
     //  Side Effect Log variables
-    @State private var sideEffectDate: String = ""
     @State private var sideEffectName: String = ""
     @State private var sideEffectSev: Int64 = 0
     @State private var medOptions: [String] = []
@@ -158,7 +157,7 @@ struct LogView: View {
     private var symptomLogView: some View {
         ZStack(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 17) {
-                dateField(label: "Date:", date: $date, text: $stringDate)
+                DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent,  textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
                 
                 CustomText(text: "Symptom*", color: accent, bold: true, textSize: screenWidth * 0.06)
                 MultipleChoice(options: $sympOptions, selected: $symp, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
@@ -197,7 +196,11 @@ struct LogView: View {
 
                     CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                         if existingLog == nil{
-                            submitSymptomLog()
+                            Task{
+                                logID = await Database.shared.createLog(userID: userID, date: date, symptom_onset: onset, symptomName: symp ?? "",  severity: severity, med_taken: medTaken, medTakenName: medTakenName, symptom_desc: sympDesc, notes: notes, submit: Date(), triggerNames: selectedTriggs) ?? 0
+                                
+                                listView = true
+                            }
                         }
                         else{
                             Task {
@@ -222,17 +225,14 @@ struct LogView: View {
                     Spacer()
                 }
             }
-            
             .padding(.bottom, 100)
         }
     }
     
-
-    
     //side effect log
     private var sideEffectLogView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            dateField(label: "Date:", date: $date, text: $sideEffectDate)
+            DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
             
             textFieldSection(title: "Side Effect*", text: $sideEffectName)
             
@@ -249,7 +249,11 @@ struct LogView: View {
                 
                 CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                     if existingLog == nil {
-                        submitSideEffectLog()
+                        Task{
+                            logID = await Database.shared.createSideEffectLog(userID: userID, date: date, side_effect: sideEffectName, side_effect_severity: sideEffectSev, medicationName: selectedMed ?? "") ?? 0
+
+                            listView = true
+                        }
                     } else {
                         Task {
                             await Database.shared.updateSideEffectLog(logID: existingLog ?? 0, userID: userID, date: date, sideEffectName: sideEffectName, sideEffectSeverity: sideEffectSev, medicationID: medID)
@@ -262,20 +266,12 @@ struct LogView: View {
                 .navigationDestination(isPresented: $listView) {
                     ListView(userID: userID, bg: $bg, accent: $accent)
                 }
-                
                 Spacer()
             }
         }
     }
     
     // Components
-    
-    //date field, which is reused for both views
-    private func dateField(label: String, date: Binding<Date>, text: Binding<String>) -> some View {
-        HStack {
-            DateTextField(date: date, textValue: text, bg: $bg, accent: $accent, label: label, textSize: screenHeight * 0.055 / 2.2, fieldHeight: min(screenHeight * 0.065, 50), labelHeight: screenWidth * 0.06)
-        }
-    }
     
     //text field, which is reused in both views
     private func textFieldSection(title: String, text: Binding<String>) -> some View {
@@ -292,7 +288,6 @@ struct LogView: View {
     private func setupData() async {
         //get the current date
         stringDate = formatter.string(from: Date())
-        sideEffectDate = formatter.string(from: Date())
         
         //get data from database
         sympOptions = (try? await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")) ?? []
@@ -319,10 +314,11 @@ struct LogView: View {
                     selectedTriggs = log.trigger_names ?? []
                     triggIDs = log.trigger_ids ?? []
                     medEffective = log.med_worked ?? false
+                    
                     showSymptomView = true
 
                 } else if log.log_type == "SideEffect" {
-                    sideEffectDate = formatter.string(from: log.date)
+                    stringDate = formatter.string(from: log.date)
                     sideEffectName = log.side_effect_med ?? ""
                     sideEffectSev = log.severity
                     selectedMed = log.medication_name ?? ""
@@ -330,47 +326,9 @@ struct LogView: View {
 
                     showSymptomView = false
                 }
-
             } else {
                 notes = "test"
             }
-        }
-
-    }
-    
-    //function to add the log to the database
-    private func submitSymptomLog(){
-        Task {
-            
-            //get the symptoms and triggers from the names
-            sympID = (await Database.shared.getIDFromName(tableName: "Symptoms", names: [symp ?? ""], userID: userID)).first ?? 0
-            
-            triggIDs = await Database.shared.getIDFromName(tableName: "Triggers", names: selectedTriggs, userID: userID)
-            
-            if medTakenName != ""{
-                emergMedID = (await Database.shared.getIDFromName(tableName: "Medications", names: [medTakenName ?? ""], userID: userID)).first
-            }
-            
-            //add log to database
-            logID = await Database.shared.createLog(userID: userID,  date: date, symptom_onset: onset ?? "", symptom: sympID, severity: severity, med_taken: medTaken, med_taken_id: emergMedID, symptom_desc: sympDesc, notes: notes, submit: Date(), triggerIDs: triggIDs) ?? 0
-            
-            listView = true
-        }
-    }
-    
-    //function to add the side effect to the database
-    private func submitSideEffectLog() {
-        Task {
-            //get the medication ID from the name
-            medID = (await Database.shared.getIDFromName(tableName: "Medications", names: [selectedMed ?? ""], userID: userID)).first ?? 0
-           
-            //convert the date from a string
-            let enteredDate = formatter.date(from: sideEffectDate) ?? Date()
-            
-            //add it to the database
-            logID = await Database.shared.createSideEffectLog(userID: userID, date: enteredDate, submit_time: Date(), side_effect: sideEffectName, side_effect_severity: sideEffectSev, medication_id: medID) ?? 0
-            
-            listView = true
         }
     }
 }

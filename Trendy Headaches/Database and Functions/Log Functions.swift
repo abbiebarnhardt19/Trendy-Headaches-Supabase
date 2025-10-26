@@ -10,13 +10,23 @@ import CryptoKit
 
 extension Database {
     
-    // Create log function
-    func createLog(userID: Int64, date: Date, symptom_onset: String?, symptom: Int64, severity: Int64, med_taken: Bool, med_taken_id: Int64?, symptom_desc: String, notes: String, submit: Date, triggerIDs: [Int64] = []) async -> Int64? {
+    //create symptom log function
+    func createLog(userID: Int64, date: Date, symptom_onset: String?, symptomName: String, severity: Int64, med_taken: Bool, medTakenName: String?, symptom_desc: String, notes: String, submit: Date, triggerNames: [String] = []) async -> Int64? {
         
         do {
+            // Get IDs from names
+            let sympID = (await getIDFromName(tableName: "Symptoms", names: [symptomName], userID: userID)).first ?? 0
+            
+            let triggIDs = await getIDFromName(tableName: "Triggers", names: triggerNames, userID: userID)
+            
+            var emergMedID: Int64? = nil
+            if let medName = medTakenName, !medName.isEmpty {
+                emergMedID = (await getIDFromName(tableName: "Medications", names: [medName], userID: userID)).first
+            }
+            
             let dateFormatter = ISO8601DateFormatter()
             
-            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: date), onset_time: symptom_onset, severity_level: severity, symptom_id: symptom, med_taken: med_taken, log_medication_id: med_taken_id, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
+            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: date), onset_time: symptom_onset, severity_level: severity, symptom_id: sympID, med_taken: med_taken, log_medication_id: emergMedID, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
             
             let insertedLog: Log = try await client
                 .from("Logs")
@@ -28,27 +38,31 @@ extension Database {
             
             let logID = insertedLog.logId
             
-            // Associate triggers in junction table
-            for trigID in triggerIDs {
+            // Associate triggers with log
+            for trigID in triggIDs {
                 struct LogTriggerInsert: Encodable {
-                    let lt_log_id: Int64  // Changed from log_id
-                    let lt_trigger_id: Int64  // Changed from trigger_id
+                    let lt_log_id: Int64
+                    let lt_trigger_id: Int64
                 }
                 
                 let linkData = LogTriggerInsert(lt_log_id: logID, lt_trigger_id: trigID)
                 try await client.from("Log_Triggers").insert(linkData).execute()
             }
-            
             return logID
+            
         } catch {
             print("Failed to create log: \(error)")
             return nil
         }
     }
-    
-    // Create a side effect log
-    func createSideEffectLog(userID: Int64, date: Date, submit_time: Date, side_effect: String, side_effect_severity: Int64, medication_id: Int64) async -> Int64? {
+
+    //create the side effect log
+    func createSideEffectLog(userID: Int64, date: Date, side_effect: String, side_effect_severity: Int64, medicationName: String) async -> Int64? {
         do {
+            // Get medication ID from name
+            let medID = (await getIDFromName(tableName: "Medications", names: [medicationName], userID: userID)).first ?? 0
+            
+            // Create side effect log
             struct SideEffectInsert: Encodable {
                 let user_id: Int64
                 let side_effect_date: String
@@ -63,10 +77,10 @@ extension Database {
             let sideEffectData = SideEffectInsert(
                 user_id: userID,
                 side_effect_date: dateFormatter.string(from: date),
-                side_effect_submit_time: dateFormatter.string(from: submit_time),
+                side_effect_submit_time: dateFormatter.string(from: Date()),
                 side_effect_name: side_effect,
                 side_effect_severity: side_effect_severity,
-                side_effect_medication_id: medication_id
+                side_effect_medication_id: medID
             )
             
             let insertedSideEffect: SideEffect = try await client
