@@ -104,7 +104,7 @@ struct DateTextField: View {
                     CustomText(text: label, color: accent, bold: bold, textSize: labelHeight)
                         .frame(width: 62, height: 45, alignment: .center)
                     
-                    CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,   width: width, height: fieldHeight, textSize: textSize, botPad: 0)
+                    CustomTextField(bg: bg, accent: accent,  placeholder: " ",  text: $textValue,  width: width, height: fieldHeight, textSize: textSize, botPad: 0)
                 }
                 //put the calendar button over the text field
                 .overlay(

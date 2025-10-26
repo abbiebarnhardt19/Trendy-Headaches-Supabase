@@ -115,8 +115,8 @@ struct ListView: View {
                         HStack {
                             Spacer()
                             filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                .padding(.trailing, 45)
-                                .padding(.bottom, UIScreen.main.bounds.height * 0.1 + 70)
+                                .padding(.trailing, 40)
+                                .padding(.bottom, UIScreen.main.bounds.height * 0.1 + screenWidth * 0.175 + 10)
                         }
                     }
                     .transition(.move(edge: .bottom))
@@ -128,7 +128,7 @@ struct ListView: View {
                     Spacer()
                     HStack{
                         Spacer()
-                        FilterDropDown(accent: accent, popUp: $showFilter)
+                        FilterDropDown(accent: accent, popUp: $showFilter, width: screenWidth * 0.175)
                             .padding(.trailing, 10)
                             .padding(.bottom, UIScreen.main.bounds.height * 0.1)
                     }

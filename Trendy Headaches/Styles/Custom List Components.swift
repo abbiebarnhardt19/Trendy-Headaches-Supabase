@@ -10,17 +10,17 @@ import SwiftUI
 struct FilterDropDown: View {
     @State var accent: String
     @Binding var popUp: Bool
+    var width: CGFloat
     
     var body: some View {
         Button(action: { popUp.toggle() }) {
             Image(systemName: "line.horizontal.3.decrease.circle")
-                .font(.system(size: 65))
+                .font(.system(size: width))
                 .foregroundColor(Color(hex: accent))
-                .frame(width: 65, height: 25)
+                .frame(width: width, height: width/2)
         }
         .buttonStyle(PlainButtonStyle())
-        .padding(.trailing, 30)
-        .padding(.bottom, 10)
+        .padding(.trailing, 40)
     }
 }
 

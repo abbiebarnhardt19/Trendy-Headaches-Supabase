@@ -226,7 +226,7 @@ struct AnalyticsView: View {
                     }
                     HStack{
                         Spacer()
-                        FilterDropDown(accent: bg, popUp: $showFilter)
+                        FilterDropDown(accent: bg, popUp: $showFilter, width: CGFloat(60))
                             .padding(.bottom, 12)
                     }
 
