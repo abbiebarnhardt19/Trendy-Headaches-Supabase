@@ -19,7 +19,8 @@ struct AnalyticsView: View {
     @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
     @State private var hideCalendar: Bool = true
     @State private var hideSeverity: Bool = true
-    @State private var hideFreqChart: Bool = false
+    @State private var hideFreqChart: Bool = true
+    @State private var hideMedTimeline: Bool = false
     @State private var showFilter: Bool = false
     
     @State var startDate: Date = Date()
@@ -129,6 +130,13 @@ struct AnalyticsView: View {
                         else{
                             HiddenChart(bg: bg, accent: accent, chart: "Logs by Symptom",  hideChart: $hideFreqChart)
                         }
+                        
+                        if !hideMedTimeline {
+                            MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40, hideTimeline: $hideMedTimeline)
+                        }
+                        else {
+                            HiddenChart(bg: bg, accent: accent, chart: "Treatment Timeline", hideChart: $hideMedTimeline)
+                        }
                     }
                     .padding(.bottom, 170)
                 }
@@ -185,7 +193,6 @@ struct AnalyticsView: View {
                     
                     do {
                         medData = try await Database.shared.getMedications(userId: userID)
-                        print("Loaded \(medData.count) medications")
                     } catch {
                         print("Error fetching medications: \(error)")
                     }
