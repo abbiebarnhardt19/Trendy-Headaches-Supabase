@@ -308,16 +308,19 @@ struct SingleCheckbox: View {
             isOn.toggle()
         } label: {
             HStack {
-                CustomText(text: text, color: color, textAlign: .center, bold: true, textSize: textSize)
+                let font = UIFont.systemFont(ofSize: textSize, weight: .bold)
+                CustomText(text: text, color: color,width: text.width(usingFont: font) + 15, textAlign: .center, bold: true, textSize: textSize)
+                    .padding(.trailing, 15)
                 Image(systemName: isOn ? "checkmark.square.fill" : "square")
                     .resizable()
                     .frame(width: textSize, height: textSize)
                     .foregroundColor(Color(hex: color))
+                Spacer()
             }
-            .padding(.trailing, 30)
+            .frame(width: UIScreen.main.bounds.width)
         }
         .buttonStyle(.plain)
-        .frame(width: UIScreen.main.bounds.width - 40)
+        .frame(width: UIScreen.main.bounds.width)
     }
 }
 

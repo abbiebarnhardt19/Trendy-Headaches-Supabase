@@ -17,9 +17,9 @@ struct AnalyticsView: View {
     @State var allLogs: [UnifiedLog] = []
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
     @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
-    @State private var hideCalendar: Bool = false
+    @State private var hideCalendar: Bool = true
     @State private var hideSeverity: Bool = true
-    @State private var hideFreqChart: Bool = true
+    @State private var hideFreqChart: Bool = false
     @State private var showFilter: Bool = false
     
     @State var startDate: Date = Date()
@@ -30,12 +30,58 @@ struct AnalyticsView: View {
     @State var sympOptions: [String] = []
     @State var selectedSymps: [String] = []
     
+    @State var medOptions: [String] = []
+    @State var selectedMeds: [String] = []
+    @State var medData: [Medication] = []
+    
     func filterLogs() {
         logs = allLogs.filter { log in
             if log.date < startDate { return false }
             if log.date > endDate { return false }
             
             guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
+            
+            // Check if log date falls within any selected medication's active period
+            if selectedMeds.isEmpty {
+                return false
+            }
+            
+            let hasActiveMed = medData.contains { med in
+                // Only check preventative medications
+                guard med.medicationCategory == "preventative" else {
+                    return false
+                }
+                
+                // Check if medication is in selected list
+                guard selectedMeds.contains(med.medicationName) else {
+                    return false
+                }
+                
+                // Convert string dates to Date objects
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                
+                guard let medStartDate = dateFormatter.date(from: med.medicationStart) else {
+                    print("Failed to parse start date: \(med.medicationStart)")
+                    return false
+                }
+                
+                // Check if log date is after medication start
+                if log.date < medStartDate { return false }
+                
+                // If end_date exists, check if log is before it
+                if let endDateString = med.medicationEnd, !endDateString.isEmpty {
+                    if let medEndDate = dateFormatter.date(from: endDateString) {
+                        if log.date > medEndDate {
+                            return false
+                        }
+                    }
+                }
+                
+                return true
+            }
+            
+            if !hasActiveMed { return false }
             
             return true
         }
@@ -92,7 +138,7 @@ struct AnalyticsView: View {
                     VStack {
                         HStack {
                             Spacer()
-                            analyticsFilter(accent: accent, bg: bg, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                            analyticsFilter(accent: accent, bg: bg, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sympOptions: $sympOptions, selectedSymps: $selectedSymps, medOptions: $medOptions, selectedMeds: $selectedMeds)
                                 .padding(.trailing, screenWidth * 0.14 / 3.5)
                                 .padding(.top, 80)
                         }
@@ -127,10 +173,27 @@ struct AnalyticsView: View {
                     .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
 
                     selectedSymps = sympOptions
+                    
+                    Task {
+                        do {
+                            medOptions = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
+                            selectedMeds = medOptions
+                        } catch {
+                            print("Error fetching medication options: \(error)")
+                        }
+                    }
+                    
+                    do {
+                        medData = try await Database.shared.getMedications(userId: userID)
+                        print("Loaded \(medData.count) medications")
+                    } catch {
+                        print("Error fetching medications: \(error)")
+                    }
                 }
                 .onChange(of: startDate) {  filterLogs() }
                 .onChange(of: endDate) { filterLogs() }
                 .onChange(of: selectedSymps) {filterLogs()}
+                .onChange(of: selectedMeds) {filterLogs()}
             }
         }
     }

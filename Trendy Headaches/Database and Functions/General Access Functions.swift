@@ -120,4 +120,14 @@ extension Database {
         return try await query.execute().value
     }
     
+    func getMedications(userId: Int64) async throws -> [Medication] {
+        let query = client
+            .from("Medications")
+            .select()
+            .eq("user_id", value: Int(userId))
+        
+        let response: [Medication] = try await query.execute().value
+        return response
+    }
+    
 }

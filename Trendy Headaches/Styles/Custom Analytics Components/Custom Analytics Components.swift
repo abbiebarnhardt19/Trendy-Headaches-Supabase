@@ -34,16 +34,18 @@ struct analyticsFilter: View {
     @Binding var stringEnd: String
     @Binding var sympOptions: [String]
     @Binding var selectedSymps: [String]
+    @Binding var medOptions: [String]
+    @Binding var selectedMeds: [String]
     
     @State private var expandedWidth: CGFloat = 215
     @State private var unexpandedWidth: CGFloat = 255
     
     enum FilterSection {
-        case none, columns, logType, date, severity, symptoms
+        case none, date, symptoms, meds
     }
     
     @State private var expandedSection: FilterSection = .none
-    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 315), .logType: (100, 140),  .date: (55, 270),  .severity: (90, 190),  .symptoms: (120, 300)]
+    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.date: (55, 270),   .symptoms: (120, 300), .meds: (200, 300)]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -64,6 +66,13 @@ struct analyticsFilter: View {
                 
                 MultipleCheckboxWrapped(options: $sympOptions, selected: $selectedSymps, accent: accent,  bg: bg, width: expandedWidth)
                 .padding(.top, 10)
+            }
+            
+            sectionButton(title: "Preventative Treatments", section: .meds) {
+                
+                MultipleCheckboxWrapped(options: $medOptions, selected: $selectedMeds, accent: accent,  bg: bg, width: expandedWidth)
+                .padding(.top, 10)
+                .padding(.leading, 5)
             }
         }
         .padding(10)
@@ -117,6 +126,6 @@ struct analyticsFilter: View {
                     .frame(width: expandedWidth, alignment: .leading)
             }
         }
-        .frame(width: isExpanded ? currentWidth : 160, alignment: .leading)
+        .frame(width: isExpanded ? currentWidth : 200, alignment: .leading)
     }
 }
