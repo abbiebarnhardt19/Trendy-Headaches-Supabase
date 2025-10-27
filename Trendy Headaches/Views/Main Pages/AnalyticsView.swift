@@ -39,7 +39,7 @@ struct AnalyticsView: View {
         logs = allLogs.filter { log in
             if log.date < startDate { return false }
             if log.date > endDate { return false }
-            
+
             guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
             
             // Check if log date falls within any selected medication's active period
@@ -163,8 +163,14 @@ struct AnalyticsView: View {
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
                 .task {
-                    allLogs = await Database.shared.getLogList(userID: userID)
-                    logs = allLogs
+                    do {
+                        allLogs = try await Database.shared.getLogList(userID: userID)
+                        logs = allLogs
+                    } catch {
+                        if (error as NSError).code != NSURLErrorCancelled {
+                            print("Error fetching unified logs: \(error)")
+                        }
+                    }
                     
                     if let earliest = allLogs.map({ $0.date }).min() {
                         startDate = earliest
@@ -184,17 +190,21 @@ struct AnalyticsView: View {
                     
                     Task {
                         do {
-                            medOptions = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
+                            medOptions = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative", includeInactive: true)
                             selectedMeds = medOptions
                         } catch {
-                            print("Error fetching medication options: \(error)")
+                            if (error as NSError).code != NSURLErrorCancelled {
+                                print("Error fetching medications: \(error)")
+                            }
                         }
                     }
                     
                     do {
                         medData = try await Database.shared.getMedications(userId: userID)
                     } catch {
-                        print("Error fetching medications: \(error)")
+                        if (error as NSError).code != NSURLErrorCancelled {
+                            print("Error fetching medications: \(error)")
+                        }
                     }
                 }
                 .onChange(of: startDate) {  filterLogs() }

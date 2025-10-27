@@ -127,7 +127,7 @@ struct CustomStackedBarChart: View {
     
     // Make width responsive
     private var screenWidth: CGFloat { UIScreen.main.bounds.width }
-    private var width: CGFloat { screenWidth - 30 }
+    private var width: CGFloat { screenWidth - 40 }
     private var horizontalPadding: CGFloat { min(20, screenWidth * 0.05) }
 
     //get all the month data

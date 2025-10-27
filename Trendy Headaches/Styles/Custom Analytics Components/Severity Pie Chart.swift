@@ -64,7 +64,7 @@ struct SeverityPieChart: View {
         ZStack {
             RoundedRectangle(cornerRadius: 20)
                 .fill(Color(hex: accent))
-                .frame(width: UIScreen.main.bounds.width - 30, height: chartSize + 70)
+                .frame(width: UIScreen.main.bounds.width - 40, height: chartSize + 70)
             
             VStack {
                 HStack {

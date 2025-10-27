@@ -18,7 +18,7 @@ struct CalendarView: View {
     @State private var showKey = false
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    private let width = UIScreen.main.bounds.width - 60
+    private let width = UIScreen.main.bounds.width - 70
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
 
     var body: some View {

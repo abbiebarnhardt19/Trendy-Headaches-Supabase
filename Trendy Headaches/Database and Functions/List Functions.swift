@@ -9,7 +9,7 @@ import Supabase
 
 extension Database {
     
-    func getLogList(userID: Int64) async -> [UnifiedLog] {
+    func getLogList(userID: Int64) async throws -> [UnifiedLog] {
         var unifiedLogs: [UnifiedLog] = []
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"

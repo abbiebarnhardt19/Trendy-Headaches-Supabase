@@ -24,7 +24,9 @@ struct MedicationTimeline: View {
             VStack(spacing: 0) {
                 // Title and Hide button
                 HStack {
-                    CustomText(text: "Medication Timeline", color: bg, bold: true, textSize: 18)
+                    let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+                    let title = "Treatment Timeline"
+                    CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
                         .padding(.leading, 20)
                     
                     Spacer()
@@ -43,7 +45,6 @@ struct MedicationTimeline: View {
                         VStack(spacing: 20) {
                             ZStack(alignment: .topLeading) {
                                 let timelineWidth = width - 60
-                                let markerHeight: CGFloat = 40
                                 let lineY: CGFloat = 60
                                 
                                 // Horizontal line
@@ -64,16 +65,13 @@ struct MedicationTimeline: View {
                                         
                                         let font = UIFont.systemFont(ofSize: 14, weight: .regular)
                                         let title = formatMonthDay(months[index])
-                                        CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, multiAlign: .center, bold: false, textSize: 14)
+                                        CustomText(text: title, color: bg, width: "####".width(usingFont: font), textAlign: .center, multiAlign: .center, bold: false, textSize: 14)
                                     }
                                     .position(x: xPos, y: lineY + 20)
                                 }
                                 
                                 // Medication staple shapes
-                                // Medication staple shapes
                                 let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth)
-                                let maxHeight = stapleHeights.values.max() ?? 40
-                                let frameHeight = maxHeight + 80 // Add extra space for labels and padding
 
                                 ForEach(Array(medications.enumerated()), id: \.offset) { medIndex, med in
                                     let color = colorMap[med.medicationName] ?? Color.gray
@@ -92,7 +90,7 @@ struct MedicationTimeline: View {
                                                 path.addLine(to: CGPoint(x: endPos, y: lineY - markerHeight))
                                                 path.addLine(to: CGPoint(x: endPos, y: lineY))
                                             }
-                                            .stroke(color, lineWidth: 3)
+                                            .stroke(color, lineWidth: 5)
                                             .onTapGesture {
                                                 selectedMed = med
                                                 popupPosition = CGPoint(x: centerX, y: lineY - markerHeight - 15)
@@ -129,10 +127,10 @@ struct MedicationTimeline: View {
                                                 path.addLine(to: CGPoint(x: startPos, y: lineY - markerHeight))
                                                 path.addLine(to: CGPoint(x: startPos + extensionLength, y: lineY - markerHeight))
                                             }
-                                            .stroke(color, lineWidth: 3)
+                                            .stroke(color, lineWidth: 5)
                                             .onTapGesture {
                                                 selectedMed = med
-                                                popupPosition = CGPoint(x: startPos - 80, y: lineY - markerHeight / 2)
+                                                popupPosition = CGPoint(x: startPos - 110, y: lineY - markerHeight / 2)
                                                 showPopup = true
                                             }
                                             
@@ -152,40 +150,40 @@ struct MedicationTimeline: View {
                                 // Small bubble popup
                                 if showPopup, let med = selectedMed {
                                     VStack(alignment: .leading, spacing: 5) {
-                                        let font = UIFont.systemFont(ofSize: 10, weight: .regular)
+                                        let font = UIFont.systemFont(ofSize: 14, weight: .regular)
                                         HStack {
-                                            CustomText(text: "Treatment: ", color: accent, width: "Treatment: ".width(usingFont: font) + 5, bold: true, textSize: 10)
-                                            CustomText(text: med.medicationName, color: accent, width: med.medicationName.width(usingFont: font)+5, bold: false, textSize: 10)
+                                            CustomText(text: "Treatment: ", color: accent, width: "Treatment: ".width(usingFont: font) + 7, bold: true, textSize: 14)
+                                            CustomText(text: med.medicationName, color: accent, width: med.medicationName.width(usingFont: font)+7, bold: false, textSize: 14)
                                         }
                                         HStack {
                                             let med_start = formatDateShort(med.medicationStart)
-                                            CustomText(text: "Start: ", color: accent, width: "Start: ".width(usingFont: font)+5, bold: true, textSize: 10)
-                                            CustomText(text: med_start, color: accent, width: med_start.width(usingFont: font)+5, bold: false, textSize: 10)
+                                            CustomText(text: "Start: ", color: accent, width: "Start: ".width(usingFont: font)+7, bold: true, textSize: 14)
+                                            CustomText(text: med_start, color: accent, width: med_start.width(usingFont: font)+7, bold: false, textSize: 14)
                                         }
                                         
                                         HStack {
                                             let med_end = formatDateShort(med.medicationEnd)
-                                            CustomText(text: "End: ", color: accent, width: "End: ".width(usingFont: font)+5, bold: true, textSize: 10)
-                                            CustomText(text: med_end, color: accent, width: med_end.width(usingFont: font)+5, bold: false, textSize: 10)
+                                            CustomText(text: "End: ", color: accent, width: "End: ".width(usingFont: font)+7, bold: true, textSize: 14)
+                                            CustomText(text: med_end, color: accent, width: med_end.width(usingFont: font)+7, bold: false, textSize: 14)
                                         }
                                         
                                         if !med.medicationCategory.isEmpty {
                                             HStack{
-                                                CustomText(text: "Category: ", color: accent, width: "Category: ".width(usingFont: font)+5, bold: true, textSize: 10)
-                                                CustomText(text: med.medicationCategory, color: accent, width: med.medicationCategory.width(usingFont: font)+5, bold: false, textSize: 10)
+                                                CustomText(text: "Category: ", color: accent, width: "Category: ".width(usingFont: font)+7, bold: true, textSize: 14)
+                                                CustomText(text: med.medicationCategory, color: accent, width: med.medicationCategory.width(usingFont: font)+7, bold: false, textSize: 14)
                                             }
                                         }
                                     }
                                     .padding(8)
                                     .background(Color(hex: bg))
                                     .cornerRadius(8)
-                                    .position(x: popupPosition.x, y: popupPosition.y - 35)
+                                    .position(x: popupPosition.x, y: popupPosition.y - 45)
                                     .onTapGesture {
                                         showPopup = false
                                     }
                                 }
                             }
-                            .padding(.top, showPopup ? 25 : 0)
+                            .padding(.top, showPopup ? 45 : 0)
                             .frame(width: width - 60, height: getFrameHeight())
                         }
                         .padding(.top, 20)
@@ -199,6 +197,12 @@ struct MedicationTimeline: View {
             .cornerRadius(20)
             .frame(width: width)
             .padding(.bottom, 10)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if showPopup {
+                    showPopup = false
+                }
+            }
         }
         .onTapGesture {
             // Dismiss popup when tapping outside
@@ -354,7 +358,7 @@ struct MedicationTimeline: View {
                         let horizontalOverlap = !(endPos < range.start || startPos > range.end)
                         let heightDiff = abs(height - range.height)
                         
-                        if horizontalOverlap && heightDiff < 20 { // Changed from 30 to 20
+                        if horizontalOverlap && heightDiff < 20 {
                             overlaps = true
                             height += heightIncrement
                             break
@@ -370,13 +374,6 @@ struct MedicationTimeline: View {
         return heights
     }
     
-//    private func getFrameHeight() -> CGFloat {
-//        let timelineWidth = width - 60
-//        let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth)
-//        let maxHeight = stapleHeights.values.max() ?? 40
-//        return maxHeight + 60
-//    }
-    
     private func getFrameHeight() -> CGFloat {
         let timelineWidth = width - 60
         let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth)
@@ -385,7 +382,7 @@ struct MedicationTimeline: View {
         
         // If popup is showing and positioned high, add extra space
         if showPopup  {
-            return baseHeight + 30 // Add popup height
+            return baseHeight + 50 // Add popup height
         }
         
         return baseHeight

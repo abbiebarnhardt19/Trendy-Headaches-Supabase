@@ -167,7 +167,13 @@ struct ListView: View {
         }
         //load in user logs
         .task {
-            allLogs = await Database.shared.getLogList(userID: userID)
+            do {
+                allLogs = try await Database.shared.getLogList(userID: userID)
+            } catch {
+                if (error as NSError).code != NSURLErrorCancelled {
+                    print("Error fetching unified logs: \(error)")
+                }
+            }
             
             logList = allLogs
             
@@ -185,7 +191,9 @@ struct ListView: View {
                     sympOptions = Array(Set(sympOptions + sideEffectOptions)).sorted()
                     selectedSymps = sympOptions
                 } catch {
-                    print("Error fetching symptom options: \(error)")
+                    if (error as NSError).code != NSURLErrorCancelled {
+                        print("Error fetching symptom options: \(error)")
+                    }
                 }
             }
         }
@@ -198,7 +206,13 @@ struct ListView: View {
         .onChange(of: selectedSymps) {  filterLogs() }
         .onChange(of: deleteCount) {
             Task {
-                allLogs = await Database.shared.getLogList(userID: userID)
+                do {
+                    allLogs = try await Database.shared.getLogList(userID: userID)
+                } catch {
+                    if (error as NSError).code != NSURLErrorCancelled {
+                        print("Error fetching unified logs: \(error)")
+                    }
+                }
                 
                 logList = allLogs
                 

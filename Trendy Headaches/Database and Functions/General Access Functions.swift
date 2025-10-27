@@ -39,10 +39,75 @@ extension Database {
     }
     
     // Get all values for a user from a table where userID is a foreign key
-    func getListVals(userId: Int64, table: String, col: String, filterCol: String? = nil, filterVal: String? = nil) async throws -> [String] {
+//    func getListVals(userId: Int64, table: String, col: String, filterCol: String? = nil, filterVal: String? = nil) async throws -> [String] {
+//        switch table.lowercased() {
+//        case "medications":
+//            let medications: [Medication] = try await fetchFilteredList(userId: userId, tableName: "Medications", filterCol: filterCol, filterVal: filterVal)
+//            let result = medications.compactMap { medication in
+//                switch col {
+//                case "medication_name":
+//                    return medication.medicationName
+//                case "medication_category":
+//                    return medication.medicationCategory
+//                default:
+//                    return nil
+//                }
+//            }
+//            return result
+//            
+//        case "symptoms":
+//            let symptoms: [Symptom] = try await fetchFilteredList(userId: userId, tableName: "Symptoms", filterCol: filterCol, filterVal: filterVal)
+//            let result = symptoms.compactMap { symptom in
+//                switch col {
+//                case "symptom_name":
+//                    return symptom.symptomName
+//                default:
+//                    return nil
+//                }
+//            }
+//            return result
+//            
+//        case "triggers":
+//            let triggers: [Trigger] = try await fetchFilteredList(userId: userId, tableName: "Triggers", filterCol: filterCol, filterVal: filterVal)
+//            let result = triggers.compactMap { trigger in
+//                switch col {
+//                case "trigger_name":
+//                    return trigger.triggerName
+//                default:
+//                    return nil
+//                }
+//            }
+//            return result
+//            
+//        case "side_effects":
+//            let side_effects: [SideEffect] = try await client
+//                .from("Side_Effects")
+//                .select()
+//                .eq("user_id", value: Int(userId))
+//                .execute()
+//                .value
+//            
+//            let result = side_effects.compactMap { side_effect in
+//                switch col {
+//                case "side_effect_name":
+//                    return side_effect.sideEffectName
+//                default:
+//                    return nil
+//                }
+//            }
+//            // Remove duplicates and sort
+//            return Array(Set(result)).sorted()
+//            
+//        default:
+//            print(" Unknown table: \(table)")
+//            return []
+//        }
+//    }
+    
+    func getListVals(userId: Int64, table: String, col: String, filterCol: String? = nil, filterVal: String? = nil, includeInactive: Bool = false) async throws -> [String] {
         switch table.lowercased() {
         case "medications":
-            let medications: [Medication] = try await fetchFilteredList(userId: userId, tableName: "Medications", filterCol: filterCol, filterVal: filterVal)
+            let medications: [Medication] = try await fetchFilteredList(userId: userId, tableName: "Medications", filterCol: filterCol, filterVal: filterVal, includeInactive: includeInactive)
             let result = medications.compactMap { medication in
                 switch col {
                 case "medication_name":
@@ -56,7 +121,7 @@ extension Database {
             return result
             
         case "symptoms":
-            let symptoms: [Symptom] = try await fetchFilteredList(userId: userId, tableName: "Symptoms", filterCol: filterCol, filterVal: filterVal)
+            let symptoms: [Symptom] = try await fetchFilteredList(userId: userId, tableName: "Symptoms", filterCol: filterCol, filterVal: filterVal, includeInactive: includeInactive)
             let result = symptoms.compactMap { symptom in
                 switch col {
                 case "symptom_name":
@@ -68,7 +133,7 @@ extension Database {
             return result
             
         case "triggers":
-            let triggers: [Trigger] = try await fetchFilteredList(userId: userId, tableName: "Triggers", filterCol: filterCol, filterVal: filterVal)
+            let triggers: [Trigger] = try await fetchFilteredList(userId: userId, tableName: "Triggers", filterCol: filterCol, filterVal: filterVal, includeInactive: includeInactive)
             let result = triggers.compactMap { trigger in
                 switch col {
                 case "trigger_name":
@@ -105,13 +170,32 @@ extension Database {
     }
     
     // Helper function to fetch filtered lists
-    private func fetchFilteredList<T: Codable>(userId: Int64, tableName: String, filterCol: String?, filterVal: String?) async throws -> [T] {
+//    private func fetchFilteredList<T: Codable>(userId: Int64, tableName: String, filterCol: String?, filterVal: String?, useEndCol: Bool? = true) async throws -> [T] {
+//        let endColumnName = "\(tableName.dropLast().lowercased())_end"
+//        var query = client
+//            .from(tableName)
+//            .select()
+//            .eq("user_id", value: Int(userId))
+//            .is(endColumnName, value: nil)
+//        
+//        if let filterCol = filterCol, let filterVal = filterVal {
+//            query = query.eq(filterCol, value: filterVal)
+//        }
+//        
+//        return try await query.execute().value
+//    }
+    
+    private func fetchFilteredList<T: Codable>(userId: Int64, tableName: String, filterCol: String?, filterVal: String?, includeInactive: Bool = false) async throws -> [T] {
         let endColumnName = "\(tableName.dropLast().lowercased())_end"
         var query = client
             .from(tableName)
             .select()
             .eq("user_id", value: Int(userId))
-            .is(endColumnName, value: nil)
+        
+        // Only filter out inactive if includeInactive is false
+        if !includeInactive {
+            query = query.is(endColumnName, value: nil)
+        }
         
         if let filterCol = filterCol, let filterVal = filterVal {
             query = query.eq(filterCol, value: filterVal)
