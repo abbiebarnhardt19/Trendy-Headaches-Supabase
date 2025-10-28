@@ -126,20 +126,6 @@ struct LogIcon: View {
     }
 }
 
-//make a key for mapping the shapes to the symptoms
-//struct SymptomKey: View {
-//    let sympIcon: [String: String]
-//    var accent: String
-//    var width: CGFloat
-//    var itemHeight: CGFloat = 13
-//
-//    var body: some View {
-//        genSympKey(from: sympIcon, accent: accent, width: width, itemHeight: itemHeight)
-//            .frame(width: width, alignment: .leading)
-//            .padding(.bottom, 10)
-//    }
-//}
-
 struct SymptomKey: View {
     var symptomToIcon: [String: String]
     var accent: String

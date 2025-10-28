@@ -16,9 +16,10 @@ struct MedicationTimeline: View {
     @State private var selectedMed: Medication? = nil
     @State private var showPopup: Bool = false
     @State private var popupPosition: CGPoint = .zero
+    @State private var showKey: Bool = false
     
     var body: some View {
-        let colorMap = generateMedicationColors()
+        let colorMap = generateMedicationColors(bg: bg, medications: medications)
         
         ZStack {
             VStack(spacing: 0) {
@@ -31,8 +32,14 @@ struct MedicationTimeline: View {
                     
                     Spacer()
                     
-                    CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
-                        hideTimeline.toggle()
+                    HStack{
+                        CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
+                            showKey.toggle()
+                        }
+                        
+                        CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
+                            hideTimeline.toggle()
+                        }
                     }
                     .padding(.trailing, 20)
                     .padding(.top, 10)
@@ -54,7 +61,7 @@ struct MedicationTimeline: View {
                                     .position(x: timelineWidth / 2, y: lineY)
                                 
                                 // Monthly ticks with dates below
-                                let months = calculateMonthlyTicks()
+                                let months = calculateMonthlyTicks(medications: medications)
                                 ForEach(0..<months.count, id: \.self) { index in
                                     let xPos = CGFloat(index) / CGFloat(max(1, months.count - 1)) * timelineWidth
                                     
@@ -71,16 +78,16 @@ struct MedicationTimeline: View {
                                 }
                                 
                                 // Medication staple shapes
-                                let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth)
+                                let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth, medications: medications)
 
                                 ForEach(Array(medications.enumerated()), id: \.offset) { medIndex, med in
                                     let color = colorMap[med.medicationName] ?? Color.gray
                                     let markerHeight = stapleHeights[medIndex] ?? 40
                                     
-                                    if let startPos = calculatePosition(dateString: med.medicationStart, totalWidth: timelineWidth) {
+                                    if let startPos = calculatePosition(dateString: med.medicationStart, totalWidth: timelineWidth, medications: medications) {
                                         
                                         if let endString = med.medicationEnd, !endString.isEmpty,
-                                           let endPos = calculatePosition(dateString: endString, totalWidth: timelineWidth) {
+                                           let endPos = calculatePosition(dateString: endString, totalWidth: timelineWidth, medications: medications) {
                                             let centerX = (startPos + endPos) / 2
                                             
                                             // Staple shape connecting start to end
@@ -184,13 +191,17 @@ struct MedicationTimeline: View {
                                 }
                             }
                             .padding(.top, showPopup ? 45 : 0)
-                            .frame(width: width - 60, height: getFrameHeight())
+                            .frame(width: width - 60, height: getFrameHeight(showPopup: showPopup, width: width, medications: medications))
                         }
                         .padding(.top, 20)
                         .padding(.leading, 22)
                         
                         Spacer()
                     }
+                    if showKey{
+                        MedKey(colorMap: colorMap, bg: bg, width: width-60)
+                    }
+                    
                 }
             }
             .background(Color(hex: accent))
@@ -205,186 +216,75 @@ struct MedicationTimeline: View {
             }
         }
         .onTapGesture {
-            // Dismiss popup when tapping outside
             showPopup = false
         }
     }
-    
-    private func formatDateShort(_ dateString: String?) -> String {
-        guard let dateString = dateString, !dateString.isEmpty else {
-            return "Active"
-        }
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
-        guard let date = formatter.date(from: dateString) else {
-            return dateString
-        }
-        
-        formatter.dateFormat = "M/d/yy"
-        return formatter.string(from: date)
-    }
-    
-    private func calculateMonthlyTicks() -> [Date] {
-        guard let minDate = getMinDate(), let maxDate = getMaxDate() else {
-            return []
-        }
-        
-        let calendar = Calendar.current
-        var currentDate = calendar.date(from: calendar.dateComponents([.year, .month], from: minDate))!
-        var months: [Date] = []
-        
-        while currentDate <= maxDate {
-            months.append(currentDate)
-            guard let nextMonth = calendar.date(byAdding: .month, value: 1, to: currentDate) else { break }
-            currentDate = nextMonth
-        }
-        
-        return months
-    }
+}
 
-    private func calculatePosition(dateString: String, totalWidth: CGFloat) -> CGFloat? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        
-        guard let date = dateFormatter.date(from: dateString),
-              let minDate = getMinDate(),
-              let maxDate = getMaxDate() else {
-            return nil
-        }
-        
-        if minDate == maxDate {
-            return totalWidth / 2
-        }
-        
-        let calendar = Calendar.current
-        guard let firstDayOfMinMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: minDate)),
-              let firstDayOfMaxMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: maxDate)) else {
-            return nil
-        }
-        
-        guard let endOfTimeline = calendar.date(byAdding: .month, value: 1, to: firstDayOfMaxMonth) else {
-            return nil
-        }
-        
-        let totalTimeRange = endOfTimeline.timeIntervalSince(firstDayOfMinMonth)
-        let offset = date.timeIntervalSince(firstDayOfMinMonth)
-        return CGFloat(offset / totalTimeRange) * totalWidth
-    }
+
+struct MedKey: View {
+    var colorMap: [String: Color]
+    var bg: String
+    var width: CGFloat
+    var itemHeight: CGFloat = 13
     
-    private func generateMedicationColors() -> [String: Color] {
-        let baseColor = Color(hex: bg)
-        let colors = baseColor.generateColors(from: baseColor, count: medications.count)
-        return Dictionary(uniqueKeysWithValues: zip(medications.map { $0.medicationName }, colors))
-    }
-    
-    private func getMinDate() -> Date? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
+    var body: some View {
+        let rows = computeRows()
         
-        let allDates = medications.compactMap { dateFormatter.date(from: $0.medicationStart) } +
-                       medications.compactMap { med in
-                           guard let endString = med.medicationEnd, !endString.isEmpty else { return nil }
-                           return dateFormatter.date(from: endString)
-                       }
-        
-        return allDates.min()
-    }
-    
-    private func getMaxDate() -> Date? {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        
-        let allDates = medications.compactMap { dateFormatter.date(from: $0.medicationStart) } +
-                       medications.compactMap { med in
-                           guard let endString = med.medicationEnd, !endString.isEmpty else { return nil }
-                           return dateFormatter.date(from: endString)
-                       }
-        
-        let maxFromData = allDates.max()
-        return maxFromData ?? Date()
-    }
-    
-    private func formatDate(_ dateString: String?) -> String {
-        guard let dateString = dateString, !dateString.isEmpty else {
-            return "Active"
-        }
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
-        guard let date = formatter.date(from: dateString) else {
-            return dateString
-        }
-        
-        formatter.dateStyle = .short
-        formatter.timeStyle = .none
-        return formatter.string(from: date)
-    }
-    
-    private func formatMonthDay(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM\nyyyy"
-        return formatter.string(from: date)
-    }
-    
-    private func calculateStapleHeights(totalWidth: CGFloat) -> [Int: CGFloat] {
-        var heights: [Int: CGFloat] = [:]
-        var usedRanges: [(start: CGFloat, end: CGFloat, height: CGFloat)] = []
-        let baseHeight: CGFloat = 15
-        let heightIncrement: CGFloat = 3 // Changed from 25 to 15
-        
-        for (index, med) in medications.enumerated() {
-            var height = baseHeight
-            
-            if let startPos = calculatePosition(dateString: med.medicationStart, totalWidth: totalWidth) {
-                let endPos: CGFloat
-                
-                if let endString = med.medicationEnd, !endString.isEmpty,
-                   let calculatedEndPos = calculatePosition(dateString: endString, totalWidth: totalWidth) {
-                    endPos = calculatedEndPos
-                } else {
-                    // For active meds, use start pos + extension length
-                    endPos = startPos + 30
-                }
-                
-                // Check for overlaps with existing staples
-                var overlaps = true
-                while overlaps {
-                    overlaps = false
-                    for range in usedRanges {
-                        // Check if horizontal ranges overlap and heights are similar
-                        let horizontalOverlap = !(endPos < range.start || startPos > range.end)
-                        let heightDiff = abs(height - range.height)
-                        
-                        if horizontalOverlap && heightDiff < 20 {
-                            overlaps = true
-                            height += heightIncrement
-                            break
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(0..<rows.count, id: \.self) { rowIndex in
+                HStack(spacing: 10) {
+                    ForEach(0..<rows[rowIndex].count, id: \.self) { itemIndex in
+                        let item = rows[rowIndex][itemIndex]
+                        HStack(spacing: 4) {
+                            Circle()
+                                .frame(width: itemHeight, height: itemHeight)
+                                .foregroundColor(item.1)
+                            CustomText(
+                                text: String(item.0.prefix(12)),
+                                color: bg,
+                                textSize: 12
+                            )
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize(horizontal: true, vertical: false)
                         }
+                        .padding(.vertical, 2)
+                        .padding(.horizontal, 4)
                     }
                 }
-                
-                heights[index] = height
-                usedRanges.append((start: startPos, end: endPos, height: height))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .frame(width: width, alignment: .leading)
+        .padding(.bottom, 10)
+    }
+    
+    private func computeRows() -> [[(String, Color)]] {
+        var rows: [[(String, Color)]] = [[]]
+        var currentRowWidth: CGFloat = 0
+        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        let itemSpacing: CGFloat = 10
+        let horizontalPadding: CGFloat = 8
+        let iconTextGap: CGFloat = 4
+        
+        for symptom in colorMap.keys.sorted() {
+            guard let iconColor = colorMap[symptom] else { continue }
+            let displayText = String(symptom.prefix(12))
+            let textWidth = displayText.width(usingFont: font)
+            let itemWidth = itemHeight + iconTextGap + textWidth + horizontalPadding
+            
+            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
+            
+            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
+                rows.append([(symptom, iconColor)])
+                currentRowWidth = itemWidth
+            } else {
+                rows[rows.count - 1].append((symptom, iconColor))
+                currentRowWidth = newRowWidth
             }
         }
         
-        return heights
-    }
-    
-    private func getFrameHeight() -> CGFloat {
-        let timelineWidth = width - 60
-        let stapleHeights = calculateStapleHeights(totalWidth: timelineWidth)
-        let maxHeight = stapleHeights.values.max() ?? 40
-        let baseHeight = maxHeight + 60
-        
-        // If popup is showing and positioned high, add extra space
-        if showPopup  {
-            return baseHeight + 50 // Add popup height
-        }
-        
-        return baseHeight
+        return rows
     }
 }
