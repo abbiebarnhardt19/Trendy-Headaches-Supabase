@@ -35,59 +35,155 @@ struct AnalyticsView: View {
     @State var selectedMeds: [String] = []
     @State var medData: [Medication] = []
     
+//    func filterLogs() {
+//        
+//        logs = allLogs.filter { log in
+//            if log.date < startDate { return false }
+//            if log.date > endDate { return false }
+//
+//            guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
+//            
+//            
+//            // Check if log date falls within any selected medication's active period
+//            if selectedMeds.isEmpty {
+//                return false
+//            }
+//            
+//            let hasActiveMed = medData.contains { med in
+//                // Only check preventative medications
+//                guard med.medicationCategory == "preventative" else {
+//                    return false
+//                }
+//                
+//                // Check if medication is in selected list
+//                guard selectedMeds.contains(med.medicationName) else {
+//                    return false
+//                }
+//                
+//                // Convert string dates to Date objects
+//                let dateFormatter = DateFormatter()
+//                dateFormatter.dateFormat = "yyyy-MM-dd"
+//                
+//                guard let medStartDate = dateFormatter.date(from: med.medicationStart) else {
+//                    print("Failed to parse start date: \(med.medicationStart)")
+//                    return false
+//                }
+//                
+//                // Check if log date is after medication start
+//                if log.date < medStartDate { return false }
+//                
+//                // If end_date exists, check if log is before it
+//                if let endDateString = med.medicationEnd, !endDateString.isEmpty {
+//                    if let medEndDate = dateFormatter.date(from: endDateString) {
+//                        if log.date > medEndDate {
+//                            return false
+//                        }
+//                    }
+//                }
+//                
+//                return true
+//            }
+//            
+//            if !hasActiveMed { return false }
+//            
+//            return true
+//        }
+//    }
     func filterLogs() {
+        print("Total logs: \(allLogs.count)")
+        print("Selected symptoms: \(selectedSymps)")
+        print("Selected meds: \(selectedMeds)")
+        print("Med data count: \(medData.count)")
         
         logs = allLogs.filter { log in
-            if log.date < startDate { return false }
-            if log.date > endDate { return false }
+            if log.date < startDate {
+                print("❌ Log filtered: before startDate")
+                return false
+            }
+            if log.date > endDate {
+                print("❌ Log filtered: after endDate")
+                return false
+            }
 
-            guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
-            
-            
-            // Check if log date falls within any selected medication's active period
-            if selectedMeds.isEmpty {
+            guard selectedSymps.contains(log.symptom_name ?? "") else {
+                print("❌ Log filtered: symptom not selected - \(log.symptom_name ?? "nil")")
                 return false
             }
             
+            if selectedMeds.isEmpty {
+                print("❌ Log filtered: no meds selected")
+                return false
+            }
+            
+            print("🔍 Checking log date: \(log.date)")
+            print("Available meds in medData: \(medData.map { "\($0.medicationName) (\($0.medicationCategory))" })")
+
             let hasActiveMed = medData.contains { med in
-                // Only check preventative medications
+                print("  Checking med: \(med.medicationName), category: \(med.medicationCategory)")
+                
                 guard med.medicationCategory == "preventative" else {
+                    print("    ❌ Not preventative")
                     return false
                 }
                 
-                // Check if medication is in selected list
+                print("    ✓ Is preventative")
+                print("    Selected meds: \(selectedMeds)")
+                
                 guard selectedMeds.contains(med.medicationName) else {
+                    print("    ❌ Not in selected meds")
                     return false
                 }
                 
-                // Convert string dates to Date objects
+                print("    ✓ Is selected")
+                
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 
+                print("    Med start string: '\(med.medicationStart)'")
                 guard let medStartDate = dateFormatter.date(from: med.medicationStart) else {
-                    print("Failed to parse start date: \(med.medicationStart)")
+                    print("    ⚠️ Failed to parse start date: \(med.medicationStart)")
                     return false
                 }
                 
-                // Check if log date is after medication start
-                if log.date < medStartDate { return false }
+                print("    Med start date: \(medStartDate)")
+                print("    Log date: \(log.date)")
+                print("    Log >= Start? \(log.date >= medStartDate)")
                 
-                // If end_date exists, check if log is before it
+                if log.date < medStartDate {
+                    print("    ❌ Log before med start")
+                    return false
+                }
+                
                 if let endDateString = med.medicationEnd, !endDateString.isEmpty {
+                    print("    Med end string: '\(endDateString)'")
                     if let medEndDate = dateFormatter.date(from: endDateString) {
+                        print("    Med end date: \(medEndDate)")
+                        print("    Log <= End? \(log.date <= medEndDate)")
                         if log.date > medEndDate {
+                            print("    ❌ Log after med end")
                             return false
                         }
                     }
+                } else {
+                    print("    ✓ No end date (ongoing)")
                 }
                 
+                print("    ✅ Found active med: \(med.medicationName)")
                 return true
             }
+
+            print("hasActiveMed result: \(hasActiveMed)")
+
+            if !hasActiveMed {
+                print("❌ Log filtered: no active preventative med")
+                return false
+            }
             
-            if !hasActiveMed { return false }
-            
+            print("✅ Log passed all filters")
             return true
         }
+        
+        print("Filtered logs: \(logs.count)")
     }
     
     var body: some View {
