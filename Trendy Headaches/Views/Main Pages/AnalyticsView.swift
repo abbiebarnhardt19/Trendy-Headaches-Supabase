@@ -36,11 +36,13 @@ struct AnalyticsView: View {
     @State var medData: [Medication] = []
     
     func filterLogs() {
+        
         logs = allLogs.filter { log in
             if log.date < startDate { return false }
             if log.date > endDate { return false }
 
             guard selectedSymps.contains(log.symptom_name ?? "") else { return false }
+            
             
             // Check if log date falls within any selected medication's active period
             if selectedMeds.isEmpty {
