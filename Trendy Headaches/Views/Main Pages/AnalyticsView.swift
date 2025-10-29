@@ -49,21 +49,28 @@ struct AnalyticsView: View {
                 AnalyticsBGComps(bg: bg, accent: accent)
                 
                 ScrollView{
-                    analyticsDropdown(accent: accent, bg: bg, selectedView: .constant("Graphs"))
+                    analyticsDropdown(accent: accent, bg: bg, selectedView: $selectedView)
                     
-                    VStack(spacing: 0) {
+                    if selectedView == "Graphs"{
                         
-                        filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms)
-                    
-                        CalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
-                        
-                        SeverityPieChart(logList: filteredLogs, accent: accent, bg: bg)
-                        
-                        CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
-                        
-                        MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40)
+                        VStack(spacing: 0) {
+                            
+                            filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms)
+                            
+                            CalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
+                            
+                            SeverityPieChart(logList: filteredLogs, accent: accent, bg: bg)
+                            
+                            CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
+                            
+                            MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40)
+                        }
+                        .padding(.bottom, 170)
                     }
-                    .padding(.bottom, 170)
+                    
+                    else{
+                        CustomText(text: "New Screen", color: accent)
+                    }
                 }
     
                 VStack {
