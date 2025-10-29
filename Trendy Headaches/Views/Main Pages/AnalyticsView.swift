@@ -13,6 +13,8 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
+    @State var selectedView: String = "Graphs"
+    
     @State var logs: [UnifiedLog] = []
     @State var allLogs: [UnifiedLog] = []
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
@@ -47,18 +49,9 @@ struct AnalyticsView: View {
                 AnalyticsBGComps(bg: bg, accent: accent)
                 
                 ScrollView{
+                    analyticsDropdown(accent: accent, bg: bg, selectedView: .constant("Graphs"))
+                    
                     VStack(spacing: 0) {
-                        VStack{
-                            HStack{
-                                Spacer()
-                                let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
-                                CustomText(text: "Analytics", color: accent, width: "Analytics".width(usingFont: font), textSize: screenWidth * 0.1)
-                            }
-                        }
-                        .frame(width: screenWidth)
-                        .padding(.top, 25)
-                        .padding(.bottom, 15)
-                        .padding(.trailing, 20)
                         
                         filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms)
                     
