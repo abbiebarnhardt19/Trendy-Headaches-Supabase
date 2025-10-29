@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CalendarView: View {
     let logs: [UnifiedLog]
-    @Binding var hideChart: Bool
     var bg: String
     var accent: String
     let sympIcon: [String: String]
@@ -20,22 +19,31 @@ struct CalendarView: View {
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
     private let width = UIScreen.main.bounds.width - 70
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
+    
+    @State var showVisual: Bool = false
 
     var body: some View {
-        VStack(spacing: 10) {
-            TopBar
-            WeekdayLabels
-            CalendarGrid
-            if showKey {
-                SeverityKeyBar(accent: bg, width: width, height: 20)
-                SymptomKey(symptomToIcon: sympIcon, accent: bg, width: width)
+        if showVisual{
+            VStack(spacing: 10) {
+                
+                TopBar
+                WeekdayLabels
+                CalendarGrid
+                if showKey {
+                    SeverityKeyBar(accent: bg, width: width, height: 20)
+                    SymptomKey(symptomToIcon: sympIcon, accent: bg, width: width)
+                }
             }
+            .frame(width: width)
+            .padding()
+            .background(Color(hex: accent))
+            .cornerRadius(20)
+            .padding(.bottom, 10)
         }
-        .frame(width: width)
-        .padding()
-        .background(Color(hex: accent))
-        .cornerRadius(20)
-        .padding(.bottom, 10)
+        
+        else{
+            HiddenChart(bg: bg, accent: accent, chart: "Log Calendar", hideChart: $showVisual)
+        }
     }
 
     //calendar parts
@@ -55,7 +63,7 @@ struct CalendarView: View {
             Spacer()
             
             CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showKey.toggle() }
-            CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { hideChart.toggle() }
+            CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showVisual.toggle() }
         }
         .frame(height: 20)
     }

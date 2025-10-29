@@ -44,9 +44,9 @@ struct SeverityPieChart: View {
     var logList: [UnifiedLog]
     var accent: String
     var bg: String
-    @Binding var hideChart: Bool
     
     @State private var selectedSlice: String? = nil
+    @State private var showVisual: Bool = false
     
     private var severityCounts: [(severity: String, count: Int)] {
         Dictionary(grouping: logList, by: \.severity)
@@ -55,79 +55,84 @@ struct SeverityPieChart: View {
     }
     
     var body: some View {
-        let chartSize: CGFloat = 170
-        let baseColor = Color(hex: accent)
-        let popOutOffset: CGFloat = 15
-        let counts = severityCounts.map(\.count)
-        let sliceColors = baseColor.generateColors(from: baseColor, count: counts.count)
-        
-        ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(hex: accent))
-                .frame(width: UIScreen.main.bounds.width - 40, height: chartSize + 70)
+        if showVisual{
+            let chartSize: CGFloat = 170
+            let baseColor = Color(hex: accent)
+            let popOutOffset: CGFloat = 15
+            let counts = severityCounts.map(\.count)
+            let sliceColors = baseColor.generateColors(from: baseColor, count: counts.count)
             
-            VStack {
-                HStack {
-                    CustomText(text:"Log Severity", color: bg, width: 140, textSize: 20)
-                        .padding(.leading, 30)
-                    Spacer()
-                    Button(action: { hideChart.toggle() }) {
-                        CustomText(text: "Hide", color: accent, width: 45, textAlign: .center, textSize: 12)
-                            .frame(height: 25)
-                            .background(Color(hex: bg))
-                            .cornerRadius(20)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.trailing, 20)
-                }
-                .frame(width: UIScreen.main.bounds.width - 30)
-                .padding(.top, 20)
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(hex: accent))
+                    .frame(width: UIScreen.main.bounds.width - 40, height: chartSize + 70)
                 
-                ZStack {
-                    ForEach(severityCounts.indices, id: \.self) { idx in
-                        let item = severityCounts[idx]
-                        let start = startAngle(for: idx, counts: counts)
-                        let end = endAngle(for: idx, counts: counts)
-                        let mid = Angle(degrees: (start.degrees + end.degrees) / 2)
-                        let isSelected = selectedSlice == item.severity
-                        let dx = cos(mid.radians) * (isSelected ? popOutOffset : 0)
-                        let dy = sin(mid.radians) * (isSelected ? popOutOffset : 0)
-                        let sliceColor = sliceColors[idx]
-                        let textColor = Color.isHexDark(sliceColor.toHex() ?? accent) ? Color.white : Color.black
-                        
-                        PieSliceShape(startAngle: start, endAngle: end)
-                            .fill(sliceColor)
-                            .overlay(PieSliceShape(startAngle: start, endAngle: end).stroke(.black, lineWidth: 2))
-                            .frame(width: chartSize, height: chartSize)
-                            .offset(x: dx, y: dy)
-                            .onTapGesture { withAnimation(.spring()) { selectedSlice = isSelected ? nil : item.severity } }
-                        
-                        Text(item.severity)
-                            .font(.system(size: 18, design: .serif))
-                            .foregroundColor(textColor)
-                            .position(
-                                x: chartSize/2 + cos(mid.radians) * chartSize * 0.35 + dx,
-                                y: chartSize/2 + sin(mid.radians) * chartSize * 0.35 + dy
-                            )
+                VStack {
+                    HStack {
+                        CustomText(text:"Log Severity", color: bg, width: 140, textSize: 20)
+                            .padding(.leading, 30)
+                        Spacer()
+                        Button(action: {showVisual.toggle() }) {
+                            CustomText(text: "Hide", color: accent, width: 45, textAlign: .center, textSize: 12)
+                                .frame(height: 25)
+                                .background(Color(hex: bg))
+                                .cornerRadius(20)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        .padding(.trailing, 20)
                     }
+                    .frame(width: UIScreen.main.bounds.width - 30)
+                    .padding(.top, 20)
                     
-                    if let selected = selectedSlice,
-                       let idx = severityCounts.firstIndex(where: { $0.severity == selected }) {
-                        let item = severityCounts[idx]
-                        let mid = Angle(degrees: (startAngle(for: idx, counts: counts).degrees + endAngle(for: idx, counts: counts).degrees)/2)
-                        let dx = -cos(mid.radians) * 50
-                        let dy = -sin(mid.radians) * 50
-                        let symptomCounts = makeSymptomCounts(for: selected, logs: logList)
+                    ZStack {
+                        ForEach(severityCounts.indices, id: \.self) { idx in
+                            let item = severityCounts[idx]
+                            let start = startAngle(for: idx, counts: counts)
+                            let end = endAngle(for: idx, counts: counts)
+                            let mid = Angle(degrees: (start.degrees + end.degrees) / 2)
+                            let isSelected = selectedSlice == item.severity
+                            let dx = cos(mid.radians) * (isSelected ? popOutOffset : 0)
+                            let dy = sin(mid.radians) * (isSelected ? popOutOffset : 0)
+                            let sliceColor = sliceColors[idx]
+                            let textColor = Color.isHexDark(sliceColor.toHex() ?? accent) ? Color.white : Color.black
+                            
+                            PieSliceShape(startAngle: start, endAngle: end)
+                                .fill(sliceColor)
+                                .overlay(PieSliceShape(startAngle: start, endAngle: end).stroke(.black, lineWidth: 2))
+                                .frame(width: chartSize, height: chartSize)
+                                .offset(x: dx, y: dy)
+                                .onTapGesture { withAnimation(.spring()) { selectedSlice = isSelected ? nil : item.severity } }
+                            
+                            Text(item.severity)
+                                .font(.system(size: 18, design: .serif))
+                                .foregroundColor(textColor)
+                                .position(
+                                    x: chartSize/2 + cos(mid.radians) * chartSize * 0.35 + dx,
+                                    y: chartSize/2 + sin(mid.radians) * chartSize * 0.35 + dy
+                                )
+                        }
                         
-                        TooltipView(severity: item.severity, total: item.count, logListCount: logList.count, symptoms: symptomCounts, accent: accent, bg: bg)
-                            .position(x: chartSize/2 + dx, y: chartSize/2 + dy)
+                        if let selected = selectedSlice,
+                           let idx = severityCounts.firstIndex(where: { $0.severity == selected }) {
+                            let item = severityCounts[idx]
+                            let mid = Angle(degrees: (startAngle(for: idx, counts: counts).degrees + endAngle(for: idx, counts: counts).degrees)/2)
+                            let dx = -cos(mid.radians) * 50
+                            let dy = -sin(mid.radians) * 50
+                            let symptomCounts = makeSymptomCounts(for: selected, logs: logList)
+                            
+                            TooltipView(severity: item.severity, total: item.count, logListCount: logList.count, symptoms: symptomCounts, accent: accent, bg: bg)
+                                .position(x: chartSize/2 + dx, y: chartSize/2 + dy)
+                        }
                     }
+                    .frame(width: chartSize, height: chartSize)
+                    Spacer()
                 }
-                .frame(width: chartSize, height: chartSize)
-                Spacer()
+                .frame(width: chartSize + 40, height: chartSize + 80)
+                .padding(.bottom, 10)
             }
-            .frame(width: chartSize + 40, height: chartSize + 80)
-            .padding(.bottom, 10)
+        }
+        else{
+            HiddenChart(bg: bg, accent: accent, chart: "Log Severity Chart", hideChart: $showVisual)
         }
     }
 }

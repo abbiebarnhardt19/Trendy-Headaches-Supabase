@@ -18,114 +18,50 @@ struct HiddenChart: View {
     
     var body: some View {
         HStack {
-            CustomButton( text: "Show \(chart) Visual",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  30,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { hideChart.toggle() } )
+            CustomButton( text: "\(chart)",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  30,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { hideChart.toggle() } )
         }
         .frame(width: screenWidth)
     }
 }
 
-
-struct analyticsFilter: View {
-    @State var accent: String
-    @State var bg: String
-    @Binding var start: Date
-    @Binding var end: Date
-    @Binding var stringStart: String
-    @Binding var stringEnd: String
-    @Binding var sympOptions: [String]
-    @Binding var selectedSymps: [String]
-    @Binding var medOptions: [String]
-    @Binding var selectedMeds: [String]
+struct filterSymptom: View {
+    var bg: String
+    var accent: String
+    @Binding var symptomOptions: [String]
+    @Binding var selectedSymptom : [String]
     
-    @State private var expandedWidth: CGFloat = 215
-    @State private var unexpandedWidth: CGFloat = 255
+    @State private var showSymptomFilter: Bool = false
     
-    enum FilterSection {
-        case none, date, symptoms, meds
-    }
-    
-    @State private var expandedSection: FilterSection = .none
-    @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.date: (55, 270),   .symptoms: (120, 300), .meds: (200, 300)]
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            
-            // MARK: Date
-            sectionButton(title: "Date", section: .date) {
-                VStack {
-                    DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 250, label: "Start:")
-                        .padding(.top, 10)
-
-                    DateTextField(date: $end, textValue: $stringEnd, bg: $accent,  accent: $bg, width: 250, label: "End:")
-                }
-                .padding(.leading, 5)
-            }
-            
-            // MARK: Symptoms
-            sectionButton(title: "Symptoms", section: .symptoms) {
-                
-                MultipleCheckboxWrapped(options: $sympOptions, selected: $selectedSymps, accent: accent,  bg: bg, width: expandedWidth)
-                .padding(.top, 10)
-            }
-            
-            sectionButton(title: "Preventative Treatments", section: .meds) {
-                
-                MultipleCheckboxWrapped(options: $medOptions, selected: $selectedMeds, accent: accent,  bg: bg, width: expandedWidth)
-                .padding(.top, 10)
-                .padding(.leading, 5)
-            }
-        }
-        .padding(10)
-        .padding(.trailing, 10)
-        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous)
-            .stroke(Color(hex: bg), lineWidth: 5))
-        .background(Color(hex: accent))
-        .cornerRadius(20)
-        .padding(.bottom, 20)
-    }
-    
-    // MARK: Section Button Helper
-    @ViewBuilder
-    private func sectionButton<Content: View>(
-        title: String,
-        section: FilterSection,
-        @ViewBuilder content: () -> Content
-    ) -> some View {
-        let widths = dropdownWidths[section] ?? (300, 300)
-        let expandedWidth = widths.expanded
-        let isExpanded = expandedSection == section
-        
-        let currentWidth: CGFloat = {
-            if let activeWidths = dropdownWidths[expandedSection] {
-                return expandedSection == .none ? widths.collapsed : activeWidths.expanded
-            } else {
-                return widths.collapsed
-            }
-        }()
-        
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 5) {
-                CustomText(text: title, color: bg,  width: currentWidth, textAlign: .leading, bold: true)
-                
-                Button(action: {
-                    withAnimation(.easeInOut) {
-                        self.expandedSection = isExpanded ? .none : section
+        if showSymptomFilter {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack{
+                    CustomText(text:"Select Symptom: ", color: bg, textSize: screenWidth * 0.055)
+                    
+                    CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
+                        showSymptomFilter.toggle()
                     }
-                }) {
-                    Image(systemName: "chevron.down")
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                        .font(.system(size: 20))
-                        .foregroundColor(Color(hex: bg))
                 }
-                .buttonStyle(PlainButtonStyle())
-            }
-            .padding(.horizontal, 5)
                 
-            if isExpanded {
-                content()
-                    .frame(width: expandedWidth, alignment: .leading)
+                MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.7)
             }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(maxWidth: screenWidth * 0.9, alignment: .leading)
+            .padding(.bottom, 10)
         }
-        .frame(width: isExpanded ? currentWidth : 200, alignment: .leading)
+
+        else {
+            HStack {
+                CustomButton( text: "Select Symptom",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  30,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { showSymptomFilter.toggle() } )
+            }
+            .frame(width: screenWidth)
+        }
     }
 }

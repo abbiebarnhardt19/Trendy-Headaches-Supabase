@@ -118,12 +118,13 @@ struct CustomStackedBarChart: View {
     var logList: [UnifiedLog]
     var accent: String
     var bg: String
-    @Binding var hideChart: Bool
 
     @State var showKey: Bool = false
     @State var yearOff: Int = 0
     @State private var selMon: Date? = nil
     @State private var selSymp: String? = nil
+    
+    @State private var showVisual: Bool = false
     
     // Make width responsive
     private var screenWidth: CGFloat { UIScreen.main.bounds.width }
@@ -161,144 +162,149 @@ struct CustomStackedBarChart: View {
     }
 
     var body: some View {
-        let color = Color(hex: accent)
-        let colorMap = Dictionary(uniqueKeysWithValues: zip(sympOrder, color.generateColors(from: color, count: sympOrder.count)))
-
-        let chartHeight: CGFloat = 150
-        let yStep = max(1, Int(ceil(Double(maxCount) / 5)))
-        let yMax = ((maxCount + yStep - 1) / yStep) * yStep
-        let yVals = Array(stride(from: 0, through: yMax, by: yStep))
-
-        // Make spacing and widths responsive
-        let yAxWid: CGFloat = 15
-        let leftPadding: CGFloat = min(10, screenWidth * 0.025)
-        let rightPadding: CGFloat = min(10, screenWidth * 0.025)
-        let barSpac: CGFloat = max(4, min(10, screenWidth * 0.02)) // Scale spacing down on small screens
-        let availableWidth = width - yAxWid - leftPadding - rightPadding - (barSpac * 11)
-        let barWidth = max(15, availableWidth / 12) // Minimum bar width of 15
-
-        VStack(alignment: .leading, spacing: 10) {
-            // Buttons
-            HStack {
-                HStack(spacing: 0) {
-                    CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12, botPad: 0) { yearOff -= 1}
-                    
-                    let font = UIFont.systemFont(ofSize: 19, weight: .regular)
-                    let title = "Logs by Symptom"
-                    CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
-                    
-                    CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
-                }
-                .padding(.bottom, 10)
-                
-                Spacer()
-                
-                CustomButton(text:"Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showKey.toggle()}
-                
-                CustomButton(text:"Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){hideChart.toggle()}
-            }
-            .padding(.horizontal, horizontalPadding)
+        if showVisual{
+            let color = Color(hex: accent)
+            let colorMap = Dictionary(uniqueKeysWithValues: zip(sympOrder, color.generateColors(from: color, count: sympOrder.count)))
             
-            // Chart area with Y-axis and bars
-            ZStack(alignment:.topLeading) {
-                HStack(alignment: .top, spacing:0) {
-                    // Y-axis
-                    VStack(spacing:0) {
-                        ForEach(yVals.reversed(), id:\.self) { value in
-                            CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
-                                .frame(height:1)
-                                .offset(x:5, y:-3)
-                            
-                            if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
-                        }
+            let chartHeight: CGFloat = 150
+            let yStep = max(1, Int(ceil(Double(maxCount) / 5)))
+            let yMax = ((maxCount + yStep - 1) / yStep) * yStep
+            let yVals = Array(stride(from: 0, through: yMax, by: yStep))
+            
+            // Make spacing and widths responsive
+            let yAxWid: CGFloat = 15
+            let leftPadding: CGFloat = min(10, screenWidth * 0.025)
+            let rightPadding: CGFloat = min(10, screenWidth * 0.025)
+            let barSpac: CGFloat = max(4, min(10, screenWidth * 0.02)) // Scale spacing down on small screens
+            let availableWidth = width - yAxWid - leftPadding - rightPadding - (barSpac * 11)
+            let barWidth = max(15, availableWidth / 12) // Minimum bar width of 15
+            
+            VStack(alignment: .leading, spacing: 10) {
+                // Buttons
+                HStack {
+                    HStack(spacing: 0) {
+                        CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12, botPad: 0) { yearOff -= 1}
+                        
+                        let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+                        let title = "Logs by Symptom"
+                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
+                        
+                        CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
                     }
-                    .frame(height: chartHeight, alignment:.top)
+                    .padding(.bottom, 10)
                     
                     Spacer()
-                        .frame(width: leftPadding)
                     
-                    ZStack(alignment:.topLeading) {
-                        //grid lines
+                    CustomButton(text:"Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showKey.toggle()}
+                    
+                    CustomButton(text:"Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showVisual.toggle()}
+                }
+                .padding(.horizontal, horizontalPadding)
+                
+                // Chart area with Y-axis and bars
+                ZStack(alignment:.topLeading) {
+                    HStack(alignment: .top, spacing:0) {
+                        // Y-axis
                         VStack(spacing:0) {
                             ForEach(yVals.reversed(), id:\.self) { value in
-                                Rectangle().fill(Color(hex:bg).opacity(0.3)).frame(height:1)
+                                CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
+                                    .frame(height:1)
+                                    .offset(x:5, y:-3)
+                                
                                 if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
                             }
                         }
-                        .frame(height: chartHeight)
+                        .frame(height: chartHeight, alignment:.top)
                         
-                        // Bars
-                        HStack(alignment:.bottom, spacing:barSpac) {
-                            ForEach(data, id:\.month) { monData in
-                                VStack(spacing:2) {
-                                    ZStack(alignment:.bottom) {
-                                        RoundedRectangle(cornerRadius:6).fill(color.opacity(0.2))
-                                        VStack(spacing: 0) {
-                                            let popGap: CGFloat = 8
-
-                                            ForEach(sympOrder, id: \.self) { symp in
-                                                if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
-                                                    let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
-                                                    let isSel = selMon == monData.month && selSymp == s.symptom
-                                                    let topPad: CGFloat = isSel ? popGap / 2 : 0
-                                                    let botPad: CGFloat = isSel ? popGap / 2 : 0
-
-                                                    Rectangle()
-                                                        .fill(colorMap[s.symptom] ?? .gray)
-                                                        .frame(height: segHeight)
-                                                        .padding(.top, topPad)
-                                                        .padding(.bottom, botPad)
-                                                        .onTapGesture {
-                                                            withAnimation(.spring()) {
-                                                                if selMon == monData.month && selSymp == s.symptom {
-                                                                    selMon = nil
-                                                                    selSymp = nil
-                                                                } else {
-                                                                    selMon = monData.month
-                                                                    selSymp = s.symptom
+                        Spacer()
+                            .frame(width: leftPadding)
+                        
+                        ZStack(alignment:.topLeading) {
+                            //grid lines
+                            VStack(spacing:0) {
+                                ForEach(yVals.reversed(), id:\.self) { value in
+                                    Rectangle().fill(Color(hex:bg).opacity(0.3)).frame(height:1)
+                                    if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
+                                }
+                            }
+                            .frame(height: chartHeight)
+                            
+                            // Bars
+                            HStack(alignment:.bottom, spacing:barSpac) {
+                                ForEach(data, id:\.month) { monData in
+                                    VStack(spacing:2) {
+                                        ZStack(alignment:.bottom) {
+                                            RoundedRectangle(cornerRadius:6).fill(color.opacity(0.2))
+                                            VStack(spacing: 0) {
+                                                let popGap: CGFloat = 8
+                                                
+                                                ForEach(sympOrder, id: \.self) { symp in
+                                                    if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
+                                                        let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
+                                                        let isSel = selMon == monData.month && selSymp == s.symptom
+                                                        let topPad: CGFloat = isSel ? popGap / 2 : 0
+                                                        let botPad: CGFloat = isSel ? popGap / 2 : 0
+                                                        
+                                                        Rectangle()
+                                                            .fill(colorMap[s.symptom] ?? .gray)
+                                                            .frame(height: segHeight)
+                                                            .padding(.top, topPad)
+                                                            .padding(.bottom, botPad)
+                                                            .onTapGesture {
+                                                                withAnimation(.spring()) {
+                                                                    if selMon == monData.month && selSymp == s.symptom {
+                                                                        selMon = nil
+                                                                        selSymp = nil
+                                                                    } else {
+                                                                        selMon = monData.month
+                                                                        selSymp = s.symptom
+                                                                    }
                                                                 }
                                                             }
-                                                        }
                                                     }
                                                 }
                                             }
                                             .clipShape(RoundedRectangle(cornerRadius:8))
                                         }
                                         .frame(width:barWidth,height:chartHeight)
-                                    
-                                    CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
-                                        .fixedSize()
-                                        .padding(.top,5)
+                                        
+                                        CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
+                                            .fixedSize()
+                                            .padding(.top,5)
+                                    }
                                 }
                             }
+                            .frame(maxWidth: availableWidth + (barSpac * 11))
                         }
-                        .frame(maxWidth: availableWidth + (barSpac * 11))
+                        
+                        Spacer()
+                            .frame(width: rightPadding)
                     }
                     
-                    Spacer()
-                        .frame(width: rightPadding)
+                    // popup if segment is selected
+                    if let selMon, let selSymp {
+                        TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
+                            .offset(x: yAxWid + leftPadding)
+                    }
                 }
+                .frame(height:chartHeight+30)
                 
-                // popup if segment is selected
-                if let selMon, let selSymp {
-                    TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
-                        .offset(x: yAxWid + leftPadding)
+                //symptom legend
+                if showKey {
+                    BarSymptomKey(sympOrder: sympOrder, colorMap: colorMap, bg: bg, width: width - (horizontalPadding * 2))
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.bottom, 5)
                 }
             }
-            .frame(height:chartHeight+30)
-            
-            //symptom legend
-            if showKey {
-                BarSymptomKey(sympOrder: sympOrder, colorMap: colorMap, bg: bg, width: width - (horizontalPadding * 2))
-                    .padding(.horizontal, horizontalPadding)
-                    .padding(.bottom, 5)
-            }
+            .padding(.vertical,10)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width:width)
+            .padding(.bottom, 10)
         }
-        .padding(.vertical,10)
-        .background(Color(hex:accent))
-        .cornerRadius(20)
-        .frame(width:width)
-        .padding(.bottom, 10)
+        else{
+            HiddenChart(bg: bg, accent: accent, chart: "Log Frequency Chart", hideChart: $showVisual)
+        }
     }
 
     private var monthFormatter: DateFormatter {
