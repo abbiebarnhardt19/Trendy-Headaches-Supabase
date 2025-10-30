@@ -59,13 +59,17 @@ struct AnalyticsView: View {
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
                             
-                            SeverityPieChart(logList: filteredLogs, accent: accent, bg: bg)
+                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Log Severity", groupBy: \.severity)
                             
                             CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
                             
                             MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40)
                             
                             MedTakenCalendarView(logs: filteredLogs, bg: bg, accent: accent)
+                            
+                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Emergency Treatment Effective", groupBy: \.med_worked)
+                            
+                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Symptom Onset", groupBy: \.onset_time)
                         }
                         .padding(.bottom, 170)
                     }

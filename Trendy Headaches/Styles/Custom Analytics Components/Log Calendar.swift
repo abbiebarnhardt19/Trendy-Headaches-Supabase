@@ -17,7 +17,7 @@ struct LogCalendarView: View {
     @State private var showKey = false
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    private let width = UIScreen.main.bounds.width - 70
+    private let width = UIScreen.main.bounds.width - 80
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
     
     @State var showVisual: Bool = false
@@ -58,8 +58,6 @@ struct LogCalendarView: View {
             
             CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
 
-            
-            
             Spacer()
             
             CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showKey.toggle() }
