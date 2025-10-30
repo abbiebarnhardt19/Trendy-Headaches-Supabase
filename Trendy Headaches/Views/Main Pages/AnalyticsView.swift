@@ -57,13 +57,15 @@ struct AnalyticsView: View {
                             
                             filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms)
                             
-                            CalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
+                            LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
                             
                             SeverityPieChart(logList: filteredLogs, accent: accent, bg: bg)
                             
                             CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
                             
                             MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40)
+                            
+                            MedTakenCalendarView(logs: filteredLogs, bg: bg, accent: accent)
                         }
                         .padding(.bottom, 170)
                     }

@@ -1,37 +1,60 @@
 //
-//  Calendar.swift
-//  Trendy Headaches
+//  Med Taken Calendar.swift
+//  Trendy Headaches Supabase
 //
-//  Created by Abigail Barnhardt on 10/14/25.
+//  Created by Abigail Barnhardt on 10/30/25.
 //
 
 import SwiftUI
 
-struct CalendarView: View {
+struct MedTakenCalendarView: View {
     let logs: [UnifiedLog]
     var bg: String
     var accent: String
-    let sympIcon: [String: String]
 
     @State private var currentMonth = Date()
     @State private var showKey = false
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    private let width = UIScreen.main.bounds.width - 70
+    private let width = UIScreen.main.bounds.width - 80
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
     
     @State var showVisual: Bool = false
+    
+    // Generate medication colors based on unique medications
+    private var medicationColors: [String: Color] {
+        
+        
+        let uniqueMeds = Array(Set(logs.compactMap { log -> String? in
+            guard log.med_taken == true, let medName = log.medication_name else { return nil }
+            return medName
+        })).sorted()
+        
+        guard !uniqueMeds.isEmpty else { return [:] }
+        
+        let colors: [Color]
+        if uniqueMeds.count == 1 {
+            // For a single medication, use the base accent color
+            colors = [Color(hex: bg)]
+        } else {
+            colors = Color(hex: accent).generateColors(from: Color(hex: accent), count: uniqueMeds.count)
+        }
+        
+        var result: [String: Color] = [:]
+        for i in 0..<min(uniqueMeds.count, colors.count) {
+            result[uniqueMeds[i]] = colors[i]
+        }
+        return result
+    }
 
     var body: some View {
         if showVisual{
             VStack(spacing: 10) {
-                
                 TopBar
                 WeekdayLabels
                 CalendarGrid
                 if showKey {
-                    SeverityKeyBar(accent: bg, width: width, height: 20)
-                    SymptomKey(symptomToIcon: sympIcon, accent: bg, width: width)
+                    MedicationKey(bg: bg, accent: accent, width: width, medicationColors: medicationColors)
                 }
             }
             .frame(width: width)
@@ -40,9 +63,8 @@ struct CalendarView: View {
             .cornerRadius(20)
             .padding(.bottom, 10)
         }
-        
         else{
-            HiddenChart(bg: bg, accent: accent, chart: "Log Calendar", hideChart: $showVisual)
+            HiddenChart(bg: bg, accent: accent, chart: "Emergency Treatment Calendar", hideChart: $showVisual)
         }
     }
 
@@ -57,8 +79,6 @@ struct CalendarView: View {
                 .padding(.bottom, 9)
             
             CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
-
-            
             
             Spacer()
             
@@ -77,14 +97,19 @@ struct CalendarView: View {
         }
     }
 
-        //lay out the days on the grid
+    //lay out the days on the grid
     private var CalendarGrid: some View {
         let days = makeDays(for: currentMonth)
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
             ForEach(days.indices, id: \.self) { idx in
                 if let date = days[idx] {
-                    let dayLogs = logs.filter { calendar.isDate($0.date, inSameDayAs: date) }
-                    DayCell(date: date, logs: dayLogs, bg: bg, sympIcon: sympIcon, calendar: calendar)
+                    // Filter for logs where medication was taken and has a medication name
+                    let dayLogs = logs.filter { log in
+                        calendar.isDate(log.date, inSameDayAs: date) &&
+                        log.med_taken == true &&
+                        log.medication_name != nil
+                    }
+                    MedTakenDayCell(date: date, logs: dayLogs, bg: bg, calendar: calendar, medicationColors: medicationColors)
                 } else {
                     Spacer().frame(height: 20)
                 }
@@ -94,68 +119,67 @@ struct CalendarView: View {
 }
 
 //make each day
-struct DayCell: View {
+struct MedTakenDayCell: View {
     let date: Date
     let logs: [UnifiedLog]
     let bg: String
-    let sympIcon: [String: String]
     let calendar: Calendar
+    let medicationColors: [String: Color]
 
     var body: some View {
         ZStack {
             // Day number
             CustomText(text: "\(calendar.component(.day, from: date))", color: bg, textAlign: .center, textSize: 14)
 
-            // Log icons
+            // Med icons - circles colored by medication
             ForEach(Array(logs.enumerated()), id: \.offset) { i, log in
-                LogIcon(log: log, index: i, total: logs.count, sympIcon: sympIcon)
+                MedIcon(log: log, index: i, total: logs.count, medicationColors: medicationColors)
             }
         }
         .frame(height: 25)
     }
 }
 
-//log icon with symbol
-struct LogIcon: View {
+//medication icon - always a circle, color based on medication
+struct MedIcon: View {
     let log: UnifiedLog
     let index: Int
     let total: Int
-    let sympIcon: [String: String]
+    let medicationColors: [String: Color]
 
     var body: some View {
         let angle = Double(index)/Double(total) * 360
         let radius: CGFloat = 12
-        Image(systemName: icon(for: log.symptom_name, symptomToIcon: sympIcon))
-            .resizable()
-            .scaledToFit()
+        Circle()
             .frame(width: 6, height: 6)
-            .foregroundColor(color(forSeverity: log.severity))
+            .foregroundColor(medicationColors[log.medication_name ?? ""] ?? .gray)
             .offset(x: cos(angle * .pi / 180) * radius, y: sin(angle * .pi / 180) * radius)
     }
 }
-
-struct SymptomKey: View {
-    var symptomToIcon: [String: String]
-    var accent: String
-    var width: CGFloat
+// Key showing medication colors
+struct MedicationKey: View {
+    let bg: String
+    let accent: String
+    let width: CGFloat
+    let medicationColors: [String: Color]
     var itemHeight: CGFloat = 13
     
     var body: some View {
         let rows = computeRows()
         
         VStack(alignment: .leading, spacing: 8) {
+            
             ForEach(0..<rows.count, id: \.self) { rowIndex in
                 HStack(spacing: 10) {
                     ForEach(rows[rowIndex], id: \.0) { item in
                         HStack(spacing: 4) {
-                            Image(systemName: item.1)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: itemHeight, height: itemHeight)
-                                .foregroundColor(Color(hex: accent))
+                            Circle()
+                                .frame(width: 10, height: 10)
+                                .foregroundColor(item.1)
+                            
                             CustomText(
                                 text: String(item.0.prefix(12)),
-                                color: accent,
+                                color: bg,
                                 textSize: 12
                             )
                             .lineLimit(1)
@@ -170,22 +194,25 @@ struct SymptomKey: View {
             }
         }
         .frame(width: width, alignment: .leading)
+        .cornerRadius(10)
+        .padding(.leading, 10)
     }
     
-    private func computeRows() -> [[(String, String)]] {
-        var rows: [[(String, String)]] = [[]]
+    private func computeRows() -> [[(String, Color)]] {
+        var rows: [[(String, Color)]] = [[]]
         var currentRowWidth: CGFloat = 0
         let font = UIFont.systemFont(ofSize: 12, weight: .regular)
         let itemSpacing: CGFloat = 10
         let horizontalPadding: CGFloat = 8
         let iconTextGap: CGFloat = 4
+        let circleWidth: CGFloat = 10
         
-        for symptom in symptomToIcon.keys.sorted() {
-            let iconName = symptomToIcon[symptom] ?? "questionmark.square.fill"
-            let displayText = String(symptom.prefix(12))
+        for med in medicationColors.keys.sorted() {
+            guard let color = medicationColors[med] else { continue }
+            let displayText = String(med.prefix(12))
             let textWidth = displayText.width(usingFont: font)
-            // icon + gap + text + padding
-            let itemWidth = itemHeight + iconTextGap + textWidth + horizontalPadding
+            // circle + gap + text + padding
+            let itemWidth = circleWidth + iconTextGap + textWidth + horizontalPadding
             
             // Calculate what the new width would be if we add this item
             let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
@@ -193,46 +220,15 @@ struct SymptomKey: View {
             // Wrap to new row if needed
             if newRowWidth > width && !rows[rows.count - 1].isEmpty {
                 // Start a new row
-                rows.append([(symptom, iconName)])
+                rows.append([(med, color)])
                 currentRowWidth = itemWidth
             } else {
                 // Add to current row
-                rows[rows.count - 1].append((symptom, iconName))
+                rows[rows.count - 1].append((med, color))
                 currentRowWidth = newRowWidth
             }
         }
         
         return rows
-    }
-}
-
-
-//making the color key
-struct SeverityKeyBar: View {
-    var accent: String
-    var width: CGFloat = 300
-    var height: CGFloat = 20
-
-    private let severityColors: [Color] = [
-        "#FFB950", "#FFAD33", "#FF931F", "#FF7E33", "#FA5E1F",
-        "#EC3F13", "#B81702", "#A50104", "#8E0103", "#7A0103"
-    ].map(Color.init(hex:))
-
-    var body: some View {
-        VStack(spacing: 4) {
-            // Gradient bar
-            RoundedRectangle(cornerRadius: height / 2)
-                .fill(LinearGradient(colors: severityColors, startPoint: .leading, endPoint: .trailing))
-                .frame(width: width, height: height)
-
-            HStack(spacing: 0) {
-                ForEach(1...10, id: \.self) { level in
-                    CustomText(text: "\(level)", color: accent, textAlign: .center, textSize: 14)
-                        .frame(width: width / 10)
-                }
-            }
-        }
-        .frame(width: width)
-        .padding(.vertical, 10)
     }
 }

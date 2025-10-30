@@ -53,7 +53,7 @@ struct filterSymptom: View {
             .padding(.bottom, 20)
             .background(Color(hex:accent))
             .cornerRadius(20)
-            .frame(width: screenWidth - 40, alignment: .leading)
+            .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
         }
 
