@@ -81,6 +81,9 @@ struct DateTextField: View {
     @State var width: CGFloat = 220
     @State var label: String = "Date:"
     @State var bold: Bool = false
+    @State var height: CGFloat = UIScreen.main.bounds.width * 0.125
+    @State var fieldTextSize: CGFloat = UIScreen.main.bounds.width * 0.05
+    @State var labelTextSize: CGFloat = UIScreen.main.bounds.width * 0.06
     
     @State private var showDatePicker: Bool = false
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -94,11 +97,11 @@ struct DateTextField: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .regular)
-                CustomText(text: label, color: accent, width: "Tests".width(usingFont: font)+10, bold: bold, textSize: screenWidth * 0.06)
+                let font = UIFont.systemFont(ofSize: labelTextSize, weight: .regular)
+                CustomText(text: label, color: accent, width: "Tests".width(usingFont: font)+10, bold: bold, textSize: labelTextSize)
                 
                 let fieldWidth = width - "Tests".width(usingFont: font)
-                CustomTextField(bg: bg, accent: accent, placeholder: " ", text: $textValue, width: fieldWidth , height: screenWidth * 0.125, textSize: screenWidth * 0.05, botPad: 0)
+                CustomTextField(bg: bg, accent: accent, placeholder: " ", text: $textValue, width: fieldWidth , height: height, textSize: fieldTextSize, botPad: 0)
             }
             .overlay(
                 HStack {
@@ -108,7 +111,7 @@ struct DateTextField: View {
                     }) {
                         Image(systemName: "calendar")
                             .foregroundColor(Color(hex: bg))
-                            .font(.system(size: screenWidth * 0.06))
+                            .font(.system(size: fieldTextSize * 1.2))
                             .padding(.trailing, 15)
                     }
                 }
@@ -116,19 +119,19 @@ struct DateTextField: View {
             .buttonStyle(PlainButtonStyle())
             
             if showDatePicker {
-                CustomCalendarView( selectedDate: $date, isPresented: $showDatePicker, bg: bg, accent: accent, width: width)
-                .frame(width: width)
-                .background(Color(hex: accent))
-                .cornerRadius(20)
-                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                .colorScheme(Color.isHexDark(accent) ? .dark : .light)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onChange(of: date) {
-                    textValue = formatter.string(from: date)
-                    withAnimation { showDatePicker = false }
-                }
-                .padding(.top, 8)
-                .zIndex(1000)
+                    CustomCalendarView( selectedDate: $date, isPresented: $showDatePicker, bg: bg, accent: accent, width: width)
+                        .frame(width: width)
+                        .background(Color(hex: accent))
+                        .cornerRadius(20)
+                        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                        .colorScheme(Color.isHexDark(accent) ? .dark : .light)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .onChange(of: date) {
+                            textValue = formatter.string(from: date)
+                            withAnimation { showDatePicker = false }
+                        }
+                        .padding(.top, 8)
+                        .zIndex(1000)
             }
         }
     }

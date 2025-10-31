@@ -38,7 +38,10 @@ extension Database {
                     ($0["trigger"] as? [String: Any])?["trigger_name"] as? String
                 }
                 
-                unifiedLogs.append(UnifiedLog( log_id: logData["log_id"] as! Int64, user_id: logData["user_id"] as! Int64, log_type: "Symptom", date: dateFormatter.date(from: logData["date"] as! String) ?? Date(), severity: logData["severity_level"] as! Int64, submit_time: dateFormatter.date(from: logData["submit_time"] as! String) ?? Date(), symptom_id: logData["symptom_id"] as? Int64, symptom_name: symptomDict?["symptom_name"] as? String, onset_time: logData["onset_time"] as? String, med_taken: logData["med_taken"] as? Bool, medication_id: logData["log_medication_id"] as? Int64, medication_name: medDict?["medication_name"] as? String, med_worked: logData["med_worked"] as? Bool, symptom_description: logData["symptom_description"] as? String, notes: logData["notes"] as? String, trigger_ids: nil, trigger_names: triggerNames.isEmpty ? nil : triggerNames, side_effect_med: nil ))
+                
+                let newLog = UnifiedLog( log_id: logData["log_id"] as! Int64, user_id: logData["user_id"] as! Int64, log_type: "Symptom", date: dateFormatter.date(from: logData["date"] as! String) ?? Date(), severity: logData["severity_level"] as! Int64, submit_time: dateFormatter.date(from: logData["submit_time"] as! String) ?? Date(), symptom_id: logData["symptom_id"] as? Int64, symptom_name: symptomDict?["symptom_name"] as? String, onset_time: logData["onset_time"] as? String, med_taken: logData["med_taken"] as? Bool, medication_id: logData["log_medication_id"] as? Int64, medication_name: medDict?["medication_name"] as? String, med_worked: logData["med_worked"] as? Bool, symptom_description: logData["symptom_description"] as? String, notes: logData["notes"] as? String, trigger_ids: nil, trigger_names: triggerNames.isEmpty ? nil : triggerNames, side_effect_med: nil )
+                
+                unifiedLogs.append(newLog)
             }
             
             // Fetch side effect logs

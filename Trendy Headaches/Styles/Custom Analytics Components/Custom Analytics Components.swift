@@ -18,7 +18,7 @@ struct HiddenChart: View {
     
     var body: some View {
         HStack {
-            CustomButton( text: "\(chart)",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { hideChart.toggle() } )
+            CustomButton( text: "\(chart)",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { hideChart.toggle() } )
         }
         .frame(width: screenWidth)
     }
@@ -29,24 +29,44 @@ struct filterSymptom: View {
     var accent: String
     @Binding var symptomOptions: [String]
     @Binding var selectedSymptom : [String]
+    @Binding var startDate: Date
+    @Binding var endDate: Date
     
     @State private var showSymptomFilter: Bool = false
+    
+    // Date Formatter
+    private let formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f
+    }()
     
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     
     var body: some View {
+        
+        @State var startDateString = formatter.string(from: startDate)
+        @State var endDateString = formatter.string(from: endDate)
+        
         if showSymptomFilter {
             VStack(alignment: .leading, spacing: 10) {
                 HStack{
-                    CustomText(text:"Select Symptom: ", color: bg, textSize: screenWidth * 0.055)
+                    CustomText(text:"Select Symptom: ", color: bg, textSize: screenWidth * 0.05)
                     
                     CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
                         showSymptomFilter.toggle()
                     }
                 }
                 
-                MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.7)
+                MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
+                    .padding(.bottom, 5)
+                
+                CustomText(text:"Date Range: ", color: bg, textSize: screenWidth * 0.05)
+                    .padding(.bottom, 5)
+                DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
+
+                DateTextField(date: $endDate, textValue: $endDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "End: ", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
             }
             .padding(.horizontal, 15)
             .padding(.top, 10)
@@ -60,7 +80,7 @@ struct filterSymptom: View {
         else {
             HStack {
                 
-                CustomButton( text: "Select Symptom",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { showSymptomFilter.toggle() } )
+                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showSymptomFilter.toggle() } )
             }
             .frame(width: screenWidth)
         }

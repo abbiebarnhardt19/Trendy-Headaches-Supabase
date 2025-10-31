@@ -27,21 +27,54 @@ struct AnalyticsView: View {
     @State var symptomOptions: [String] = []
     @State var selectedSymptoms: [String] = []
     
+    @State var startDate: Date = Date()
+    @State var endDate: Date = Date()
+
+    
     @State var medData: [Medication] = []
     
+//    var filteredLogs: [UnifiedLog] {
+//        if selectedSymptoms.isEmpty {
+//            return []
+//        } else {
+//            return logs.filter { log in
+//                guard let name = log.symptom_name else {
+//                    return false
+//                }
+//                
+//                // log.date is not optional, use it directly
+//                let withinDateRange = log.date >= startDate && log.date <= endDate
+//                return selectedSymptoms.contains(name) && withinDateRange
+//            }
+//        }
+//    }
+    
     var filteredLogs: [UnifiedLog] {
+        print("DEBUG filteredLogs: selectedSymptoms = \(selectedSymptoms)")
+        print("DEBUG filteredLogs: startDate = \(startDate), endDate = \(endDate)")
+        
         if selectedSymptoms.isEmpty {
-            return [] // ← return empty instead of all logs
+            print("DEBUG filteredLogs: selectedSymptoms is EMPTY, returning []")
+            return []
         } else {
-            return logs.filter { log in
-                if let name = log.symptom_name {
-                    return selectedSymptoms.contains(name)
+            let filtered = logs.filter { log in
+                guard let name = log.symptom_name else {
+                    return false
                 }
-                return false
+                
+                let withinDateRange = log.date >= startDate && log.date <= endDate
+                let symptomMatch = selectedSymptoms.contains(name)
+                
+                if log.trigger_names != nil {
+                    print("DEBUG: Log \(log.log_id) - symptom: \(name), date: \(log.date), symptomMatch: \(symptomMatch), dateMatch: \(withinDateRange), triggers: \(log.trigger_names ?? [])")
+                }
+                
+                return symptomMatch && withinDateRange
             }
+            print("DEBUG filteredLogs: Returning \(filtered.count) logs")
+            return filtered
         }
     }
-
     
     var body: some View {
         NavigationStack{
@@ -55,7 +88,7 @@ struct AnalyticsView: View {
                         
                         VStack(spacing: 0) {
                             
-                            filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms)
+                            filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate)
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
                             
@@ -70,6 +103,10 @@ struct AnalyticsView: View {
                             GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Emergency Treatment Effective", groupBy: \.med_worked)
                             
                             GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Symptom Onset", groupBy: \.onset_time)
+                            
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Side Effect", groupColumn: \UnifiedLog.side_effect_med, chartName: "Side Effect Medication", accent: accent, bg: bg)
+                            
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.trigger_names, chartName: "Symptom Triggers", accent: accent, bg: bg)
                         }
                         .padding(.bottom, 170)
                     }
@@ -85,6 +122,11 @@ struct AnalyticsView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
+                .onAppear {
+                    // Set endDate when view first appears
+                    let calendar = Calendar.current
+                    endDate = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
+                }
                 .task {
                     do {
                         let result = try await fetchAnalyticsData(userID: Int(userID))
@@ -92,6 +134,8 @@ struct AnalyticsView: View {
                         medData = result.1
                         symptomOptions = result.2
                         selectedSymptoms = result.2
+                        startDate = result.3 ?? Date()
+                        
                     } catch {
                         print("Error fetching all data:", error)
                     }

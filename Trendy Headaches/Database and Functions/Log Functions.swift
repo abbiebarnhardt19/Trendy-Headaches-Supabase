@@ -24,9 +24,11 @@ extension Database {
                 emergMedID = (await getIDFromName(tableName: "Medications", names: [medName], userID: userID)).first
             }
             
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: date)
             let dateFormatter = ISO8601DateFormatter()
             
-            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: date), onset_time: symptom_onset, severity_level: severity, symptom_id: sympID, med_taken: med_taken, log_medication_id: emergMedID, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
+            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: startOfDay), onset_time: symptom_onset, severity_level: severity, symptom_id: sympID, med_taken: med_taken, log_medication_id: emergMedID, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
             
             let insertedLog: Log = try await client
                 .from("Logs")
