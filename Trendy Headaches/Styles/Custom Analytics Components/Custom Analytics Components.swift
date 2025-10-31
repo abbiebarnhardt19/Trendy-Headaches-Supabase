@@ -103,6 +103,7 @@ struct analyticsDropdown: View {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isExpanded.toggle()
                 }
+                
             }) {
                 HStack(spacing: 5) {
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.09 + 5, weight: .regular)
@@ -125,6 +126,7 @@ struct analyticsDropdown: View {
                 .padding(.horizontal, 10)
                 .padding(.top, 35)
             }
+            .buttonStyle(PlainButtonStyle())
 
             // Dropdown menu
             if isExpanded {
