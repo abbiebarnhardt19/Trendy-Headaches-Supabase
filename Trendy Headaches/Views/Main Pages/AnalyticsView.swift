@@ -33,22 +33,6 @@ struct AnalyticsView: View {
     
     @State var medData: [Medication] = []
     
-//    var filteredLogs: [UnifiedLog] {
-//        if selectedSymptoms.isEmpty {
-//            return []
-//        } else {
-//            return logs.filter { log in
-//                guard let name = log.symptom_name else {
-//                    return false
-//                }
-//                
-//                // log.date is not optional, use it directly
-//                let withinDateRange = log.date >= startDate && log.date <= endDate
-//                return selectedSymptoms.contains(name) && withinDateRange
-//            }
-//        }
-//    }
-    
     var filteredLogs: [UnifiedLog] {
         print("DEBUG filteredLogs: selectedSymptoms = \(selectedSymptoms)")
         print("DEBUG filteredLogs: startDate = \(startDate), endDate = \(endDate)")
@@ -106,7 +90,11 @@ struct AnalyticsView: View {
                             
                             AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Side Effect", groupColumn: \UnifiedLog.side_effect_med, chartName: "Side Effect Medication", accent: accent, bg: bg)
                             
-                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.trigger_names, chartName: "Symptom Triggers", accent: accent, bg: bg)
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.trigger_names, chartName: "Trigger Frequency", accent: accent, bg: bg)
+                            
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.symptom_description, chartName: "Symptom Description", accent: accent, bg: bg)
+                            
+                            
                         }
                         .padding(.bottom, 170)
                     }
@@ -146,5 +134,5 @@ struct AnalyticsView: View {
 }
 
 #Preview {
-    AnalyticsView(userID:11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    AnalyticsView(userID:12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

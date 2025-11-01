@@ -438,14 +438,17 @@ struct GenericPieChart<T: Hashable>: View {
                 
                 VStack(spacing: 10) {
                     HStack {
-                        CustomText(text: chartTitle, color: bg, width: 200, textSize: 20)
+                        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
+                        CustomText(text: chartTitle, color: bg, width: chartTitle.width(usingFont: font) + 15, textSize: 20)
                             .padding(.leading, 30)
                         Spacer()
+                        
                         Button(action: { showVisual.toggle() }) {
-                            CustomText(text: "Hide", color: accent, width: 45, textAlign: .center, textSize: 12)
-                                .frame(height: 25)
-                                .background(Color(hex: bg))
-                                .cornerRadius(20)
+                            Image(systemName: "eye.slash.circle")
+                                .resizable() // Add this!
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundStyle(Color(hex: bg))
+                                .frame(width: 25, height: 25)
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.trailing, 20)
@@ -453,90 +456,98 @@ struct GenericPieChart<T: Hashable>: View {
                     .frame(width: UIScreen.main.bounds.width - 30)
                     .padding(.top, 10)
                     
-                    ZStack {
-                        ForEach(groupedCounts.indices, id: \.self) { idx in
-                            let item = groupedCounts[idx]
-                            let start = startAngle(for: idx, counts: counts)
-                            let end = endAngle(for: idx, counts: counts)
-                            let mid = Angle(degrees: (start.degrees + end.degrees) / 2)
-                            let isSelected = selectedSlice == item.key
-                            let dx = cos(mid.radians) * (isSelected ? popOutOffset : 0)
-                            let dy = sin(mid.radians) * (isSelected ? popOutOffset : 0)
-                            let sliceColor = sliceColors[idx]
-                            let textColor = Color.isHexDark(sliceColor.toHex() ?? accent) ? Color.white : Color.black
-                            
-                            PieSliceShape(startAngle: start, endAngle: end)
-                                .fill(sliceColor)
-                                .overlay(PieSliceShape(startAngle: start, endAngle: end).stroke(.black, lineWidth: 2))
-                                .frame(width: chartSize, height: chartSize)
-                                .offset(x: dx, y: dy)
-                                .onTapGesture { withAnimation(.spring()) { selectedSlice = isSelected ? nil : item.key } }
-                            
-                            // Show text labels for numeric or boolean values
-                            if isNumeric || isBoolean {
-                                Text(item.key)
-                                    .font(.system(size: 18, design: .serif))
-                                    .foregroundColor(textColor)
-                                    .position(
-                                        x: chartSize/2 + cos(mid.radians) * chartSize * 0.35 + dx,
-                                        y: chartSize/2 + sin(mid.radians) * chartSize * 0.35 + dy
-                                    )
-                            }
-                        }
-                        
-                        if let selected = selectedSlice,
-                           let idx = groupedCounts.firstIndex(where: { $0.key == selected }) {
-                            let item = groupedCounts[idx]
-                            let mid = Angle(degrees: (startAngle(for: idx, counts: counts).degrees + endAngle(for: idx, counts: counts).degrees)/2)
-                            let dx = -cos(mid.radians) * 50
-                            let dy = -sin(mid.radians) * 50
-                            let selectedLogs = logList.filter { log -> Bool in
-                                let value = log[keyPath: groupBy]
-                                if let boolValue = value as? Bool {
-                                    return (boolValue ? "Yes" : "No") == selected
-                                } else if let optionalBool = value as? Bool? {
-                                    guard let unwrapped = optionalBool else { return false }
-                                    return (unwrapped ? "Yes" : "No") == selected
-                                } else if let stringValue = value as? String {
-                                    return stringValue == selected
-                                } else if let intValue = value as? Int64 {
-                                    return String(intValue) == selected
-                                } else if let optionalString = value as? String? {
-                                    return optionalString == selected
-                                } else {
-                                    return String(describing: value) == selected
+                    if !logList.isEmpty{
+                        ZStack {
+                            ForEach(groupedCounts.indices, id: \.self) { idx in
+                                let item = groupedCounts[idx]
+                                let start = startAngle(for: idx, counts: counts)
+                                let end = endAngle(for: idx, counts: counts)
+                                let mid = Angle(degrees: (start.degrees + end.degrees) / 2)
+                                let isSelected = selectedSlice == item.key
+                                let dx = cos(mid.radians) * (isSelected ? popOutOffset : 0)
+                                let dy = sin(mid.radians) * (isSelected ? popOutOffset : 0)
+                                let sliceColor = sliceColors[idx]
+                                let textColor = Color.isHexDark(sliceColor.toHex() ?? accent) ? Color.white : Color.black
+                                
+                                PieSliceShape(startAngle: start, endAngle: end)
+                                    .fill(sliceColor)
+                                    .overlay(PieSliceShape(startAngle: start, endAngle: end).stroke(.black, lineWidth: 2))
+                                    .frame(width: chartSize, height: chartSize)
+                                    .offset(x: dx, y: dy)
+                                    .onTapGesture { withAnimation(.spring()) { selectedSlice = isSelected ? nil : item.key } }
+                                
+                                // Show text labels for numeric or boolean values
+                                if isNumeric || isBoolean {
+                                    Text(item.key)
+                                        .font(.system(size: 18, design: .serif))
+                                        .foregroundColor(textColor)
+                                        .position(
+                                            x: chartSize/2 + cos(mid.radians) * chartSize * 0.35 + dx,
+                                            y: chartSize/2 + sin(mid.radians) * chartSize * 0.35 + dy
+                                        )
                                 }
                             }
-                            let symptomCounts = makeSymptomCounts(for: selected, logs: selectedLogs)
                             
-                            TooltipView(
-                                label: item.key,
-                                total: item.count,
-                                logListCount: logList.count,
-                                symptoms: symptomCounts,
-                                accent: accent,
-                                bg: bg
-                            )
-                            .position(x: chartSize/2 + dx, y: chartSize/2 + dy)
+                            if let selected = selectedSlice,
+                               let idx = groupedCounts.firstIndex(where: { $0.key == selected }) {
+                                let item = groupedCounts[idx]
+                                let mid = Angle(degrees: (startAngle(for: idx, counts: counts).degrees + endAngle(for: idx, counts: counts).degrees)/2)
+                                let dx = -cos(mid.radians) * 50
+                                let dy = -sin(mid.radians) * 50
+                                let selectedLogs = logList.filter { log -> Bool in
+                                    let value = log[keyPath: groupBy]
+                                    if let boolValue = value as? Bool {
+                                        return (boolValue ? "Yes" : "No") == selected
+                                    } else if let optionalBool = value as? Bool? {
+                                        guard let unwrapped = optionalBool else { return false }
+                                        return (unwrapped ? "Yes" : "No") == selected
+                                    } else if let stringValue = value as? String {
+                                        return stringValue == selected
+                                    } else if let intValue = value as? Int64 {
+                                        return String(intValue) == selected
+                                    } else if let optionalString = value as? String? {
+                                        return optionalString == selected
+                                    } else {
+                                        return String(describing: value) == selected
+                                    }
+                                }
+                                let symptomCounts = makeSymptomCounts(for: selected, logs: selectedLogs)
+                                
+                                TooltipView(
+                                    label: item.key,
+                                    total: item.count,
+                                    logListCount: logList.count,
+                                    symptoms: symptomCounts,
+                                    accent: accent,
+                                    bg: bg
+                                )
+                                .position(x: chartSize/2 + dx, y: chartSize/2 + dy)
+                            }
                         }
+                        .frame(width: chartSize, height: chartSize)
+                        
+                        
+                        // Show color key for string values (not boolean or numeric)
+                        if !isNumeric && !isBoolean {
+                            PieChartColorKey(
+                                items: groupedCounts,
+                                colors: sliceColors,
+                                bg: bg,
+                                width: UIScreen.main.bounds.width - 80
+                            )
+                        }
+                        
+                        Spacer()
                     }
-                    .frame(width: chartSize, height: chartSize)
-                    
-                    // Show color key for string values (not boolean or numeric)
-                    if !isNumeric && !isBoolean {
-                        PieChartColorKey(
-                            items: groupedCounts,
-                            colors: sliceColors,
-                            bg: bg,
-                            width: UIScreen.main.bounds.width - 80
-                        )
+                    else{
+                        CustomText(text:"No Data", color:bg, textAlign: .center, bold: true)
+                            .padding(.bottom, 10)
                     }
-                    
-                    Spacer()
                 }
-                
             }
             .padding(.bottom, 10)
+            
+            
         } else {
             HiddenChart(bg: bg, accent: accent, chart: chartTitle, hideChart: $showVisual)
         }

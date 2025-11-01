@@ -82,8 +82,26 @@ struct MedTakenCalendarView: View {
             
             Spacer()
             
-            CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showKey.toggle() }
-            CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) { showVisual.toggle() }
+            Button(action: { showKey.toggle() }) {
+                Image(systemName: "info.circle")
+                    .resizable() // Add this!
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(Color(hex:bg))
+                    .frame(width: 25, height: 25)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.trailing, 5)
+            .padding(.bottom, 5)
+            
+            Button(action: { showVisual.toggle() }) {
+                Image(systemName: "eye.slash.circle")
+                    .resizable() // Add this!
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(Color(hex: bg))
+                    .frame(width: 25, height: 25)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .padding(.bottom, 5)
         }
         .frame(height: 20)
     }

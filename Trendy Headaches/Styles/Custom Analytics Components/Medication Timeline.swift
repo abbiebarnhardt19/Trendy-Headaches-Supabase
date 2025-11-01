@@ -34,13 +34,24 @@ struct MedicationTimeline: View {
                         Spacer()
                         
                         HStack{
-                            CustomButton(text: "Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
-                                showKey.toggle()
+                            Button(action: { showKey.toggle() }) {
+                                Image(systemName: "info.circle")
+                                    .resizable() // Add this!
+                                    .aspectRatio(contentMode: .fit)
+                                    .foregroundStyle(Color(hex:bg))
+                                    .frame(width: 25, height: 25)
                             }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.trailing, 5)
                             
-                            CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
-                                showVisual.toggle()
+                            Button(action: { showVisual.toggle() }) {
+                                Image(systemName: "eye.slash.circle")
+                                    .resizable() // Add this!
+                                    .aspectRatio(contentMode: .fit)
+                                    .foregroundStyle(Color(hex: bg))
+                                    .frame(width: 25, height: 25)
                             }
+                            .buttonStyle(PlainButtonStyle())
                         }
                         .padding(.trailing, 20)
                         .padding(.top, 10)

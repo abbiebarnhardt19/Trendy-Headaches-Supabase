@@ -14,13 +14,19 @@ extension Database {
     func createLog(userID: Int64, date: Date, symptom_onset: String?, symptomName: String, severity: Int64, med_taken: Bool, medTakenName: String?, symptom_desc: String, notes: String, submit: Date, triggerNames: [String] = []) async -> Int64? {
         
         do {
-            // Get IDs from names
-            let sympID = (await getIDFromName(tableName: "Symptoms", names: [symptomName], userID: userID)).first ?? 0
+            // Capitalize first letter of each word
+            let capitalizedSymptomName = symptomName.capitalized
+            let capitalizedMedName = medTakenName?.capitalized
+            let capitalizedTriggerNames = triggerNames.map { $0.capitalized }
+            let capitalizedOnset = symptom_onset?.capitalized
             
-            let triggIDs = await getIDFromName(tableName: "Triggers", names: triggerNames, userID: userID)
+            // Get IDs from names (using capitalized versions)
+            let sympID = (await getIDFromName(tableName: "Symptoms", names: [capitalizedSymptomName], userID: userID)).first ?? 0
+            
+            let triggIDs = await getIDFromName(tableName: "Triggers", names: capitalizedTriggerNames, userID: userID)
             
             var emergMedID: Int64? = nil
-            if let medName = medTakenName, !medName.isEmpty {
+            if let medName = capitalizedMedName, !medName.isEmpty {
                 emergMedID = (await getIDFromName(tableName: "Medications", names: [medName], userID: userID)).first
             }
             
@@ -28,7 +34,19 @@ extension Database {
             let startOfDay = calendar.startOfDay(for: date)
             let dateFormatter = ISO8601DateFormatter()
             
-            let logData = LogInsert(user_id: userID, date: dateFormatter.string(from: startOfDay), onset_time: symptom_onset, severity_level: severity, symptom_id: sympID, med_taken: med_taken, log_medication_id: emergMedID, med_worked: nil, symptom_description: symptom_desc, notes: notes, submit_time: dateFormatter.string(from: submit))
+            let logData = LogInsert(
+                user_id: userID,
+                date: dateFormatter.string(from: startOfDay),
+                onset_time: capitalizedOnset,
+                severity_level: severity,
+                symptom_id: sympID,
+                med_taken: med_taken,
+                log_medication_id: emergMedID,
+                med_worked: nil,
+                symptom_description: symptom_desc,
+                notes: notes,
+                submit_time: dateFormatter.string(from: submit)
+            )
             
             let insertedLog: Log = try await client
                 .from("Logs")
@@ -59,10 +77,55 @@ extension Database {
     }
 
     //create the side effect log
+//    func createSideEffectLog(userID: Int64, date: Date, side_effect: String, side_effect_severity: Int64, medicationName: String) async -> Int64? {
+//        do {
+//            // Get medication ID from name
+//            let medID = (await getIDFromName(tableName: "Medications", names: [medicationName], userID: userID)).first ?? 0
+//            
+//            // Create side effect log
+//            struct SideEffectInsert: Encodable {
+//                let user_id: Int64
+//                let side_effect_date: String
+//                let side_effect_submit_time: String
+//                let side_effect_name: String
+//                let side_effect_severity: Int64
+//                let side_effect_medication_id: Int64
+//            }
+//            
+//            let dateFormatter = ISO8601DateFormatter()
+//            
+//            let sideEffectData = SideEffectInsert(
+//                user_id: userID,
+//                side_effect_date: dateFormatter.string(from: date),
+//                side_effect_submit_time: dateFormatter.string(from: Date()),
+//                side_effect_name: side_effect,
+//                side_effect_severity: side_effect_severity,
+//                side_effect_medication_id: medID
+//            )
+//            
+//            let insertedSideEffect: SideEffect = try await client
+//                .from("Side_Effects")
+//                .insert(sideEffectData)
+//                .select()
+//                .single()
+//                .execute()
+//                .value
+//            
+//            return insertedSideEffect.sideEffectId
+//        } catch {
+//            print("Failed to create side effect log: \(error)")
+//            return nil
+//        }
+//    }
+    
     func createSideEffectLog(userID: Int64, date: Date, side_effect: String, side_effect_severity: Int64, medicationName: String) async -> Int64? {
         do {
-            // Get medication ID from name
-            let medID = (await getIDFromName(tableName: "Medications", names: [medicationName], userID: userID)).first ?? 0
+            // Capitalize first letter of each word
+            let capitalizedSideEffect = side_effect.capitalized
+            let capitalizedMedicationName = medicationName.capitalized
+            
+            // Get medication ID from name (using capitalized version)
+            let medID = (await getIDFromName(tableName: "Medications", names: [capitalizedMedicationName], userID: userID)).first ?? 0
             
             // Create side effect log
             struct SideEffectInsert: Encodable {
@@ -74,13 +137,15 @@ extension Database {
                 let side_effect_medication_id: Int64
             }
             
+            let calendar = Calendar.current
+            let startOfDay = calendar.startOfDay(for: date)
             let dateFormatter = ISO8601DateFormatter()
             
             let sideEffectData = SideEffectInsert(
                 user_id: userID,
-                side_effect_date: dateFormatter.string(from: date),
+                side_effect_date: dateFormatter.string(from: startOfDay),
                 side_effect_submit_time: dateFormatter.string(from: Date()),
-                side_effect_name: side_effect,
+                side_effect_name: capitalizedSideEffect,
                 side_effect_severity: side_effect_severity,
                 side_effect_medication_id: medID
             )
@@ -144,6 +209,117 @@ extension Database {
     }
     
     // Function to update the rest of the log
+//    func updateSymptomLog(logID: Int64, userID: Int64, date: Date?, onsetTime: String?, severity: Int64?, symptomID: Int64?, medTaken: Bool?, medicationID: Int64?, medWorked: Bool?, symptomDescription: String?, notes: String?, triggerIDs: [Int64]?) async {
+//        do {
+//            // Create a struct for the update
+//            struct LogUpdate: Encodable {
+//                var date: String?
+//                var onset_time: String?
+//                var severity_level: Int64?
+//                var symptom_id: Int64?
+//                var med_taken: Bool?
+//                var log_medication_id: Int64?
+//                var med_worked: Bool?
+//                var symptom_description: String?
+//                var notes: String?
+//            }
+//            
+//            var update = LogUpdate()
+//            
+//            if let newDate = date {
+//                update.date = ISO8601DateFormatter().string(from: newDate)
+//            }
+//            if let newOnset = onsetTime {
+//                update.onset_time = newOnset
+//            }
+//            if let newSeverity = severity {
+//                update.severity_level = newSeverity
+//            }
+//            if let newSymptomID = symptomID {
+//                update.symptom_id = newSymptomID
+//            }
+//            if let newMedTaken = medTaken {
+//                update.med_taken = newMedTaken
+//            }
+//            if let newMedicationID = medicationID {
+//                update.log_medication_id = newMedicationID
+//            }
+//            if let newMedWorked = medWorked {
+//                update.med_worked = newMedWorked
+//            }
+//            if let newSymptomDesc = symptomDescription {
+//                update.symptom_description = newSymptomDesc
+//            }
+//            if let newNotes = notes {
+//                update.notes = newNotes
+//            }
+//            
+//            // Perform the update
+//            try await client
+//                .from("Logs")
+//                .update(update)
+//                .eq("log_id", value: Int(logID))  // Changed from String
+//                .execute()
+//            
+//            // Update triggers separately if needed
+//            if let newTriggerIDs = triggerIDs {
+//                // Remove old triggers for this log
+//                try await client
+//                    .from("Log_Triggers")
+//                    .delete()
+//                    .eq("lt_log_id", value: Int(logID))
+//                    .execute()
+//                
+//                // Insert new trigger links
+//                for tID in newTriggerIDs {
+//                    struct LogTriggerInsert: Encodable {
+//                        let lt_log_id: Int64
+//                        let lt_trigger_id: Int64
+//                    }
+//                    
+//                    let linkData = LogTriggerInsert(lt_log_id: logID, lt_trigger_id: tID)
+//                    try await client.from("Log_Triggers").insert(linkData).execute()
+//                }
+//            }
+//        } catch {
+//            print("Error updating symptom log: \(error)")
+//        }
+//    }
+//    
+//    // Update a side effects log
+//    func updateSideEffectLog(logID: Int64, userID: Int64, date: Date?, sideEffectName: String?, sideEffectSeverity: Int64?, medicationID: Int64?) async {
+//        do {
+//            var updateDict: [String: Any] = [:]
+//            
+//            if let newDate = date {
+//                updateDict["date"] = ISO8601DateFormatter().string(from: newDate)
+//            }
+//            if let newName = sideEffectName {
+//                updateDict["side_effect_name"] = newName
+//            }
+//            if let newSeverity = sideEffectSeverity {
+//                updateDict["side_effect_severity"] = newSeverity
+//            }
+//            if let newMedicationID = medicationID {
+//                updateDict["medication_id"] = newMedicationID
+//            }
+//            
+//            // Perform update only if there's something to update
+//            if !updateDict.isEmpty {
+//                let jsonData = try JSONSerialization.data(withJSONObject: updateDict)
+//                let jsonString = String(data: jsonData, encoding: .utf8)!
+//                
+//                try await client
+//                    .from("Side_Effects")
+//                    .update(jsonString)
+//                    .eq("side_effect_id", value: String(logID))
+//                    .execute()
+//            }
+//        } catch {
+//            print("Error updating side effect log: \(error)")
+//        }
+//    }
+    
     func updateSymptomLog(logID: Int64, userID: Int64, date: Date?, onsetTime: String?, severity: Int64?, symptomID: Int64?, medTaken: Bool?, medicationID: Int64?, medWorked: Bool?, symptomDescription: String?, notes: String?, triggerIDs: [Int64]?) async {
         do {
             // Create a struct for the update
@@ -162,10 +338,12 @@ extension Database {
             var update = LogUpdate()
             
             if let newDate = date {
-                update.date = ISO8601DateFormatter().string(from: newDate)
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: newDate)
+                update.date = ISO8601DateFormatter().string(from: startOfDay)
             }
             if let newOnset = onsetTime {
-                update.onset_time = newOnset
+                update.onset_time = newOnset.capitalized
             }
             if let newSeverity = severity {
                 update.severity_level = newSeverity
@@ -193,7 +371,7 @@ extension Database {
             try await client
                 .from("Logs")
                 .update(update)
-                .eq("log_id", value: Int(logID))  // Changed from String
+                .eq("log_id", value: Int(logID))
                 .execute()
             
             // Update triggers separately if needed
@@ -220,23 +398,25 @@ extension Database {
             print("Error updating symptom log: \(error)")
         }
     }
-    
+
     // Update a side effects log
     func updateSideEffectLog(logID: Int64, userID: Int64, date: Date?, sideEffectName: String?, sideEffectSeverity: Int64?, medicationID: Int64?) async {
         do {
             var updateDict: [String: Any] = [:]
             
             if let newDate = date {
-                updateDict["date"] = ISO8601DateFormatter().string(from: newDate)
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: newDate)
+                updateDict["side_effect_date"] = ISO8601DateFormatter().string(from: startOfDay)
             }
             if let newName = sideEffectName {
-                updateDict["side_effect_name"] = newName
+                updateDict["side_effect_name"] = newName.capitalized
             }
             if let newSeverity = sideEffectSeverity {
                 updateDict["side_effect_severity"] = newSeverity
             }
             if let newMedicationID = medicationID {
-                updateDict["medication_id"] = newMedicationID
+                updateDict["side_effect_medication_id"] = newMedicationID
             }
             
             // Perform update only if there's something to update

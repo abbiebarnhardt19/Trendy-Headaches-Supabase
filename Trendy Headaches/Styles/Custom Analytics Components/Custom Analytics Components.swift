@@ -54,9 +54,14 @@ struct filterSymptom: View {
                 HStack{
                     CustomText(text:"Select Symptom: ", color: bg, textSize: screenWidth * 0.05)
                     
-                    CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
-                        showSymptomFilter.toggle()
+                    Button(action: { showSymptomFilter.toggle() }) {
+                        Image(systemName: "eye.slash.circle")
+                            .resizable() // Add this!
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundStyle(Color(hex: bg))
+                            .frame(width: 25, height: 25)
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
                 
                 MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)

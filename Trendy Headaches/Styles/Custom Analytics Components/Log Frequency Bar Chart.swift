@@ -195,99 +195,122 @@ struct CustomStackedBarChart: View {
                     
                     Spacer()
                     
-                    CustomButton(text:"Key", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showKey.toggle()}
+                    Button(action: { showKey.toggle() }) {
+                        Image(systemName: "info.circle")
+                            .resizable() // Add this!
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundStyle(Color(hex:bg))
+                            .frame(width: 25, height: 25)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.trailing, 5)
                     
-                    CustomButton(text:"Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14){showVisual.toggle()}
+                    Button(action: { showVisual.toggle() }) {
+                        Image(systemName: "eye.slash.circle")
+                            .resizable() // Add this!
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundStyle(Color(hex: bg))
+                            .frame(width: 25, height: 25)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
                 .padding(.horizontal, horizontalPadding)
                 
                 // Chart area with Y-axis and bars
-                ZStack(alignment:.topLeading) {
-                    HStack(alignment: .top, spacing:0) {
-                        // Y-axis
-                        VStack(spacing:0) {
-                            ForEach(yVals.reversed(), id:\.self) { value in
-                                CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
-                                    .frame(height:1)
-                                    .offset(x:5, y:-3)
-                                
-                                if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
-                            }
-                        }
-                        .frame(height: chartHeight, alignment:.top)
-                        
-                        Spacer()
-                            .frame(width: leftPadding)
-                        
-                        ZStack(alignment:.topLeading) {
-                            //grid lines
+                if !logList.isEmpty{
+                    ZStack(alignment:.topLeading) {
+                        HStack(alignment: .top, spacing:0) {
+                            // Y-axis
                             VStack(spacing:0) {
                                 ForEach(yVals.reversed(), id:\.self) { value in
-                                    Rectangle().fill(Color(hex:bg).opacity(0.3)).frame(height:1)
+                                    CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
+                                        .frame(height:1)
+                                        .offset(x:5, y:-3)
+                                    
                                     if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
                                 }
                             }
-                            .frame(height: chartHeight)
+                            .frame(height: chartHeight, alignment:.top)
                             
-                            // Bars
-                            HStack(alignment:.bottom, spacing:barSpac) {
-                                ForEach(data, id:\.month) { monData in
-                                    VStack(spacing:2) {
-                                        ZStack(alignment:.bottom) {
-                                            RoundedRectangle(cornerRadius:6).fill(color.opacity(0.2))
-                                            VStack(spacing: 0) {
-                                                let popGap: CGFloat = 8
-                                                
-                                                ForEach(sympOrder, id: \.self) { symp in
-                                                    if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
-                                                        let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
-                                                        let isSel = selMon == monData.month && selSymp == s.symptom
-                                                        let topPad: CGFloat = isSel ? popGap / 2 : 0
-                                                        let botPad: CGFloat = isSel ? popGap / 2 : 0
-                                                        
-                                                        Rectangle()
-                                                            .fill(colorMap[s.symptom] ?? .gray)
-                                                            .frame(height: segHeight)
-                                                            .padding(.top, topPad)
-                                                            .padding(.bottom, botPad)
-                                                            .onTapGesture {
-                                                                withAnimation(.spring()) {
-                                                                    if selMon == monData.month && selSymp == s.symptom {
-                                                                        selMon = nil
-                                                                        selSymp = nil
-                                                                    } else {
-                                                                        selMon = monData.month
-                                                                        selSymp = s.symptom
-                                                                    }
-                                                                }
-                                                            }
-                                                    }
-                                                }
-                                            }
-                                            .clipShape(RoundedRectangle(cornerRadius:8))
-                                        }
-                                        .frame(width:barWidth,height:chartHeight)
-                                        
-                                        CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
-                                            .fixedSize()
-                                            .padding(.top,5)
+                            Spacer()
+                                .frame(width: leftPadding)
+                            
+                            ZStack(alignment:.topLeading) {
+                                //grid lines
+                                VStack(spacing:0) {
+                                    ForEach(yVals.reversed(), id:\.self) { value in
+                                        Rectangle().fill(Color(hex:bg).opacity(0.3)).frame(height:1)
+                                        if value>0 { Spacer().frame(height: chartHeight*CGFloat(yStep)/CGFloat(yMax)) }
                                     }
                                 }
+                                .frame(height: chartHeight)
+                                
+                                // Bars
+                                HStack(alignment:.bottom, spacing:barSpac) {
+                                    ForEach(data, id:\.month) { monData in
+                                        VStack(spacing:2) {
+                                            ZStack(alignment:.bottom) {
+                                                RoundedRectangle(cornerRadius:6).fill(color.opacity(0.2))
+                                                VStack(spacing: 0) {
+                                                    let popGap: CGFloat = 8
+                                                    
+                                                    ForEach(sympOrder, id: \.self) { symp in
+                                                        if let s = monData.symptoms.first(where: { $0.symptom == symp }) {
+                                                            let segHeight = chartHeight * CGFloat(s.count) / CGFloat(yMax)
+                                                            let isSel = selMon == monData.month && selSymp == s.symptom
+                                                            let topPad: CGFloat = isSel ? popGap / 2 : 0
+                                                            let botPad: CGFloat = isSel ? popGap / 2 : 0
+                                                            
+                                                            Rectangle()
+                                                                .fill(colorMap[s.symptom] ?? .gray)
+                                                                .frame(height: segHeight)
+                                                                .padding(.top, topPad)
+                                                                .padding(.bottom, botPad)
+                                                                .onTapGesture {
+                                                                    withAnimation(.spring()) {
+                                                                        if selMon == monData.month && selSymp == s.symptom {
+                                                                            selMon = nil
+                                                                            selSymp = nil
+                                                                        } else {
+                                                                            selMon = monData.month
+                                                                            selSymp = s.symptom
+                                                                        }
+                                                                    }
+                                                                }
+                                                        }
+                                                    }
+                                                }
+                                                .clipShape(RoundedRectangle(cornerRadius:8))
+                                            }
+                                            .frame(width:barWidth,height:chartHeight)
+                                            
+                                            CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
+                                                .fixedSize()
+                                                .padding(.top,5)
+                                        }
+                                    }
+                                }
+                                .frame(maxWidth: availableWidth + (barSpac * 11))
                             }
-                            .frame(maxWidth: availableWidth + (barSpac * 11))
+                            
+                            Spacer()
+                                .frame(width: rightPadding)
                         }
+
                         
-                        Spacer()
-                            .frame(width: rightPadding)
+                        // popup if segment is selected
+                        if let selMon, let selSymp {
+                            TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
+                                .offset(x: yAxWid + leftPadding)
+                        }
                     }
-                    
-                    // popup if segment is selected
-                    if let selMon, let selSymp {
-                        TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
-                            .offset(x: yAxWid + leftPadding)
-                    }
+                    .frame(height:chartHeight+30)
                 }
-                .frame(height:chartHeight+30)
+                else{
+                    CustomText(text: "No Data", color: bg, textAlign: .center, bold: true)
+                        .padding(.bottom, 10)
+                }
+                
                 
                 //symptom legend
                 if showKey {

@@ -17,8 +17,7 @@ struct AnalyticsBarChart: View {
 
     @State private var showVisual = false
     let width = UIScreen.main.bounds.width - 50
-
-    // MARK: - Frequency Calculation
+    
     var frequencyData: [(key: String, count: Int)] {
         // Filter by category if provided
         let filteredLogs: [UnifiedLog] = {
@@ -34,14 +33,17 @@ struct AnalyticsBarChart: View {
         var values: [String] = []
         
         if let stringKeyPath = groupColumn as? KeyPath<UnifiedLog, String?> {
-            // Handle String? KeyPath
-            values = filteredLogs.compactMap { log -> String? in
-                return log[keyPath: stringKeyPath]
+            // Handle String? KeyPath - filter out nil and empty strings, split by comma
+            values = filteredLogs.flatMap { log -> [String] in
+                guard let value = log[keyPath: stringKeyPath], !value.isEmpty else { return [] }
+                // Split by comma and trim whitespace
+                return value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
             }
         } else if let arrayKeyPath = groupColumn as? KeyPath<UnifiedLog, [String]?> {
-            // Handle [String]? KeyPath - flatten the arrays
+            // Handle [String]? KeyPath - flatten the arrays and filter out nil/empty
             values = filteredLogs.flatMap { log -> [String] in
-                return log[keyPath: arrayKeyPath] ?? []
+                guard let array = log[keyPath: arrayKeyPath], !array.isEmpty else { return [] }
+                return array.filter { !$0.isEmpty } // Also filter out empty strings within the array
             }
         }
         
@@ -77,48 +79,58 @@ struct AnalyticsBarChart: View {
 
                         Spacer()
 
-                        CustomButton(text: "Hide", bg: accent, accent: bg, height: 30, width: 50, textSize: 14) {
-                            showVisual.toggle()
+                        Button(action: { showVisual.toggle() }) {
+                            Image(systemName: "eye.slash.circle")
+                                .resizable() // Add this!
+                                .aspectRatio(contentMode: .fit)
+                                .foregroundStyle(Color(hex: bg))
+                                .frame(width: 25, height: 25)
                         }
+                        .buttonStyle(PlainButtonStyle())
                         .padding(.trailing, 25)
                         .padding(.top, 7)
                     }
 
-                    // Chart
-                    VStack {
-                        ForEach(frequencyData, id: \.key) { item in
-                            HStack(spacing: 0) {
-                                // Label column
-                                let font = UIFont.systemFont(ofSize: 12)
-                                CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font) + 10, textSize: 12)
-                                    .frame(width: longestKeyWidth, alignment: .trailing)
-                                    .padding(.leading, 5)
-                                    .padding(.bottom, 5)
+                    if !frequencyData.isEmpty {
+                        VStack {
+                            ForEach(frequencyData, id: \.key) { item in
+                                HStack(spacing: 0) {
+                                    // Label column
+                                    let font = UIFont.systemFont(ofSize: 12)
+                                    CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font) + 10, textSize: 12)
+                                        .frame(width: longestKeyWidth, alignment: .trailing)
+                                        .padding(.leading, 5)
+                                        .padding(.bottom, 5)
 
-                                // Bar column
-                                GeometryReader { geo in
-                                    let maxCount = frequencyData.first?.count ?? 1
-                                    let ratio = CGFloat(item.count) / CGFloat(maxCount)
-                                    let barWidth = geo.size.width * ratio - 5
+                                    // Bar column
+                                    GeometryReader { geo in
+                                        let maxCount = frequencyData.first?.count ?? 1
+                                        let ratio = CGFloat(item.count) / CGFloat(maxCount)
+                                        let barWidth = geo.size.width * ratio - 5
 
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color(hex: accent))
-                                            .frame(height: 25)
+                                        ZStack(alignment: .leading) {
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(Color(hex: accent))
+                                                .frame(height: 25)
 
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color(hex: bg))
-                                            .frame(width: barWidth, height: 25)
-                                        
-                                        CustomText(text: "\(item.count) Logs", color: accent, width: barWidth, textAlign: .center, textSize: 12)
-                                            .clipped()
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .fill(Color(hex: bg))
+                                                .frame(width: barWidth, height: 25)
+                                            
+                                            CustomText(text: "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth, textAlign: .center, textSize: 12)
+                                                .clipped()
+                                        }
                                     }
+                                    .frame(height: 30)
                                 }
-                                .frame(height: 30)
                             }
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
+                    else{
+                        CustomText(text: "No Data", color: bg, textAlign: .center, bold: true)
+                            .padding(.bottom, 10)
+                    }
                 }
                 .padding(.bottom, 10)
                 .padding(.top, 5)

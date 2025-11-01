@@ -117,13 +117,13 @@ struct ProfileView: View {
                 EditableList(items: $symps,  title: "Symptoms", bg: newBG, accent: newAcc,
                      onAdd: { newSymptom in
                     Task {
-                        await Database.shared.insertItem(tableName: "Symptoms", userID: userID, name: newSymptom)
+                        await Database.shared.insertItem(tableName: "Symptoms", userID: userID, name: newSymptom.capitalized)
                     }
                 },
                              
                     onEdit: { oldValue, newValue in
                     Task {
-                        await Database.shared.updateItem(tableName: "Symptoms", userID: userID, old: oldValue, new: newValue)
+                        await Database.shared.updateItem(tableName: "Symptoms", userID: userID, old: oldValue, new: newValue.capitalized)
                     }
                 },
                      
@@ -138,13 +138,13 @@ struct ProfileView: View {
                 EditableList(items: $prevMeds, title: "Preventative Medications", bg: newBG, accent: newAcc,
                      onAdd: { newPrevMed in
                     Task {
-                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newPrevMed, medCat: "preventative")
+                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newPrevMed.capitalized, medCat: "preventative")
                     }
                 },
                              
                     onEdit: { oldValue, newValue in
                     Task {
-                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue, medCat: "preventative")
+                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue.capitalized, medCat: "preventative")
                     }
                 },
                              
@@ -180,13 +180,13 @@ struct ProfileView: View {
                 EditableList(items: $triggs, title: "Triggers", bg: newBG, accent: newAcc,
                      onAdd: { newTrigger in
                     Task {
-                        await Database.shared.insertItem(tableName: "Triggers", userID: userID, name: newTrigger)
+                        await Database.shared.insertItem(tableName: "Triggers", userID: userID, name: newTrigger.capitalized)
                     }
                 },
                              
                      onEdit: { oldValue, newValue in
                     Task {
-                        await Database.shared.updateItem(tableName: "Triggers", userID: userID, old: oldValue, new: newValue)
+                        await Database.shared.updateItem(tableName: "Triggers", userID: userID, old: oldValue, new: newValue.capitalized)
                     }
                 },
                      
@@ -201,13 +201,13 @@ struct ProfileView: View {
                 EditableList( items: $emergMeds, title: "Emergency Medications", bg: newBG, accent: newAcc,
                       onAdd: { newEmergencyMed in
                     Task {
-                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newEmergencyMed, medCat: "emergency")
+                        await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newEmergencyMed.capitalized, medCat: "emergency")
                     }
                 },
                               
                     onEdit: { oldValue, newValue in
                     Task {
-                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue, medCat: "emergency")
+                        await Database.shared.updateItem(tableName: "Medications", userID: userID, old: oldValue, new: newValue.capitalized, medCat: "emergency")
                     }
                 },
                               
@@ -288,13 +288,12 @@ struct ProfileView: View {
     private func saveProfileChanges() {
         Task {
             if sQ != newSQ {
-                await Database.shared.updateUser(userID: userID, value: newSQ, col: "security_question")
+                await Database.shared.updateUser(userID: userID, value: newSQ.capitalized, col: "security_question")
             }
             
             let normSA = Database.normalize(newSA)
-            let hashedSA = normSA
-            if hashedSA != sA {
-                await Database.shared.updateUser(userID: userID, value: hashedSA, col: "security_answer")
+            if normSA != sA {
+                await Database.shared.updateUser(userID: userID, value: normSA.capitalized, col: "security_answer")
             }
             
             if bg != newBG {
@@ -314,5 +313,5 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(userID: 11, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ProfileView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
 }

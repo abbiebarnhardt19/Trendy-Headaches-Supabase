@@ -92,7 +92,7 @@ struct CreateAccountView3: View {
     
     private func createAccount() async {
         do{
-            try await Database.createUser(email: email, pass: passOne,  SQ: SQ,  SA: SA,  bg: bg, accent: accent, symps: symps, prevMeds: prevMeds, emergMeds: emergMeds, triggs: triggs)
+            try await Database.createUser(email: email, pass: passOne,  SQ: SQ.capitalized,  SA: SA.capitalized,  bg: bg, accent: accent, symps: symps.capitalized, prevMeds: prevMeds.capitalized, emergMeds: emergMeds.capitalized, triggs: triggs.capitalized)
             created = true
         }
         catch{
