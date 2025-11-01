@@ -49,6 +49,7 @@ struct LogCalendarView: View {
     //calendar parts
     private var TopBar: some View {
         HStack(spacing: 8) {
+            
             CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
             
             let font = UIFont.systemFont(ofSize: 19, weight: .regular)

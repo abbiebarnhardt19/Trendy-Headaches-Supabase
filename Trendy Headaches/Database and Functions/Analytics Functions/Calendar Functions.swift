@@ -82,56 +82,7 @@ func textWidth(for text: String, fontSize: CGFloat = 14) -> CGFloat {
     let size = text.size(withAttributes: attributes)
     return size.width
 }
-//
-//// Generate rows of icons + symptom names
-//func genSympKey(
-//    from symptomToIcon: [String: String],
-//    accent: String,
-//    width: CGFloat,
-//    itemHeight: CGFloat = 13
-//) -> some View {
-//    var widthUsed: CGFloat = 0
-//    var rows: [[(String, String)]] = [[]]
-//
-//    for symptom in symptomToIcon.keys.sorted() {
-//        let iconName = symptomToIcon[symptom] ?? "questionmark.square.fill"
-//        let displayText = String(symptom.prefix(12))
-//        let itemWidth = textWidth(for: displayText) + itemHeight
-//
-//        if widthUsed + itemWidth > width {
-//            rows.append([])
-//            widthUsed = 0
-//        }
-//        rows[rows.count - 1].append((symptom, iconName))
-//        widthUsed += itemWidth
-//    }
-//
-//    return VStack(alignment: .leading) {
-//        ForEach(0..<rows.count, id: \.self) { rowIndex in
-//            HStack {
-//                ForEach(rows[rowIndex], id: \.0) { item in
-//                    HStack(spacing: 4) {
-//                        Image(systemName: item.1)
-//                            .resizable()
-//                            .scaledToFit()
-//                            .frame(width: itemHeight, height: itemHeight)
-//                            .foregroundColor(Color(hex: accent))
-//                        CustomText(
-//                            text: String(item.0.prefix(12)),
-//                            color: accent,
-//                            textSize: 12
-//                        )
-//                        .lineLimit(1)
-//                        .truncationMode(.tail)
-//                    }
-//                    .padding(.vertical, 2)
-//                    .padding(.horizontal, 4)
-//                }
-//            }
-//        }
-//    }
-//}
-//
+
 func icon(for symptom: String?, symptomToIcon: [String: String]) -> String {
     guard let name = symptom, !name.isEmpty else { return "questionmark.square.fill" }
     return symptomToIcon[name] ?? "questionmark.square.fill"

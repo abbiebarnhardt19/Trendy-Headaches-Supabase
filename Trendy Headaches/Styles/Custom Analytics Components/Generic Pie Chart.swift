@@ -355,54 +355,43 @@ struct GenericPieChart<T: Hashable>: View {
             
             // Handle Bool? (optional boolean)
             if let optionalBool = value as? Bool? {
-                print("DEBUG: Matched Bool? - value: \(String(describing: optionalBool))")
                 guard let unwrapped = optionalBool else {
-                    print("DEBUG: Bool? was nil")
                     return nil
                 }
                 let result = unwrapped ? "Yes" : "No"
-                print("DEBUG: Bool? unwrapped to: \(result)")
                 return result
             }
             // Handle Bool (non-optional boolean)
             else if let boolValue = value as? Bool {
-                print("DEBUG: Matched Bool - value: \(boolValue)")
                 let result = boolValue ? "Yes" : "No"
-                print("DEBUG: Bool converted to: \(result)")
                 return result
             }
             // Handle String
             else if let stringValue = value as? String {
-                print("DEBUG: Matched String - value: \(stringValue)")
                 return stringValue.isEmpty ? nil : stringValue
             }
             // Handle Int64
             else if let intValue = value as? Int64 {
-                print("DEBUG: Matched Int64 - value: \(intValue)")
                 return String(intValue)
             }
             // Handle String? (optional string)
             else if let optionalString = value as? String? {
-                print("DEBUG: Matched String? - value: \(String(describing: optionalString))")
                 if let unwrapped = optionalString, !unwrapped.isEmpty {
                     return unwrapped
                 }
                 return nil
             }
             else {
-                print("DEBUG: No match, using String(describing:)")
                 return String(describing: value)
             }
         }
         
-        print("DEBUG: Grouped dictionary keys: \(grouped.keys)")
         
         let result = grouped.compactMap { (key, value) -> (String, Int)? in
             guard let key = key else { return nil }
             return (key, value.count)
         }
         
-        print("DEBUG: Final groupedCounts: \(result)")
         
         // Check if all keys are numeric
         let allNumeric = result.allSatisfy { Int($0.0) != nil }
@@ -456,7 +445,7 @@ struct GenericPieChart<T: Hashable>: View {
                     .frame(width: UIScreen.main.bounds.width - 30)
                     .padding(.top, 10)
                     
-                    if !logList.isEmpty{
+                    if !groupedCounts.isEmpty{
                         ZStack {
                             ForEach(groupedCounts.indices, id: \.self) { idx in
                                 let item = groupedCounts[idx]

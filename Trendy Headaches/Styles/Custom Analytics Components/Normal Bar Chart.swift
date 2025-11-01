@@ -88,7 +88,6 @@ struct AnalyticsBarChart: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         .padding(.trailing, 25)
-                        .padding(.top, 7)
                     }
 
                     if !frequencyData.isEmpty {
