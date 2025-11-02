@@ -185,9 +185,9 @@ struct CustomStackedBarChart: View {
                     HStack(spacing: 0) {
                         CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12, botPad: 0) { yearOff -= 1}
                         
-                        let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+                        let font = UIFont.systemFont(ofSize: 19, weight: .bold)
                         let title = "Logs by Symptom"
-                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
+                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, bold: true, textSize: 19)
                         
                         CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
                     }

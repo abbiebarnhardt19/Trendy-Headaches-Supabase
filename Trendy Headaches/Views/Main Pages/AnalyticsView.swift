@@ -13,7 +13,7 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
-    @State var selectedView: String = "Statistics"
+    @State var selectedView: String = "Graphs"
     
     @State var logs: [UnifiedLog] = []
     @State var allLogs: [UnifiedLog] = []

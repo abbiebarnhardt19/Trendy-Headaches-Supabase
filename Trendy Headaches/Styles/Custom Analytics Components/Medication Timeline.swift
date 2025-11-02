@@ -26,9 +26,9 @@ struct MedicationTimeline: View {
                 VStack(spacing: 0) {
                     // Title and Hide button
                     HStack {
-                        let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+                        let font = UIFont.systemFont(ofSize: 19, weight: .bold)
                         let title = "Treatment Timeline"
-                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, textSize: 19)
+                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center,bold: true, textSize: 19)
                             .padding(.leading, 20)
                         
                         Spacer()

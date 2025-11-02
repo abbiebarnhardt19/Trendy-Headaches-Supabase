@@ -52,7 +52,7 @@ struct filterSymptom: View {
         if showSymptomFilter {
             VStack(alignment: .leading, spacing: 10) {
                 HStack{
-                    CustomText(text:"Select Symptom: ", color: bg, textSize: screenWidth * 0.05)
+                    CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     
                     Button(action: { showSymptomFilter.toggle() }) {
                         Image(systemName: "eye.slash.circle")
@@ -67,7 +67,7 @@ struct filterSymptom: View {
                 MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
                 
-                CustomText(text:"Date Range: ", color: bg, textSize: screenWidth * 0.05)
+                CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     .padding(.bottom, 5)
                 DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
 

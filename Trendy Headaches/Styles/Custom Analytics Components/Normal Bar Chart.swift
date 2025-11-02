@@ -73,9 +73,9 @@ struct AnalyticsBarChart: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // Header
                     HStack {
-                        let font = UIFont.systemFont(ofSize: 19, weight: .regular)
-                        CustomText(text: chartName, color: bg, width: chartName.width(usingFont: font) + 15, textAlign: .center, textSize: 19)
-                            .padding(.leading, 25)
+                        let font = UIFont.systemFont(ofSize: 19, weight: .bold)
+                        CustomText(text: chartName, color: bg, width: chartName.width(usingFont: font) + 15, textAlign: .leading, bold: true, textSize: 19)
+                            .padding(.leading, 35)
 
                         Spacer()
 

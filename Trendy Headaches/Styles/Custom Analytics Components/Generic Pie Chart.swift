@@ -347,11 +347,9 @@ struct GenericPieChart<T: Hashable>: View {
     @State private var showVisual: Bool = false
     
     private var groupedCounts: [(key: String, count: Int)] {
-        print("DEBUG: Starting grouping with logList count: \(logList.count)")
         
         let grouped = Dictionary(grouping: logList) { log -> String? in
             let value = log[keyPath: groupBy]
-            print("DEBUG: Processing value: \(value), type: \(type(of: value))")
             
             // Handle Bool? (optional boolean)
             if let optionalBool = value as? Bool? {
@@ -392,7 +390,6 @@ struct GenericPieChart<T: Hashable>: View {
             return (key, value.count)
         }
         
-        
         // Check if all keys are numeric
         let allNumeric = result.allSatisfy { Int($0.0) != nil }
         
@@ -427,8 +424,8 @@ struct GenericPieChart<T: Hashable>: View {
                 
                 VStack(spacing: 10) {
                     HStack {
-                        let font = UIFont.systemFont(ofSize: 20, weight: .regular)
-                        CustomText(text: chartTitle, color: bg, width: chartTitle.width(usingFont: font) + 15, textSize: 20)
+                        let font = UIFont.systemFont(ofSize: 20, weight: .bold)
+                        CustomText(text: chartTitle, color: bg, width: chartTitle.width(usingFont: font) + 15, bold: true, textSize: 20)
                             .padding(.leading, 30)
                         Spacer()
                         
