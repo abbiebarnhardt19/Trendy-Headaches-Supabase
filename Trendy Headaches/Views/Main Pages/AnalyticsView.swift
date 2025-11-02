@@ -13,7 +13,7 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
-    @State var selectedView: String = "Graphs"
+    @State var selectedView: String = "Statistics"
     
     @State var logs: [UnifiedLog] = []
     @State var allLogs: [UnifiedLog] = []
@@ -34,11 +34,8 @@ struct AnalyticsView: View {
     @State var medData: [Medication] = []
     
     var filteredLogs: [UnifiedLog] {
-        print("DEBUG filteredLogs: selectedSymptoms = \(selectedSymptoms)")
-        print("DEBUG filteredLogs: startDate = \(startDate), endDate = \(endDate)")
         
         if selectedSymptoms.isEmpty {
-            print("DEBUG filteredLogs: selectedSymptoms is EMPTY, returning []")
             return []
         } else {
             let filtered = logs.filter { log in
@@ -50,12 +47,10 @@ struct AnalyticsView: View {
                 let symptomMatch = selectedSymptoms.contains(name)
                 
                 if log.trigger_names != nil {
-                    print("DEBUG: Log \(log.log_id) - symptom: \(name), date: \(log.date), symptomMatch: \(symptomMatch), dateMatch: \(withinDateRange), triggers: \(log.trigger_names ?? [])")
                 }
                 
                 return symptomMatch && withinDateRange
             }
-            print("DEBUG filteredLogs: Returning \(filtered.count) logs")
             return filtered
         }
     }
@@ -105,11 +100,12 @@ struct AnalyticsView: View {
                     }
                     
                     else if selectedView == "Statistics"{
-                        logFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
+                        LogFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
                         
-                        severityStats(accent: accent, bg: bg, logList: filteredLogs)
+                        SeverityStats(accent: accent, bg: bg, logList: filteredLogs)
                         
-                        onsetStats(accent: accent, bg: bg, logList: filteredLogs)
+                        OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
+                        
                     }
                     else{
                         CustomText(text: "New Screen", color: accent)

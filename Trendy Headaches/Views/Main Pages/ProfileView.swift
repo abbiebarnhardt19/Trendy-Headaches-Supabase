@@ -127,7 +127,7 @@ struct ProfileView: View {
                     }
                 },
                      
-                     onDelete: { value in
+                     onDelete: { (value,nil) in
                     Task {
                         await Database.shared.endItem(tableName: "Symptoms", userID: userID, name: value)
                     }
@@ -135,7 +135,7 @@ struct ProfileView: View {
                 
                 //prev meds editable list
                 sectionTitle("Preventative Medications", width: colWidth)
-                EditableList(items: $prevMeds, title: "Preventative Medications", bg: newBG, accent: newAcc,
+                EditableList(items: $prevMeds, title: "Preventative Medications", bg: newBG, accent: newAcc, requiresReason: true,
                      onAdd: { newPrevMed in
                     Task {
                         await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newPrevMed.capitalized, medCat: "preventative")
@@ -148,9 +148,9 @@ struct ProfileView: View {
                     }
                 },
                              
-                    onDelete: { value in
+                    onDelete: { (value, reason) in
                     Task {
-                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "preventative")
+                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "preventative", endReason: reason)
                     }
                 })
                 
@@ -190,7 +190,7 @@ struct ProfileView: View {
                     }
                 },
                      
-                     onDelete: { value in
+                     onDelete: { (value, nil) in
                     Task {
                         await Database.shared.endItem(tableName: "Triggers", userID: userID, name: value)
                     }
@@ -198,7 +198,7 @@ struct ProfileView: View {
                 
                 //emerg meds editable list
                 sectionTitle("Emergency Medications", width: colWidth)
-                EditableList( items: $emergMeds, title: "Emergency Medications", bg: newBG, accent: newAcc,
+                EditableList( items: $emergMeds, title: "Emergency Medications", bg: newBG, accent: newAcc, requiresReason: true,
                       onAdd: { newEmergencyMed in
                     Task {
                         await Database.shared.insertItem(tableName: "Medications", userID: userID, name: newEmergencyMed.capitalized, medCat: "emergency")
@@ -211,9 +211,9 @@ struct ProfileView: View {
                     }
                 },
                               
-                    onDelete: { value in
+                    onDelete: { (value, reason) in
                     Task {
-                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "emergency")
+                        await Database.shared.endItem(tableName: "Medications", userID: userID, name: value, medCat: "emergency", endReason: reason)
                     }
                 })
                 

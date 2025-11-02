@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-struct logFrequencyStats: View{
+struct LogFrequencyStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
@@ -106,7 +106,7 @@ struct logFrequencyStats: View{
 }
 
 
-struct severityStats: View{
+struct SeverityStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
@@ -182,14 +182,14 @@ struct severityStats: View{
     }
 }
 
-struct onsetStats: View{
+struct OnsetStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
-    @State var showStats: Bool = true
+    @State var showStats: Bool = false
     
     var totalLogs: Int {
         logList.count
@@ -268,3 +268,53 @@ struct onsetStats: View{
         }
     }
 }
+//
+//struct MedicationTable: View{
+//    var accent: String
+//    var bg: String
+//    var medicationList: [Medication]
+//    
+//    let screenWidth = UIScreen.main.bounds.width
+//    let screenHeight = UIScreen.main.bounds.height
+//    @State var showTable: Bool = true
+//    
+//    var body: some View{
+//        if showTable{
+//            VStack{
+//                HStack(alignment: .top){
+//                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+//                    CustomText(text:"Treatment History", color: bg, width: "Treatment History:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+//                
+//                    
+//                    Spacer() // Add spacer to push button to the right
+//                    
+//                    Button(action: { showTable.toggle() }) {
+//                        Image(systemName: "eye.slash.circle")
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fit)
+//                            .foregroundStyle(Color(hex: bg))
+//                            .frame(width: 25, height: 25)
+//                    }
+//                    .buttonStyle(PlainButtonStyle())
+//                }
+//                .frame(width: screenWidth - 50 - 15 * 2)
+//                .padding(.bottom, 5)
+//                
+//                Table(medicationList) {
+//                    TableColumn("Given Name", value: \.log_type)
+//                }
+//            }
+//            .padding(.horizontal, 15)
+//            .padding(.top, 10)
+//            .padding(.bottom, 20)
+//            .background(Color(hex:accent))
+//            .cornerRadius(20)
+//            .frame(width: screenWidth - 50, alignment: .leading)
+//            .padding(.bottom, 10)
+//        }
+//        else{
+//            HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showTable)
+//        }
+//        
+//    }
+//}

@@ -186,7 +186,7 @@ extension Database {
             switch tableName.lowercased() {
             case "medications":
                 guard let category = medCat else { return }
-                let medicationData = MedicationInsert(user_id: userID, medication_category: category, medication_name: name, medication_start: dateString, medication_end: nil)
+                let medicationData = MedicationInsert(user_id: userID, medication_category: category, medication_name: name, medication_start: dateString, medication_end: nil, end_reason: nil)
                 try await client.from("Medications").insert(medicationData).execute()
                 
             case "symptoms":
@@ -238,48 +238,74 @@ extension Database {
         }
     }
     
-    // Function for users to stop an item
-    func endItem(tableName: String, userID: Int64, name: String, medCat: String? = nil) async {
+    func endItem(
+        tableName: String,
+        userID: Int64,
+        name: String,
+        medCat: String? = nil,
+        endReason: String? = nil
+    ) async {
         do {
             let nameColumn: String
             let endColumn: String
-            
+            let endReasonColumn: String?
+
+            // Match database column names
             switch tableName.lowercased() {
             case "medications":
                 nameColumn = "medication_name"
                 endColumn = "medication_end"
+                endReasonColumn = "end_reason"
             case "symptoms":
                 nameColumn = "symptom_name"
                 endColumn = "symptom_end"
+                endReasonColumn = nil
             case "triggers":
                 nameColumn = "trigger_name"
                 endColumn = "trigger_end"
+                endReasonColumn = nil
             default:
                 print("Unknown table: \(tableName)")
                 return
             }
-            
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd"
-            let endDate = dateFormatter.string(from: Date())
-            
+
+            // Format date
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            let endDate = formatter.string(from: Date())
+
+            // Default reason
+            let reasonToSave = (endReason?.isEmpty ?? true) ? "Unknown" : endReason!
+
+            // ✅ Only include valid dictionary keys
+            var updateData: [String: String] = [endColumn: endDate]
+            if let endReasonColumn = endReasonColumn {
+                updateData[endReasonColumn] = reasonToSave
+            }
+
+            // Build query
             var query = try client
                 .from(tableName)
-                .update([endColumn: endDate])
+                .update(updateData)
                 .eq("user_id", value: Int(userID))
                 .eq(nameColumn, value: name)
-            
+
             if let category = medCat {
                 query = query.eq("medication_category", value: category)
             }
-            
-            try await query.execute()
-            
-            print("Ended \(name) at \(Date())")
+
+            // Execute
+            print("Update data being sent to Supabase:", updateData)
+            let result = try await query.execute()
+            print("Supabase result:", result)
+            print("✅ Ended \(name) with reason: \(reasonToSave) at \(Date())")
+
         } catch {
-            print("Failed to end \(name): \(error)")
+            print("❌ Failed to end \(name): \(error)")
         }
     }
+
+
     
     // Delete list duplicates
     static func deleteDups(list: [String]) -> [String] {

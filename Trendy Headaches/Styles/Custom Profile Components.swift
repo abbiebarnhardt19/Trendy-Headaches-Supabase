@@ -10,9 +10,10 @@ import SwiftUI
 struct EditableList: View {
     @Binding var items: [String]
     var title, bg, accent: String
+    var requiresReason: Bool = false
     var onAdd: (String) -> Void
     var onEdit: (String, String) -> Void
-    var onDelete: (String) -> Void
+    var onDelete: (_ name: String, _ reason: String?) -> Void
 
     let width = UIScreen.main.bounds.width / 2 - 15
     let rowHeight: CGFloat = 50
@@ -22,6 +23,8 @@ struct EditableList: View {
     @State private var originalValue = ""
     @State private var showDeleteConfirmation = false
     @State private var itemToDelete: String? = nil
+    @State private var medEndReason: String = ""
+
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,17 +33,34 @@ struct EditableList: View {
             }
             addNewItemRow
         }
-        .alert("Are you sure you want to delete this item?",
-               isPresented: $showDeleteConfirmation,
-               presenting: itemToDelete) { item in
-            Button("Delete", role: .destructive) {
-                onDelete(item)
-                items.removeAll { $0 == item }
+        .alert(
+            requiresReason ? "Please list a reason for stopping this medication" : "Are you sure you want to delete this item?",
+            isPresented: $showDeleteConfirmation,
+            presenting: itemToDelete
+        ) { item in
+            if requiresReason {
+                TextField("Enter reason", text: $medEndReason)
+                Button("Submit", role: .destructive) {
+                    onDelete(item, medEndReason) // pass them separately
+                    items.removeAll { $0 == item }
+                    medEndReason = "" // reset
+                }
+                Button("Cancel", role: .cancel) {
+                    medEndReason = ""
+                }
+            } else {
+                Button("Delete", role: .destructive) {
+                    onDelete(item, "")
+                    items.removeAll { $0 == item }
+                }
+                Button("Cancel", role: .cancel) {}
             }
-            Button("Cancel", role: .cancel) {}
         } message: { item in
-            Text("This will mark '\(item)' as inactive.")
+            if !requiresReason {
+                Text("This will mark '\(item)' as inactive.")
+            }
         }
+
         .frame(width: width,
                height: CGFloat(items.indices.filter { items[$0] != "None entered" }.count + 1) * rowHeight)
         .padding(.bottom, 5)

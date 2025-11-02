@@ -55,7 +55,7 @@ class Database {
         if let preventative = preventativeMedsCSV, !preventative.isEmpty {
             let medsArray = preventative.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
-                let medicationData = MedicationInsert(user_id: userId, medication_category: "preventative", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil)
+                let medicationData = MedicationInsert(user_id: userId, medication_category: "preventative", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil, end_reason: nil)
                 do {
                     try await client.from("Medications").insert(medicationData).execute()
                 } catch let error as PostgrestError {
@@ -72,7 +72,7 @@ class Database {
         if let emergency = emergencyMedsCSV, !emergency.isEmpty {
             let medsArray = emergency.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
             for med in medsArray where !med.isEmpty {
-                let medicationData = MedicationInsert(user_id: userId, medication_category: "emergency", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil)
+                let medicationData = MedicationInsert(user_id: userId, medication_category: "emergency", medication_name: med, medication_start: ISO8601DateFormatter().string(from: Date()), medication_end: nil, end_reason: nil)
                 do {
                     try await client.from("Medications").insert(medicationData).execute()
                 } catch let error as PostgrestError {

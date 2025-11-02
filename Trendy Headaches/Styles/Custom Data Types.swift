@@ -87,6 +87,7 @@ struct Medication: Codable {
     let medicationName: String
     let medicationStart: String
     let medicationEnd: String?
+    let endReason: String?
     
     enum CodingKeys: String, CodingKey {
         case medicationId = "medication_id"
@@ -95,6 +96,7 @@ struct Medication: Codable {
         case medicationName = "medication_name"
         case medicationStart = "medication_start"
         case medicationEnd = "medication_end"
+        case endReason = "end_reason"
     }
 }
 
@@ -123,6 +125,7 @@ struct MedicationInsert: Encodable {
     let user_id: Int64
     let medication_category, medication_name, medication_start: String
     let medication_end: String?
+    let end_reason: String?
 }
 
 struct SymptomInsert: Encodable {
