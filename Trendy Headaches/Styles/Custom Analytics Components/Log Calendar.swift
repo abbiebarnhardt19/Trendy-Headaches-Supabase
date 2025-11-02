@@ -52,9 +52,9 @@ struct LogCalendarView: View {
             
             CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
             
-            let font = UIFont.systemFont(ofSize: 19, weight: .regular)
+            let font = UIFont.systemFont(ofSize: 19, weight: .bold)
             let title = monthYearString(for: currentMonth)
-            CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, textSize: 19)
+            CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, bold: true, textSize: 19)
                 .padding(.bottom, 9)
             
             CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
