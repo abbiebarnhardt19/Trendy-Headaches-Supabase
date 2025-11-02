@@ -92,76 +92,79 @@ struct filterSymptom: View {
     }
 }
 
-struct analyticsDropdown: View {
+struct AnalyticsDropdown: View {
     var accent: String
     var bg: String
-    @Binding var selectedView: String
-
-    private let options = ["Graphs", "Statistics", "Comparisons"]
+    var options: [String]
+    @Binding var selected: String
+    var textSize: CGFloat = UIScreen.main.bounds.width * 0.09
+    
     private let screenWidth = UIScreen.main.bounds.width
     @State private var isExpanded = false
-
+    
     var body: some View {
+        let optionTextSize = max(textSize*0.5, 14)
+        let labelFont = UIFont.systemFont(ofSize: textSize, weight: .regular)
+        let dropdownFont = UIFont.systemFont(ofSize: optionTextSize, weight: .regular)
+        let longestWidthForDropdown = options.map { $0.width(usingFont: dropdownFont) }.max() ?? 0
+        
+        
         VStack(alignment: .trailing, spacing: 6) {
-            // Label button
+            // Button
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isExpanded.toggle()
                 }
-                
             }) {
                 HStack(spacing: 5) {
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.09 + 5, weight: .regular)
-
                     CustomText(
-                        text: selectedView,
+                        text: selected,
                         color: accent,
-                        width: selectedView.width(usingFont: font),
-                        textSize: screenWidth * 0.09
+                        width: selected.width(usingFont: labelFont)+15,
+                        textAlign: .leading,
+                        textSize: textSize
                     )
-
+                    
                     Image(systemName: "chevron.down")
                         .resizable()
-                        .frame(width: screenWidth * 0.05, height: screenWidth * 0.05 / 2)
+                        .frame(width: textSize * 0.6, height: textSize * 0.3)
                         .foregroundColor(Color(hex: accent))
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                         .animation(.easeInOut(duration: 0.25), value: isExpanded)
-                        .padding(.top, 4)
+                        .padding(.top, 5)
+                        .padding(.leading, 2)
                 }
-                .padding(.horizontal, 10)
-                .padding(.top, 35)
             }
             .buttonStyle(PlainButtonStyle())
-
-            // Dropdown menu
+            
+            // Expanded menu (appears below button)
             if isExpanded {
                 VStack(spacing: 0) {
                     ForEach(options.indices, id: \.self) { index in
                         let option = options[index]
-
+                        
                         Button(action: {
                             withAnimation(.easeInOut(duration: 0.3)) {
-                                selectedView = option
+                                selected = option
                                 isExpanded = false
                             }
                         }) {
-                            let font = UIFont.systemFont(ofSize: screenWidth * 0.055 + 5, weight: .regular)
                             HStack {
                                 CustomText(
                                     text: option,
                                     color: bg,
-                                    width: "Comparisons".width(usingFont: font),
+                                    width: longestWidthForDropdown + 10,
                                     textAlign: .center,
-                                    textSize: screenWidth * 0.055
+                                    textSize: optionTextSize
                                 )
                                 Spacer()
                             }
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
-                            .background(option == selectedView ? Color(hex: accent).opacity(0.55) :  Color(hex: accent) )
+                            .background(option == selected ? Color(hex: accent).opacity(0.55) :  Color(hex: accent) )
                         }
                         .buttonStyle(.plain)
-
+                        
                         if index != options.count - 1 {
                             Divider()
                                 .background(Color(hex:bg).opacity(0.7))
@@ -173,15 +176,9 @@ struct analyticsDropdown: View {
                     RoundedRectangle(cornerRadius: 10)
                         .stroke(Color(hex: accent).opacity(0.6), lineWidth: 1)
                 )
-                .shadow(radius: 2)
-                .frame(width: "Comparisons".width(usingFont: UIFont.systemFont(ofSize: screenWidth * 0.055 + 5)) + 40)
+                .frame(width: longestWidthForDropdown + 14 * 2 + 15)
                 .transition(.move(edge: .top).combined(with: .opacity))
-                .padding(.bottom, 10)
-                .padding(.top, 5)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(.trailing, 20)
     }
-       
 }

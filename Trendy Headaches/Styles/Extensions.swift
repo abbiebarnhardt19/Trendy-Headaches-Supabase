@@ -149,9 +149,14 @@ extension String {
             .map { $0.prefix(1).uppercased() + $0.dropFirst() }
             .joined(separator: " ")
     }
+//    func width(usingFont font: UIFont) -> CGFloat {
+//        let attributes = [NSAttributedString.Key.font: font]
+//        return (self as NSString).size(withAttributes: attributes).width
+//    }
     func width(usingFont font: UIFont) -> CGFloat {
         let attributes = [NSAttributedString.Key.font: font]
-        return (self as NSString).size(withAttributes: attributes).width
+        let size = (self as NSString).size(withAttributes: attributes)
+        return ceil(size.width)
     }
 }
 

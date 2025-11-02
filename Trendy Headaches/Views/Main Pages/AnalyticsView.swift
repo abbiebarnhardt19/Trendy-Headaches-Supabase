@@ -13,7 +13,7 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
-    @State var selectedView: String = "Graphs"
+    @State var selectedView: String = "Statistics"
     
     @State var logs: [UnifiedLog] = []
     @State var allLogs: [UnifiedLog] = []
@@ -66,7 +66,12 @@ struct AnalyticsView: View {
                 AnalyticsBGComps(bg: bg, accent: accent)
                 
                 ScrollView{
-                    analyticsDropdown(accent: accent, bg: bg, selectedView: $selectedView)
+                    HStack{
+                        Spacer()
+                        AnalyticsDropdown(accent: accent, bg: bg, options: ["Graphs", "Statistics", "Comparison"],selected: $selectedView)
+                            .padding(.trailing, 20)
+                            .padding(.top, 35)
+                    }
                     
                     if selectedView == "Graphs"{
                         
@@ -99,6 +104,13 @@ struct AnalyticsView: View {
                         .padding(.bottom, 170)
                     }
                     
+                    else if selectedView == "Statistics"{
+                        logFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
+                        
+                        severityStats(accent: accent, bg: bg, logList: filteredLogs)
+                        
+                        onsetStats(accent: accent, bg: bg, logList: filteredLogs)
+                    }
                     else{
                         CustomText(text: "New Screen", color: accent)
                     }
