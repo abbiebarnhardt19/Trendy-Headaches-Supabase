@@ -106,6 +106,8 @@ struct AnalyticsView: View {
                         
                         OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
                         
+                        ScrollableMedicationTable(accent: accent, bg: bg, medicationList: medData)
+                        
                     }
                     else{
                         CustomText(text: "New Screen", color: accent)

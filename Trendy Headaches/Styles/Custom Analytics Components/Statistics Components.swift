@@ -268,53 +268,162 @@ struct OnsetStats: View{
         }
     }
 }
-//
-//struct MedicationTable: View{
-//    var accent: String
-//    var bg: String
-//    var medicationList: [Medication]
-//    
-//    let screenWidth = UIScreen.main.bounds.width
-//    let screenHeight = UIScreen.main.bounds.height
-//    @State var showTable: Bool = true
-//    
-//    var body: some View{
-//        if showTable{
-//            VStack{
-//                HStack(alignment: .top){
-//                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-//                    CustomText(text:"Treatment History", color: bg, width: "Treatment History:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-//                
-//                    
-//                    Spacer() // Add spacer to push button to the right
-//                    
-//                    Button(action: { showTable.toggle() }) {
-//                        Image(systemName: "eye.slash.circle")
-//                            .resizable()
-//                            .aspectRatio(contentMode: .fit)
-//                            .foregroundStyle(Color(hex: bg))
-//                            .frame(width: 25, height: 25)
-//                    }
-//                    .buttonStyle(PlainButtonStyle())
-//                }
-//                .frame(width: screenWidth - 50 - 15 * 2)
-//                .padding(.bottom, 5)
-//                
-//                Table(medicationList) {
-//                    TableColumn("Given Name", value: \.log_type)
-//                }
-//            }
-//            .padding(.horizontal, 15)
-//            .padding(.top, 10)
-//            .padding(.bottom, 20)
-//            .background(Color(hex:accent))
-//            .cornerRadius(20)
-//            .frame(width: screenWidth - 50, alignment: .leading)
-//            .padding(.bottom, 10)
-//        }
-//        else{
-//            HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showTable)
-//        }
-//        
-//    }
-//}
+struct ScrollableMedicationTable: View {
+    var accent: String
+    var bg: String
+    var medicationList: [Medication]
+
+    @State private var showTable: Bool = true
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let rowHeight: CGFloat = 35
+    let visibleRows = 5
+    
+    private let columns = ["Name", "Cat.", "Start", "End", "Reason"]
+    
+    private let dateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "MM/dd/yy"
+        return df
+    }()
+    
+    var body: some View {
+        VStack(spacing: 10) {
+            // Title + toggle
+            HStack {
+                let font = UIFont.systemFont(ofSize: 18, weight: .bold)
+                CustomText(
+                    text: "Treatment History",
+                    color: bg,
+                    width: "Treatment History".width(usingFont: font) + 20,
+                    bold: true,
+                    textSize: 18
+                )
+                Spacer()
+                Button(action: { showTable.toggle() }) {
+                    Image(systemName: showTable ? "eye.slash.circle" : "eye.circle")
+                        .resizable()
+                        .frame(width: 25, height: 25)
+                        .foregroundStyle(Color(hex: bg))
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+
+            if showTable {
+                let columnWidths = calculateColumnWidths()
+
+                ScrollView([.horizontal, .vertical], showsIndicators: true) {
+                    VStack(spacing: 0) {
+                        // Header
+                        HStack(spacing: 0) {
+                            ForEach(columns.indices, id: \.self) { i in
+                                CustomText(
+                                    text: columns[i],
+                                    color: bg,
+                                    textAlign: .center,
+                                    bold: true,
+                                    textSize: 16
+                                )
+                                .frame(width: columnWidths[i], height: rowHeight)
+                                .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
+                                .border(Color(hex: bg).opacity(0.2), width: 1)
+                            }
+                        }
+
+                        // Rows
+                        ForEach(medicationList, id: \.medicationId) { med in
+                            HStack(spacing: 0) {
+                                let startDisplay = formatDateString(med.medicationStart)
+                                let endDisplay = formatDateString(med.medicationEnd)
+                                let categoryDisplay = {
+                                    switch med.medicationCategory.lowercased() {
+                                    case "preventative": return "prev"
+                                    case "emergency": return "emerg"
+                                    default: return med.medicationCategory
+                                    }
+                                }()
+
+                                let rowData = [
+                                    med.medicationName,
+                                    categoryDisplay,
+                                    startDisplay,
+                                    endDisplay,
+                                    med.endReason ?? ""
+                                ]
+
+                                ForEach(rowData.indices, id: \.self) { i in
+                                    let text = i == 0 ? String(rowData[i].prefix(10)) : rowData[i]
+                                    CustomText(
+                                        text: text,
+                                        color: bg,
+                                        textAlign: .center,
+                                        textSize: screenWidth * 0.035
+                                    )
+                                    .frame(width: columnWidths[i], height: rowHeight)
+                                    .background(Color(hex: accent).opacity(0.2))
+                                    .border(Color(hex:bg).opacity(0.2), width: 1)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                }
+                            }
+                        }
+                    }
+                    .padding(5)
+                }
+                .frame(width: screenWidth - 50, height: rowHeight * CGFloat(visibleRows) + 5)
+                .background(Color(hex: accent).opacity(0.1))
+                .cornerRadius(12)
+                .padding(.bottom, 15)
+            } else {
+                HiddenChart(bg: bg, accent: accent, chart: "Treatment History", hideChart: $showTable)
+            }
+        }
+        .frame(width: screenWidth - 50) // **forces the card width**
+        .background(Color(hex: accent))
+        .cornerRadius(20)
+    }
+
+    
+    private func formatDateString(_ dateString: String?) -> String {
+        guard let dateString = dateString, !dateString.isEmpty else { return "N/A" }
+        let isoFormatter = DateFormatter()
+        isoFormatter.dateFormat = "yyyy-MM-dd"
+        if let date = isoFormatter.date(from: dateString) {
+            return dateFormatter.string(from: date)
+        } else {
+            return dateString
+        }
+    }
+    
+    private func calculateColumnWidths() -> [CGFloat] {
+        let font = UIFont.systemFont(ofSize: 14)
+        var widths: [CGFloat] = []
+        
+        // Name: 10 chars of the longest name
+        if let maxName = medicationList.map({ $0.medicationName }).max(by: { $1.count > $0.count }) {
+            let tenChars = String(maxName.prefix(10))
+            widths.append(tenChars.width(usingFont: font) + 15)
+        } else {
+            widths.append(10 * 8) // fallback
+        }
+        
+        // Cat.: 5 chars max
+        widths.append("emerg".width(usingFont: font) + 15)
+        
+        // Start & End: date width
+        let dateSample = "11/11/11"
+        widths.append(dateSample.width(usingFont: font) + 15)
+        widths.append(dateSample.width(usingFont: font) + 15)
+        
+        // Reason: max 50 characters or "Reason", whichever is larger
+        let maxReason = medicationList.map { ($0.endReason ?? "") }.max(by: { $1.count > $0.count }) ?? ""
+        let reasonText = String(maxReason.prefix(50))
+        let reasonWidth = max("Reason ".width(usingFont: font), reasonText.width(usingFont: font))
+        widths.append(reasonWidth + 20)
+        
+        return widths
+    }
+
+}
