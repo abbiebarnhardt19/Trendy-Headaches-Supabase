@@ -16,19 +16,17 @@ struct LogFrequencyStats: View{
     @State var showStats: Bool = false
     @State var typeFilter: String = "All Types"
     
-    // Filtered logs based on type
     var filteredLogs: [UnifiedLog] {
         switch typeFilter {
         case "Symptom":
             return logList.filter { $0.log_type == "Symptom" }
         case "Side Effect":
             return logList.filter { $0.log_type == "Side Effect" }
-        default: // "All Types"
+        default:
             return logList
         }
     }
     
-    // Calculate statistics
     var totalLogs: Int {
         filteredLogs.count
     }
@@ -42,7 +40,6 @@ struct LogFrequencyStats: View{
         let calendar = Calendar.current
         let weeks = calendar.dateComponents([.weekOfYear], from: earliest, to: latest).weekOfYear ?? 0
         
-        // At least 1 week if there are logs
         let weekCount = max(weeks, 1)
         return Double(totalLogs) / Double(weekCount)
     }
@@ -56,7 +53,6 @@ struct LogFrequencyStats: View{
         let calendar = Calendar.current
         let months = calendar.dateComponents([.month], from: earliest, to: latest).month ?? 0
         
-        // At least 1 month if there are logs
         let monthCount = max(months, 1)
         return Double(totalLogs) / Double(monthCount)
     }
@@ -70,7 +66,7 @@ struct LogFrequencyStats: View{
                     
                     AnalyticsDropdown(accent: bg, bg: accent, options: ["All Types" , "Symptom", "Side Effect"], selected: $typeFilter, textSize: screenWidth * 0.05)
                     
-                    Spacer() // Add spacer to push button to the right
+                    Spacer()
                     
                     Button(action: { showStats.toggle() }) {
                         Image(systemName: "eye.slash.circle")
@@ -105,7 +101,6 @@ struct LogFrequencyStats: View{
     }
 }
 
-
 struct SeverityStats: View{
     var accent: String
     var bg: String
@@ -123,7 +118,7 @@ struct SeverityStats: View{
             return logList.filter { $0.log_type == "Symptom" }
         case "Side Effect":
             return logList.filter { $0.log_type == "Side Effect" }
-        default: // "All Types"
+        default:
             return logList
         }
     }
@@ -149,7 +144,7 @@ struct SeverityStats: View{
                     
                     AnalyticsDropdown(accent: bg, bg: accent, options: ["All Types" , "Symptom", "Side Effect"], selected: $typeFilter, textSize: screenWidth * 0.05)
                     
-                    Spacer() // Add spacer to push button to the right
+                    Spacer()
                     
                     Button(action: { showStats.toggle() }) {
                         Image(systemName: "eye.slash.circle")
@@ -205,7 +200,6 @@ struct OnsetStats: View{
         }
         
         let totalLogsWithOnset = logsWithOnset.count
-    
         
         guard totalLogsWithOnset > 0 else { return [0.0, 0.0, 0.0, 0.0, 0.0] }
         
@@ -231,8 +225,7 @@ struct OnsetStats: View{
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
                     CustomText(text:"Symptom Onset Stats:", color: bg, width: "Symptom Onset Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
                 
-                    
-                    Spacer() // Add spacer to push button to the right
+                    Spacer()
                     
                     Button(action: { showStats.toggle() }) {
                         Image(systemName: "eye.slash.circle")
@@ -268,6 +261,8 @@ struct OnsetStats: View{
         }
     }
 }
+
+
 struct ScrollableMedicationTable: View {
     var accent: String
     var bg: String
@@ -281,25 +276,18 @@ struct ScrollableMedicationTable: View {
     
     private let columns = ["Name", "Cat.", "Start", "End", "Reason"]
     
-    private let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateFormat = "MM/dd/yy"
-        return df
-    }()
-    
     var body: some View {
+        if showTable {
         VStack(spacing: 10) {
             // Title + toggle
             HStack {
                 let font = UIFont.systemFont(ofSize: 18, weight: .bold)
-                CustomText(
-                    text: "Treatment History",
-                    color: bg,
-                    width: "Treatment History".width(usingFont: font) + 20,
-                    bold: true,
-                    textSize: 18
-                )
+                let title = "Treatment History"
+                
+                CustomText( text: title,  color: bg,  width: title.width(usingFont: font) + 20, bold: true,  textSize: 18)
+                
                 Spacer()
+                
                 Button(action: { showTable.toggle() }) {
                     Image(systemName: showTable ? "eye.slash.circle" : "eye.circle")
                         .resizable()
@@ -311,119 +299,58 @@ struct ScrollableMedicationTable: View {
             .padding(.horizontal, 20)
             .padding(.top, 10)
 
-            if showTable {
-                let columnWidths = calculateColumnWidths()
+            let columnWidths = calculateColumnWidths(medicationList: medicationList)
 
-                ScrollView([.horizontal, .vertical], showsIndicators: true) {
-                    VStack(spacing: 0) {
-                        // Header
-                        HStack(spacing: 0) {
-                            ForEach(columns.indices, id: \.self) { i in
-                                CustomText(
-                                    text: columns[i],
-                                    color: bg,
-                                    textAlign: .center,
-                                    bold: true,
-                                    textSize: 16
-                                )
-                                .frame(width: columnWidths[i], height: rowHeight)
-                                .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
-                                .border(Color(hex: bg).opacity(0.2), width: 1)
-                            }
-                        }
-
-                        // Rows
-                        ForEach(medicationList, id: \.medicationId) { med in
+                ScrollView([.vertical, .horizontal], showsIndicators: true) {
+                    LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        Section(header:
                             HStack(spacing: 0) {
-                                let startDisplay = formatDateString(med.medicationStart)
-                                let endDisplay = formatDateString(med.medicationEnd)
-                                let categoryDisplay = {
-                                    switch med.medicationCategory.lowercased() {
-                                    case "preventative": return "prev"
-                                    case "emergency": return "emerg"
-                                    default: return med.medicationCategory
-                                    }
-                                }()
-
-                                let rowData = [
-                                    med.medicationName,
-                                    categoryDisplay,
-                                    startDisplay,
-                                    endDisplay,
-                                    med.endReason ?? ""
-                                ]
-
-                                ForEach(rowData.indices, id: \.self) { i in
-                                    let text = i == 0 ? String(rowData[i].prefix(10)) : rowData[i]
-                                    CustomText(
-                                        text: text,
-                                        color: bg,
-                                        textAlign: .center,
-                                        textSize: screenWidth * 0.035
-                                    )
+                                ForEach(columns.indices, id: \.self) { i in
+                                    CustomText(text: columns[i],color: bg,  textAlign: .center, bold: true,  textSize: 16)
                                     .frame(width: columnWidths[i], height: rowHeight)
-                                    .background(Color(hex: accent).opacity(0.2))
-                                    .border(Color(hex:bg).opacity(0.2), width: 1)
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
+                                    .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
+                                    .border(Color(hex: bg).opacity(0.2), width: 1)
+                                }
+                            })
+                        {
+                            ForEach(medicationList, id: \.medicationId) { med in
+                                HStack(spacing: 0) {
+                                    let startDisplay = formatDateString(dateString: med.medicationStart)
+                                    let endDisplay = formatDateString(dateString:med.medicationEnd)
+                                    let categoryDisplay = {
+                                        switch med.medicationCategory.lowercased() {
+                                        case "preventative": return "prev"
+                                        case "emergency": return "emerg"
+                                        default: return med.medicationCategory
+                                        }
+                                    }()
+                                    
+                                    let rowData = [med.medicationName, categoryDisplay, startDisplay,  endDisplay,  med.endReason ?? ""]
+
+                                    ForEach(rowData.indices, id: \.self) { i in
+                                        CustomText( text: rowData[i],color: bg, textAlign: .center,textSize: screenWidth * 0.035)
+                                        .frame(width: columnWidths[i], height: rowHeight)
+                                        .background(Color(hex: accent).opacity(0.2))
+                                        .border(Color(hex: bg).opacity(0.2), width: 1)
+                                    }
                                 }
                             }
                         }
                     }
-                    .padding(5)
                 }
-                .frame(width: screenWidth - 50, height: rowHeight * CGFloat(visibleRows) + 5)
+                .frame(width: screenWidth - 80,
+                       height: rowHeight * CGFloat(visibleRows) + 5)
                 .background(Color(hex: accent).opacity(0.1))
-                .cornerRadius(12)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .contentShape(RoundedRectangle(cornerRadius: 12))
                 .padding(.bottom, 15)
-            } else {
-                HiddenChart(bg: bg, accent: accent, chart: "Treatment History", hideChart: $showTable)
             }
-        }
-        .frame(width: screenWidth - 50) // **forces the card width**
+        .frame(width: screenWidth - 50)
         .background(Color(hex: accent))
         .cornerRadius(20)
-    }
-
-    
-    private func formatDateString(_ dateString: String?) -> String {
-        guard let dateString = dateString, !dateString.isEmpty else { return "N/A" }
-        let isoFormatter = DateFormatter()
-        isoFormatter.dateFormat = "yyyy-MM-dd"
-        if let date = isoFormatter.date(from: dateString) {
-            return dateFormatter.string(from: date)
-        } else {
-            return dateString
+        }
+        else{
+            HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showTable)
         }
     }
-    
-    private func calculateColumnWidths() -> [CGFloat] {
-        let font = UIFont.systemFont(ofSize: 14)
-        var widths: [CGFloat] = []
-        
-        // Name: 10 chars of the longest name
-        if let maxName = medicationList.map({ $0.medicationName }).max(by: { $1.count > $0.count }) {
-            let tenChars = String(maxName.prefix(10))
-            widths.append(tenChars.width(usingFont: font) + 15)
-        } else {
-            widths.append(10 * 8) // fallback
-        }
-        
-        // Cat.: 5 chars max
-        widths.append("emerg".width(usingFont: font) + 15)
-        
-        // Start & End: date width
-        let dateSample = "11/11/11"
-        widths.append(dateSample.width(usingFont: font) + 15)
-        widths.append(dateSample.width(usingFont: font) + 15)
-        
-        // Reason: max 50 characters or "Reason", whichever is larger
-        let maxReason = medicationList.map { ($0.endReason ?? "") }.max(by: { $1.count > $0.count }) ?? ""
-        let reasonText = String(maxReason.prefix(50))
-        let reasonWidth = max("Reason ".width(usingFont: font), reasonText.width(usingFont: font))
-        widths.append(reasonWidth + 20)
-        
-        return widths
-    }
-
 }
