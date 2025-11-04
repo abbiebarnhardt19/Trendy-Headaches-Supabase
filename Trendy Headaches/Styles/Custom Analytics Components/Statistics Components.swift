@@ -186,10 +186,6 @@ struct OnsetStats: View{
     let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = false
     
-    var totalLogs: Int {
-        logList.count
-    }
-    
     var onsetPercent: [Double] {
         // Filter to only logs where onset_time is not nil and not empty
         let logsWithOnset = logList.filter { log in
@@ -239,7 +235,7 @@ struct OnsetStats: View{
                 .frame(width: screenWidth - 50 - 15 * 2)
                 .padding(.bottom, 5)
                 
-                CustomText(text:  "Total Logs With Recorded Onset: \(Int(onsetPercent[0]))", color: bg, textSize: screenWidth * 0.045)
+                CustomText(text:  "Logs With Recorded Onset: \(Int(onsetPercent[0]))", color: bg, textSize: screenWidth * 0.045)
                 CustomText(text:  "From Wake Onset: \(String(format: "%.1f%%", onsetPercent[1]))", color: bg, textSize: screenWidth * 0.045)
                 CustomText(text:  "Morning Onset: \(String(format: "%.1f%%", onsetPercent[2]))", color: bg, textSize: screenWidth * 0.045)
                 CustomText(text:  "Afternoon Onset: \(String(format: "%.1f%%", onsetPercent[3]))", color: bg, textSize: screenWidth * 0.045)
@@ -268,7 +264,7 @@ struct ScrollableMedicationTable: View {
     var bg: String
     var medicationList: [Medication]
 
-    @State private var showTable: Bool = true
+    @State private var showTable: Bool = false
     
     let screenWidth = UIScreen.main.bounds.width
     let rowHeight: CGFloat = 35
@@ -354,3 +350,92 @@ struct ScrollableMedicationTable: View {
         }
     }
 }
+
+
+struct EmergencyMedStats: View{
+    var accent: String
+    var bg: String
+    var logList: [UnifiedLog]
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    @State var showStats: Bool = true
+    
+    
+    var medicationEffectiveness: [String] {
+        // Filter to only logs where medication was taken
+        let medLogs = logList.filter { $0.med_taken == true && $0.med_worked != nil}
+        
+        let totalLogs = medLogs.count
+        
+        // Guard in case no medication logs exist
+        guard !medLogs.isEmpty else { return ["No medication data available"] }
+        
+        // Group logs by medication_name
+        let groupedByMedication = Dictionary(grouping: medLogs) { log in
+            log.medication_name ?? "Unknown Medication"
+        }
+        
+        // Calculate effectiveness percentage for each medication
+        var result: [String] = ["Logs With Emergency Treatment:  \(totalLogs)"]
+        
+        for (medication, logs) in groupedByMedication {
+            let total = logs.count
+            
+            let effectiveCount = logs.filter { $0.med_worked == true }.count
+            
+            let percentEffective = (Double(effectiveCount) / Double(total)) * 100.0
+            
+            result.append("\(medication): \(String(format: "%.1f", percentEffective))% effective")
+        }
+        return result
+    }
+
+
+    var body: some View{
+        if showStats{
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top){
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                    let text = "Emergency Treatment Effectiveness:"
+                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                
+                    Spacer()
+                    
+                    Button(action: { showStats.toggle() }) {
+                        Image(systemName: "eye.slash.circle")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundStyle(Color(hex: bg))
+                            .frame(width: 25, height: 25)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+                .frame(width: screenWidth - 50 - 15 * 2)
+                .padding(.bottom, 5)
+                
+                ForEach(medicationEffectiveness, id: \.self) { item in
+                    CustomText(
+                        text: item,
+                        color: bg,
+                        textSize: screenWidth * 0.045
+                    )
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        else{
+            HStack {
+                HiddenChart(bg:bg, accent:accent, chart:"Emergency Treatment Stats", hideChart: $showStats)
+            }
+            .frame(width: screenWidth)
+        }
+    }
+}
+

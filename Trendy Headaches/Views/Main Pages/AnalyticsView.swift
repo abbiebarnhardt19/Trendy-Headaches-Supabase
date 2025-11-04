@@ -100,13 +100,18 @@ struct AnalyticsView: View {
                     }
                     
                     else if selectedView == "Statistics"{
-                        LogFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
-                        
-                        SeverityStats(accent: accent, bg: bg, logList: filteredLogs)
-                        
-                        OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
-                        
-                        ScrollableMedicationTable(accent: accent, bg: bg, medicationList: medData)
+                        VStack{
+                            LogFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
+                            
+                            SeverityStats(accent: accent, bg: bg, logList: filteredLogs)
+                            
+                            OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
+                            
+                            ScrollableMedicationTable(accent: accent, bg: bg, medicationList: medData)
+                            
+                            EmergencyMedStats(accent: accent, bg: bg, logList: logs)
+                        }
+                        .padding(.bottom, 170)
                         
                     }
                     else{
