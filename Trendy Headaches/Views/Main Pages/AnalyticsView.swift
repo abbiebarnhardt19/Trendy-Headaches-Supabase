@@ -32,6 +32,7 @@ struct AnalyticsView: View {
 
     
     @State var medData: [Medication] = []
+    @State var triggerOptions: [String] = []
     
     var filteredLogs: [UnifiedLog] {
         
@@ -65,7 +66,7 @@ struct AnalyticsView: View {
                         Spacer()
                         AnalyticsDropdown(accent: accent, bg: bg, options: ["Graphs", "Statistics", "Comparison"],selected: $selectedView)
                             .padding(.trailing, 20)
-                            .padding(.top, 35)
+                            .padding(.top, 20)
                     }
                     
                     if selectedView == "Graphs"{
@@ -110,6 +111,12 @@ struct AnalyticsView: View {
                             ScrollableMedicationTable(accent: accent, bg: bg, medicationList: medData)
                             
                             EmergencyMedStats(accent: accent, bg: bg, logList: logs)
+                            
+                            TriggerStats(accent: accent, bg: bg, logList: logs, triggerOptions: triggerOptions)
+                            
+                            DescriptionStats(accent: accent, bg: bg, logList: logs)
+                            
+                            SideEffectStats(accent: accent, bg: bg, logList: logs)
                         }
                         .padding(.bottom, 170)
                         
@@ -138,6 +145,8 @@ struct AnalyticsView: View {
                         symptomOptions = result.2
                         selectedSymptoms = result.2
                         startDate = result.3 ?? Date()
+                        
+                        triggerOptions = try await Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
                         
                     } catch {
                         print("Error fetching all data:", error)

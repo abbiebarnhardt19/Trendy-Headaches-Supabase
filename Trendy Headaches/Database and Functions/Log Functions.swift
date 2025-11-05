@@ -19,6 +19,7 @@ extension Database {
             let capitalizedMedName = medTakenName?.capitalized
             let capitalizedTriggerNames = triggerNames.map { $0.capitalized }
             let capitalizedOnset = symptom_onset?.capitalized
+            let capitalizedDescription = symptom_desc.capitalized
             
             // Get IDs from names (using capitalized versions)
             let sympID = (await getIDFromName(tableName: "Symptoms", names: [capitalizedSymptomName], userID: userID)).first ?? 0
@@ -43,7 +44,7 @@ extension Database {
                 med_taken: med_taken,
                 log_medication_id: emergMedID,
                 med_worked: nil,
-                symptom_description: symptom_desc,
+                symptom_description: capitalizedDescription,
                 notes: notes,
                 submit_time: dateFormatter.string(from: submit)
             )

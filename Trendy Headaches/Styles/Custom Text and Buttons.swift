@@ -224,3 +224,20 @@ struct CustomButton: View {
         .padding(.bottom, botPad)
     }
 }
+
+struct HideButton: View{
+    var accent: String
+    var bg: String
+    @Binding var show: Bool
+    
+    var body: some View{
+        Button(action: { show.toggle() }) {
+            Image(systemName: "eye.slash.circle")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color(hex: bg))
+                .frame(width: 25, height: 25)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}

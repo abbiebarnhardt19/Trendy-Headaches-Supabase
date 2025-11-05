@@ -4,18 +4,21 @@
 //
 //  Created by Abigail Barnhardt on 11/1/25.
 //
+
 import SwiftUI
 
+//shows how many logs a user has total and weekly and monthly average
 struct LogFrequencyStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
+
     @State var showStats: Bool = false
     @State var typeFilter: String = "All Types"
     
+    //filter the log based on type, default to both types
     var filteredLogs: [UnifiedLog] {
         switch typeFilter {
         case "Symptom":
@@ -27,62 +30,61 @@ struct LogFrequencyStats: View{
         }
     }
     
-    var totalLogs: Int {
-        filteredLogs.count
-    }
-    
-    var averagePerWeek: Double {
-        guard !filteredLogs.isEmpty else { return 0.0 }
+    //get the totals and averages
+    var frequencyStats: [String] {
         
+        //display a no data message if there are no logs
+        guard !filteredLogs.isEmpty else { return ["No log data available"] }
+        
+        //get all the log dates
         let dates = filteredLogs.map { $0.date }
-        guard let earliest = dates.min(), let latest = dates.max() else { return 0.0 }
         
+        //initalize results with total logs
+        var results = ["Total Logs: \(filteredLogs.count)"]
+        
+        //calcuate average logs per week
         let calendar = Calendar.current
-        let weeks = calendar.dateComponents([.weekOfYear], from: earliest, to: latest).weekOfYear ?? 0
+        let weeks = calendar.dateComponents([.weekOfYear], from: dates.min() ?? Date(), to: dates.max() ?? Date()).weekOfYear ?? 0
         
         let weekCount = max(weeks, 1)
-        return Double(totalLogs) / Double(weekCount)
-    }
-    
-    var averagePerMonth: Double {
-        guard !filteredLogs.isEmpty else { return 0.0 }
+        let weeklyAverage = Double(filteredLogs.count) / Double(weekCount)
+        results.append("Weekly Average: \(String(format: "%.1f", weeklyAverage))")
         
-        let dates = filteredLogs.map { $0.date }
-        guard let earliest = dates.min(), let latest = dates.max() else { return 0.0 }
-        
-        let calendar = Calendar.current
-        let months = calendar.dateComponents([.month], from: earliest, to: latest).month ?? 0
+        //calculate average logs per month
+        let months = calendar.dateComponents([.month], from: dates.min() ?? Date(), to: dates.max() ?? Date()).month ?? 0
         
         let monthCount = max(months, 1)
-        return Double(totalLogs) / Double(monthCount)
+        let monthlyAverage = Double(filteredLogs.count) / Double(monthCount)
+        results.append("Monthly Average: \(String(format: "%.1f", monthlyAverage))")
+        
+        return results
     }
+
     
     var body: some View{
+        //show the data
         if showStats{
             VStack(alignment: .leading, spacing: 10) {
+                //top bar of section
                 HStack(alignment: .top){
+                    
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
                     CustomText(text:"Frequency Stats:", color: bg, width: "Frequency Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
                     
+                    //filter by log type
                     AnalyticsDropdown(accent: bg, bg: accent, options: ["All Types" , "Symptom", "Side Effect"], selected: $typeFilter, textSize: screenWidth * 0.05)
                     
                     Spacer()
                     
-                    Button(action: { showStats.toggle() }) {
-                        Image(systemName: "eye.slash.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex: bg))
-                            .frame(width: 25, height: 25)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    HideButton(accent: accent, bg: bg, show: $showStats)
                 }
                 .frame(width: screenWidth - 50 - 15 * 2)
                 .padding(.bottom, 5)
                 
-                CustomText(text: "Total Logs: \(totalLogs)", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text: "Average Per Week: \(String(format: "%.1f", averagePerWeek))", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text: "Average Per Month: \(String(format: "%.1f", averagePerMonth))", color: bg, textSize: screenWidth * 0.045)
+                //list out each stat
+                ForEach(frequencyStats, id: \.self) { item in
+                    CustomText( text: item,  color: bg,  textSize: screenWidth * 0.045)
+                }
             }
             .padding(.horizontal, 15)
             .padding(.top, 10)
@@ -92,6 +94,7 @@ struct LogFrequencyStats: View{
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
         }
+        //if hidden, show show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Frequency Stats", hideChart: $showStats)
@@ -101,13 +104,14 @@ struct LogFrequencyStats: View{
     }
 }
 
+//average log severity
 struct SeverityStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
+
     @State var showStats: Bool = false
     @State var typeFilter: String = "All Types"
     
@@ -123,21 +127,17 @@ struct SeverityStats: View{
         }
     }
     
-    // Calculate statistics
-    var totalLogs: Int {
-        filteredLogs.count
-    }
-    
     var averageSeverity: Double {
-        guard totalLogs > 0 else { return 0.0 }
+        guard filteredLogs.count > 0 else { return 0.0 }
         
         let totalSeverity = filteredLogs.reduce(0) { $0 + $1.severity }
-        return Double(totalSeverity) / Double(totalLogs)
+        return Double(totalSeverity) / Double(filteredLogs.count)
     }
     
     var body: some View{
         if showStats{
             VStack(alignment: .leading, spacing: 10) {
+                //top header
                 HStack(alignment: .top){
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
                     CustomText(text:"Severity Stats:", color: bg, width: "Severity Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
@@ -146,18 +146,12 @@ struct SeverityStats: View{
                     
                     Spacer()
                     
-                    Button(action: { showStats.toggle() }) {
-                        Image(systemName: "eye.slash.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex: bg))
-                            .frame(width: 25, height: 25)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    HideButton(accent: accent, bg: bg, show: $showStats)
                 }
                 .frame(width: screenWidth - 50 - 15 * 2)
                 .padding(.bottom, 5)
                 
+                //average severity
                 CustomText(text: "Average Log Severity: \(String(format: "%.1f", averageSeverity))", color: bg, textSize: screenWidth * 0.045)
             }
             .padding(.horizontal, 15)
@@ -168,6 +162,7 @@ struct SeverityStats: View{
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
         }
+        //if hidden, show show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Severity Stats", hideChart: $showStats)
@@ -177,69 +172,60 @@ struct SeverityStats: View{
     }
 }
 
+//stats showing what percent of logs were in each onset time
 struct OnsetStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = false
     
-    var onsetPercent: [Double] {
+    var onsetPercents: [String] {
         // Filter to only logs where onset_time is not nil and not empty
-        let logsWithOnset = logList.filter { log in
+        let filteredLogs = logList.filter { log in
             if let onset = log.onset_time, !onset.isEmpty {
                 return true
             }
             return false
         }
         
-        let totalLogsWithOnset = logsWithOnset.count
+        //no data message
+        guard filteredLogs.count > 0 else { return ["No data available"] }
         
-        guard totalLogsWithOnset > 0 else { return [0.0, 0.0, 0.0, 0.0, 0.0] }
+        let onsetOptions = ["From Wake", "Morning", "Afternoon", "Evening"]
+        var results = ["Logs With Onset: \(filteredLogs.count)"]
         
-        let totalFromWake = logsWithOnset.filter { $0.onset_time == "From Wake" }.count
-        let fromWakePercent = Double(totalFromWake) / Double(totalLogsWithOnset) * 100.0
+        //get the percent of logs for each onset option
+        for option in onsetOptions {
+            let onsetTotal = filteredLogs.filter { $0.onset_time == option }.count
+            let onsetPercent = Double(onsetTotal) / Double(filteredLogs.count) * 100.0
+            results.append("\(option): \(String(format: "%.1f%%", onsetPercent))")
+        }
         
-        let totalMorning = logsWithOnset.filter { $0.onset_time == "Morning" }.count
-        let morningPercent = Double(totalMorning) / Double(totalLogsWithOnset) * 100.0
-        
-        let totalAfternoon = logsWithOnset.filter { $0.onset_time == "Afternoon" }.count
-        let afternoonPercent = Double(totalAfternoon) / Double(totalLogsWithOnset) * 100.0
-        
-        let totalEvening = logsWithOnset.filter { $0.onset_time == "Evening" }.count
-        let eveningPercent = Double(totalEvening) / Double(totalLogsWithOnset) * 100.0
-        
-        return [Double(totalLogsWithOnset), fromWakePercent, morningPercent, afternoonPercent, eveningPercent]
+        return results
     }
 
     var body: some View{
+        //show the stats
         if showStats{
             VStack(alignment: .leading, spacing: 10) {
+                //top header
                 HStack(alignment: .top){
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
                     CustomText(text:"Symptom Onset Stats:", color: bg, width: "Symptom Onset Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
                 
                     Spacer()
                     
-                    Button(action: { showStats.toggle() }) {
-                        Image(systemName: "eye.slash.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex: bg))
-                            .frame(width: 25, height: 25)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    HideButton(accent: accent, bg: bg, show: $showStats)
                 }
                 .frame(width: screenWidth - 50 - 15 * 2)
                 .padding(.bottom, 5)
                 
-                CustomText(text:  "Logs With Recorded Onset: \(Int(onsetPercent[0]))", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text:  "From Wake Onset: \(String(format: "%.1f%%", onsetPercent[1]))", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text:  "Morning Onset: \(String(format: "%.1f%%", onsetPercent[2]))", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text:  "Afternoon Onset: \(String(format: "%.1f%%", onsetPercent[3]))", color: bg, textSize: screenWidth * 0.045)
-                CustomText(text:  "Evening Onset: \(String(format: "%.1f%%", onsetPercent[4]))", color: bg, textSize: screenWidth * 0.045)
+                //the stats
+                ForEach(onsetPercents, id: \.self) { option in
+                    CustomText( text: option, color: bg, textSize: screenWidth * 0.045)
+                }
             }
             .padding(.horizontal, 15)
             .padding(.top, 10)
@@ -249,6 +235,7 @@ struct OnsetStats: View{
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
         }
+        //if hidden, show the show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Symptom Onset Stats", hideChart: $showStats)
@@ -264,7 +251,7 @@ struct ScrollableMedicationTable: View {
     var bg: String
     var medicationList: [Medication]
 
-    @State private var showTable: Bool = false
+    @State private var showStats: Bool = false
     
     let screenWidth = UIScreen.main.bounds.width
     let rowHeight: CGFloat = 35
@@ -273,7 +260,7 @@ struct ScrollableMedicationTable: View {
     private let columns = ["Name", "Cat.", "Start", "End", "Reason"]
     
     var body: some View {
-        if showTable {
+        if showStats {
         VStack(spacing: 10) {
             // Title + toggle
             HStack {
@@ -284,13 +271,7 @@ struct ScrollableMedicationTable: View {
                 
                 Spacer()
                 
-                Button(action: { showTable.toggle() }) {
-                    Image(systemName: showTable ? "eye.slash.circle" : "eye.circle")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(Color(hex: bg))
-                }
-                .buttonStyle(PlainButtonStyle())
+                HideButton(accent: accent, bg: bg, show: $showStats)
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
@@ -346,7 +327,7 @@ struct ScrollableMedicationTable: View {
         .cornerRadius(20)
         }
         else{
-            HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showTable)
+            HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showStats)
         }
     }
 }
@@ -359,7 +340,7 @@ struct EmergencyMedStats: View{
     
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
-    @State var showStats: Bool = true
+    @State var showStats: Bool = false
     
     
     var medicationEffectiveness: [String] {
@@ -402,14 +383,7 @@ struct EmergencyMedStats: View{
                 
                     Spacer()
                     
-                    Button(action: { showStats.toggle() }) {
-                        Image(systemName: "eye.slash.circle")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex: bg))
-                            .frame(width: 25, height: 25)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    HideButton(accent: accent, bg: bg, show: $showStats)
                 }
                 .frame(width: screenWidth - 50 - 15 * 2)
                 .padding(.bottom, 5)
@@ -438,4 +412,241 @@ struct EmergencyMedStats: View{
         }
     }
 }
+
+
+struct TriggerStats: View{
+    var accent: String
+    var bg: String
+    var logList: [UnifiedLog]
+    var triggerOptions: [String]
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    @State var showStats: Bool = false
+    
+    
+    var triggerStats: [String] {
+        // All logs
+        let allLogs = logList
+        guard !allLogs.isEmpty else { return ["No trigger data available"] }
+        
+        // Count how many logs contain each trigger
+        var triggerCounts: [String: Int] = [:]
+        
+        for log in allLogs {
+            guard let triggers = log.trigger_names else { continue }
+            for trigger in Set(triggers) {
+                triggerCounts[trigger, default: 0] += 1
+            }
+        }
+        
+        let totalLogCount = allLogs.count
+        var result: [String] = ["Total Logs: \(totalLogCount)"]
+        
+        //  Loop through every trigger option, even if it's not present in any logs
+        for trigger in triggerOptions {
+            let count = triggerCounts[trigger] ?? 0
+            let percent = (Double(count) / Double(totalLogCount)) * 100
+            result.append("\(trigger): \(String(format: "%.1f", percent))% of logs")
+        }
+        
+        return result
+    }
+
+    var body: some View{
+        if showStats{
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top){
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                    let text = "Trigger Stats:"
+                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                
+                    Spacer()
+                    
+                    HideButton(accent: accent, bg: bg, show: $showStats)
+                }
+                .frame(width: screenWidth - 50 - 15 * 2)
+                .padding(.bottom, 5)
+                
+                ForEach(triggerStats, id: \.self) { item in
+                    CustomText(
+                        text: item,
+                        color: bg,
+                        textSize: screenWidth * 0.045
+                    )
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        else{
+            HStack {
+                HiddenChart(bg:bg, accent:accent, chart:"Trigger Stats", hideChart: $showStats)
+            }
+            .frame(width: screenWidth)
+        }
+    }
+}
+
+struct DescriptionStats: View{
+    var accent: String
+    var bg: String
+    var logList: [UnifiedLog]
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    @State var showStats: Bool = false
+    
+    
+    var descriptionStats: [String] {
+        let descriptionLogs = logList.filter { $0.symptom_description != nil && !$0.symptom_description!.isEmpty}
+        
+        let totalLogs = descriptionLogs.count
+        
+        var results = ["Total Side Effect Logs: \(totalLogs)"]
+        
+        var values: [String] = []
+
+        values = descriptionLogs.flatMap { log -> [String] in
+            guard let value = log.symptom_description, !value.isEmpty else { return [] }
+            
+            // Split by comma, trim whitespace, remove empty strings
+            return value
+                .split(separator: ",")
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+        }
+
+        // Count occurrences
+        let counts = Dictionary(values.map { ($0, 1) }, uniquingKeysWith: +)
+        
+        let total = values.count
+
+        // Step 4: Convert to percent format
+        for (phrase, count) in counts {
+            let percentage = Double(count) / Double(total) * 100
+            let formatted = "\(phrase): \(String(format: "%.1f", percentage))%"
+            results.append(formatted)
+        }
+        
+        return results
+    }
+
+    var body: some View{
+        if showStats{
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top){
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                    let text = "Symptom Description Stats:"
+                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                
+                    Spacer()
+                    
+                    HideButton(accent: accent, bg: bg, show: $showStats)
+                }
+                .frame(width: screenWidth - 50 - 15 * 2)
+                .padding(.bottom, 5)
+                
+                ForEach(descriptionStats, id: \.self) { item in
+                    CustomText(
+                        text: item,
+                        color: bg,
+                        textSize: screenWidth * 0.045
+                    )
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        else{
+            HStack {
+                HiddenChart(bg:bg, accent:accent, chart:"Symptom Description Stats", hideChart: $showStats)
+            }
+            .frame(width: screenWidth)
+        }
+    }
+}
+
+struct SideEffectStats: View{
+    var accent: String
+    var bg: String
+    var logList: [UnifiedLog]
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    @State var showStats: Bool = true
+    
+    
+    var sideEffectStats: [String] {
+        let sideEffectLogs = logList.filter { $0.log_type == "Side Effect"}
+        
+        let totalLogs = sideEffectLogs.count
+        
+        var results = ["Logs With Description: \(totalLogs)"]
+        
+        let values = sideEffectLogs.compactMap { $0.side_effect_med }
+
+        // Count occurrences
+        let counts = Dictionary(values.map { ($0, 1) }, uniquingKeysWith: +)
+
+        // Step 4: Convert to percent
+        for (phrase, count) in counts {
+            let percentage = Double(count) / Double(totalLogs) * 100
+            let formatted = "\(phrase): \(String(format: "%.1f", percentage))%"
+            results.append(formatted)
+        }
+        
+        return results
+    }
+
+    var body: some View{
+        if showStats{
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .top){
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                    let text = "Side Effect Stats:"
+                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                
+                    Spacer()
+                    
+                    HideButton(accent: accent, bg: bg, show: $showStats)
+                }
+                .frame(width: screenWidth - 50 - 15 * 2)
+                .padding(.bottom, 5)
+                
+                ForEach(sideEffectStats, id: \.self) { item in
+                    CustomText(
+                        text: item,
+                        color: bg,
+                        textSize: screenWidth * 0.045
+                    )
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        else{
+            HStack {
+                HiddenChart(bg:bg, accent:accent, chart:"Side Effect Stats", hideChart: $showStats)
+            }
+            .frame(width: screenWidth)
+        }
+    }
+}
+
 
