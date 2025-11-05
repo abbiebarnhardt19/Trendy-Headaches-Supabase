@@ -225,19 +225,48 @@ struct CustomButton: View {
     }
 }
 
-struct HideButton: View{
+struct StatsCard: View {
+    var title: String
+    var items: [String]
     var accent: String
     var bg: String
     @Binding var show: Bool
+
+    let screenWidth = UIScreen.main.bounds.width
     
-    var body: some View{
-        Button(action: { show.toggle() }) {
-            Image(systemName: "eye.slash.circle")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .foregroundStyle(Color(hex: bg))
-                .frame(width: 25, height: 25)
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Header
+            HStack(alignment: .top){
+                let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+            
+                Spacer()
+                
+                Button(action: { show.toggle() }) {
+                    Image(systemName: "eye.slash.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(Color(hex: bg))
+                        .frame(width: 25, height: 25)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .frame(width: screenWidth - 50 - 15 * 2)
+            .padding(.bottom, 5)
+            
+            // Display items
+            ForEach(items, id: \.self) { item in
+                CustomText(text: item, color: bg, textSize: screenWidth * 0.045)
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.horizontal, 15)
+        .padding(.top, 10)
+        .padding(.bottom, 20)
+        .background(Color(hex: accent))
+        .cornerRadius(20)
+        .frame(width: screenWidth - 50, alignment: .leading)
+        .padding(.bottom, 10)
     }
 }
+

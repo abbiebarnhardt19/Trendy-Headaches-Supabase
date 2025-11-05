@@ -108,7 +108,7 @@ struct AnalyticsView: View {
                             
                             OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
                             
-                            ScrollableMedicationTable(accent: accent, bg: bg, medicationList: medData)
+                            MedicationTable(accent: accent, bg: bg, medList: medData)
                             
                             EmergencyMedStats(accent: accent, bg: bg, logList: logs)
                             

@@ -64,35 +64,8 @@ struct LogFrequencyStats: View{
     var body: some View{
         //show the data
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                //top bar of section
-                HStack(alignment: .top){
-                    
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    CustomText(text:"Frequency Stats:", color: bg, width: "Frequency Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                    
-                    //filter by log type
-                    AnalyticsDropdown(accent: bg, bg: accent, options: ["All Types" , "Symptom", "Side Effect"], selected: $typeFilter, textSize: screenWidth * 0.05)
-                    
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                //list out each stat
-                ForEach(frequencyStats, id: \.self) { item in
-                    CustomText( text: item,  color: bg,  textSize: screenWidth * 0.045)
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            //card with header+data
+            StatsCard(title: "Frequency Stats:", items: frequencyStats, accent: accent, bg: bg, show: $showStats)
         }
         //if hidden, show show button
         else{
@@ -127,45 +100,24 @@ struct SeverityStats: View{
         }
     }
     
-    var averageSeverity: Double {
-        guard filteredLogs.count > 0 else { return 0.0 }
+    var averageSeverity: [String] {
+        //no data message
+        guard filteredLogs.count > 0 else { return ["No data available"] }
         
         let totalSeverity = filteredLogs.reduce(0) { $0 + $1.severity }
-        return Double(totalSeverity) / Double(filteredLogs.count)
+        let averageSeverity = Double(totalSeverity) / Double(filteredLogs.count)
+        return ["Average Log Severity: \(String(format: "%.1f", averageSeverity))"]
     }
     
     var body: some View{
+        //card with the header+ data
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                //top header
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    CustomText(text:"Severity Stats:", color: bg, width: "Severity Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                    
-                    AnalyticsDropdown(accent: bg, bg: accent, options: ["All Types" , "Symptom", "Side Effect"], selected: $typeFilter, textSize: screenWidth * 0.05)
-                    
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                //average severity
-                CustomText(text: "Average Log Severity: \(String(format: "%.1f", averageSeverity))", color: bg, textSize: screenWidth * 0.045)
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            StatsCard(title: "Average Severity:", items: averageSeverity, accent: accent, bg: bg, show: $showStats)
         }
         //if hidden, show show button
         else{
             HStack {
-                HiddenChart(bg:bg, accent:accent, chart:"Severity Stats", hideChart: $showStats)
+                HiddenChart(bg:bg, accent:accent, chart:"Average Severity", hideChart: $showStats)
             }
             .frame(width: screenWidth)
         }
@@ -209,31 +161,7 @@ struct OnsetStats: View{
     var body: some View{
         //show the stats
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                //top header
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    CustomText(text:"Symptom Onset Stats:", color: bg, width: "Symptom Onset Stats:".width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                //the stats
-                ForEach(onsetPercents, id: \.self) { option in
-                    CustomText( text: option, color: bg, textSize: screenWidth * 0.045)
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            StatsCard(title: "Symptom Onset Stats:", items: onsetPercents, accent: accent, bg: bg, show: $showStats)
         }
         //if hidden, show the show button
         else{
@@ -245,11 +173,11 @@ struct OnsetStats: View{
     }
 }
 
-
-struct ScrollableMedicationTable: View {
+//treatment history table
+struct MedicationTable: View {
     var accent: String
     var bg: String
-    var medicationList: [Medication]
+    var medList: [Medication]
 
     @State private var showStats: Bool = false
     
@@ -262,38 +190,53 @@ struct ScrollableMedicationTable: View {
     var body: some View {
         if showStats {
         VStack(spacing: 10) {
-            // Title + toggle
-            HStack {
-                let font = UIFont.systemFont(ofSize: 18, weight: .bold)
+            //header
+            HStack(alignment: .top){
+                let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
                 let title = "Treatment History"
-                
-                CustomText( text: title,  color: bg,  width: title.width(usingFont: font) + 20, bold: true,  textSize: 18)
-                
+                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+            
                 Spacer()
                 
-                HideButton(accent: accent, bg: bg, show: $showStats)
+                Button(action: { showStats.toggle() }) {
+                    Image(systemName: "eye.slash.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(Color(hex: bg))
+                        .frame(width: 25, height: 25)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, 20)
+            .frame(width: screenWidth - 50 - 15 * 2)
+            .padding(.bottom, 5)
             .padding(.top, 10)
 
-            let columnWidths = calculateColumnWidths(medicationList: medicationList)
+            //get the widths of each column
+            let colWidths = calculateColumnWidths(medicationList: medList)
 
+            //scroll horizontal and vertical with froxen top row
                 ScrollView([.vertical, .horizontal], showsIndicators: true) {
                     LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        //frozen top row
                         Section(header:
                             HStack(spacing: 0) {
+                            //make row headers
                                 ForEach(columns.indices, id: \.self) { i in
                                     CustomText(text: columns[i],color: bg,  textAlign: .center, bold: true,  textSize: 16)
-                                    .frame(width: columnWidths[i], height: rowHeight)
+                                    .frame(width: colWidths[i], height: rowHeight)
                                     .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
                                     .border(Color(hex: bg).opacity(0.2), width: 1)
                                 }
                             })
                         {
-                            ForEach(medicationList, id: \.medicationId) { med in
+                            //each of the data rows
+                            ForEach(medList, id: \.medicationId) { med in
                                 HStack(spacing: 0) {
+                                    //format the dates to ##/##/##
                                     let startDisplay = formatDateString(dateString: med.medicationStart)
                                     let endDisplay = formatDateString(dateString:med.medicationEnd)
+                                   
+                                    //shorten med types
                                     let categoryDisplay = {
                                         switch med.medicationCategory.lowercased() {
                                         case "preventative": return "prev"
@@ -304,9 +247,10 @@ struct ScrollableMedicationTable: View {
                                     
                                     let rowData = [med.medicationName, categoryDisplay, startDisplay,  endDisplay,  med.endReason ?? ""]
 
+                                    //make each cell in the row
                                     ForEach(rowData.indices, id: \.self) { i in
                                         CustomText( text: rowData[i],color: bg, textAlign: .center,textSize: screenWidth * 0.035)
-                                        .frame(width: columnWidths[i], height: rowHeight)
+                                        .frame(width: colWidths[i], height: rowHeight)
                                         .background(Color(hex: accent).opacity(0.2))
                                         .border(Color(hex: bg).opacity(0.2), width: 1)
                                     }
@@ -326,30 +270,28 @@ struct ScrollableMedicationTable: View {
         .background(Color(hex: accent))
         .cornerRadius(20)
         }
+        //if hidden, show the show button
         else{
             HiddenChart(bg: bg, accent: accent, chart: "Treatment Histroy", hideChart: $showStats)
         }
     }
 }
 
-
+//emergency med effectiveness stats
 struct EmergencyMedStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = false
     
-    
+    //get the percent effective for each med
     var medicationEffectiveness: [String] {
-        // Filter to only logs where medication was taken
+        // Filter to only logs where medication was taken and effectivness recorded
         let medLogs = logList.filter { $0.med_taken == true && $0.med_worked != nil}
         
-        let totalLogs = medLogs.count
-        
-        // Guard in case no medication logs exist
+        // No data warning
         guard !medLogs.isEmpty else { return ["No medication data available"] }
         
         // Group logs by medication_name
@@ -358,13 +300,11 @@ struct EmergencyMedStats: View{
         }
         
         // Calculate effectiveness percentage for each medication
-        var result: [String] = ["Logs With Emergency Treatment:  \(totalLogs)"]
+        var result: [String] = ["Logs With Emergency Treatment:  \(medLogs.count)"]
         
         for (medication, logs) in groupedByMedication {
             let total = logs.count
-            
             let effectiveCount = logs.filter { $0.med_worked == true }.count
-            
             let percentEffective = (Double(effectiveCount) / Double(total)) * 100.0
             
             result.append("\(medication): \(String(format: "%.1f", percentEffective))% effective")
@@ -372,38 +312,13 @@ struct EmergencyMedStats: View{
         return result
     }
 
-
     var body: some View{
+        //show stats
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    let text = "Emergency Treatment Effectiveness:"
-                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                ForEach(medicationEffectiveness, id: \.self) { item in
-                    CustomText(
-                        text: item,
-                        color: bg,
-                        textSize: screenWidth * 0.045
-                    )
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            //card with header+data
+            StatsCard(title: "Emergency Treatment Effectiveness:", items: medicationEffectiveness, accent: accent, bg: bg, show: $showStats)
         }
+        //if hidden, show show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Emergency Treatment Stats", hideChart: $showStats)
@@ -413,7 +328,7 @@ struct EmergencyMedStats: View{
     }
 }
 
-
+//show how often a trigger is present in logs
 struct TriggerStats: View{
     var accent: String
     var bg: String
@@ -421,32 +336,32 @@ struct TriggerStats: View{
     var triggerOptions: [String]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = false
     
-    
+    //get the percent of logs with each trigger
     var triggerStats: [String] {
-        // All logs
-        let allLogs = logList
-        guard !allLogs.isEmpty else { return ["No trigger data available"] }
+
+        //no data message
+        guard !logList.isEmpty else { return ["No data available"] }
         
         // Count how many logs contain each trigger
         var triggerCounts: [String: Int] = [:]
         
-        for log in allLogs {
+        //see if a trigger is present in a logs trigger array, if so , count it
+        for log in logList {
             guard let triggers = log.trigger_names else { continue }
             for trigger in Set(triggers) {
                 triggerCounts[trigger, default: 0] += 1
             }
         }
         
-        let totalLogCount = allLogs.count
-        var result: [String] = ["Total Logs: \(totalLogCount)"]
+        //initialize result array with total
+        var result: [String] = ["Total Logs: \(logList.count)"]
         
-        //  Loop through every trigger option, even if it's not present in any logs
+        //  Loop through every trigger option and get its prevelency
         for trigger in triggerOptions {
             let count = triggerCounts[trigger] ?? 0
-            let percent = (Double(count) / Double(totalLogCount)) * 100
+            let percent = (Double(count) / Double(logList.count)) * 100
             result.append("\(trigger): \(String(format: "%.1f", percent))% of logs")
         }
         
@@ -454,36 +369,12 @@ struct TriggerStats: View{
     }
 
     var body: some View{
+        //show the stats
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    let text = "Trigger Stats:"
-                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                ForEach(triggerStats, id: \.self) { item in
-                    CustomText(
-                        text: item,
-                        color: bg,
-                        textSize: screenWidth * 0.045
-                    )
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            //card with header+stats
+            StatsCard(title: "Trigger Stats", items: triggerStats, accent: accent, bg: bg, show: $showStats)
         }
+        //if hidden, show show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Trigger Stats", hideChart: $showStats)
@@ -493,43 +384,42 @@ struct TriggerStats: View{
     }
 }
 
+//shows the prevelence of description phrases
 struct DescriptionStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = false
     
-    
+    //ge the prevelence of each phrase
     var descriptionStats: [String] {
+        //only get logs where descrioption is entered
         let descriptionLogs = logList.filter { $0.symptom_description != nil && !$0.symptom_description!.isEmpty}
         
-        let totalLogs = descriptionLogs.count
-        
-        var results = ["Total Side Effect Logs: \(totalLogs)"]
+        //initalize results with total logs
+        var results = ["Total Side Effect Logs: \(descriptionLogs.count)"]
         
         var values: [String] = []
 
+        //get each instance of a description phrase
         values = descriptionLogs.flatMap { log -> [String] in
             guard let value = log.symptom_description, !value.isEmpty else { return [] }
             
-            // Split by comma, trim whitespace, remove empty strings
+            // Split by comma, trim whitespace, and remove empty strings
             return value
                 .split(separator: ",")
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
                 .filter { !$0.isEmpty }
         }
 
-        // Count occurrences
+        // Count how many times each phrase appears
         let counts = Dictionary(values.map { ($0, 1) }, uniquingKeysWith: +)
-        
-        let total = values.count
 
-        // Step 4: Convert to percent format
+        //Convert count to percent
         for (phrase, count) in counts {
-            let percentage = Double(count) / Double(total) * 100
+            let percentage = Double(count) / Double(descriptionLogs.count) * 100
             let formatted = "\(phrase): \(String(format: "%.1f", percentage))%"
             results.append(formatted)
         }
@@ -539,35 +429,10 @@ struct DescriptionStats: View{
 
     var body: some View{
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    let text = "Symptom Description Stats:"
-                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                ForEach(descriptionStats, id: \.self) { item in
-                    CustomText(
-                        text: item,
-                        color: bg,
-                        textSize: screenWidth * 0.045
-                    )
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            //card with header+stats
+            StatsCard(title: "Symptom Description Stats:", items: descriptionStats, accent: accent, bg: bg, show: $showStats)
         }
+        //show show stats button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Symptom Description Stats", hideChart: $showStats)
@@ -577,31 +442,32 @@ struct DescriptionStats: View{
     }
 }
 
+//show distribution of side effect meds
 struct SideEffectStats: View{
     var accent: String
     var bg: String
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    let screenHeight = UIScreen.main.bounds.height
     @State var showStats: Bool = true
     
-    
+    //get what percent of side effects are caused by each med
     var sideEffectStats: [String] {
+        //only use side effect logs
         let sideEffectLogs = logList.filter { $0.log_type == "Side Effect"}
         
-        let totalLogs = sideEffectLogs.count
+        //initalize results with total
+        var results = ["Logs With Description: \(sideEffectLogs.count)"]
         
-        var results = ["Logs With Description: \(totalLogs)"]
-        
+        //get all the instances of side efect med
         let values = sideEffectLogs.compactMap { $0.side_effect_med }
 
-        // Count occurrences
+        //count how many times each med appears
         let counts = Dictionary(values.map { ($0, 1) }, uniquingKeysWith: +)
 
-        // Step 4: Convert to percent
+        // Convert counts to percent
         for (phrase, count) in counts {
-            let percentage = Double(count) / Double(totalLogs) * 100
+            let percentage = Double(count) / Double(sideEffectLogs.count) * 100
             let formatted = "\(phrase): \(String(format: "%.1f", percentage))%"
             results.append(formatted)
         }
@@ -611,35 +477,10 @@ struct SideEffectStats: View{
 
     var body: some View{
         if showStats{
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top){
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                    let text = "Side Effect Stats:"
-                    CustomText(text: text, color: bg, width: text.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
-                
-                    Spacer()
-                    
-                    HideButton(accent: accent, bg: bg, show: $showStats)
-                }
-                .frame(width: screenWidth - 50 - 15 * 2)
-                .padding(.bottom, 5)
-                
-                ForEach(sideEffectStats, id: \.self) { item in
-                    CustomText(
-                        text: item,
-                        color: bg,
-                        textSize: screenWidth * 0.045
-                    )
-                }
-            }
-            .padding(.horizontal, 15)
-            .padding(.top, 10)
-            .padding(.bottom, 20)
-            .background(Color(hex:accent))
-            .cornerRadius(20)
-            .frame(width: screenWidth - 50, alignment: .leading)
-            .padding(.bottom, 10)
+            //card with header+stats
+            StatsCard(title: "Side Effect Stats:", items: sideEffectStats, accent: accent, bg: bg, show: $showStats)
         }
+        //if hidden, show show button
         else{
             HStack {
                 HiddenChart(bg:bg, accent:accent, chart:"Side Effect Stats", hideChart: $showStats)
@@ -648,5 +489,3 @@ struct SideEffectStats: View{
         }
     }
 }
-
-
