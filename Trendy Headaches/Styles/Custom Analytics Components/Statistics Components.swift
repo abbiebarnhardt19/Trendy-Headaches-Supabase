@@ -193,7 +193,7 @@ struct MedicationTable: View {
             //header
             HStack(alignment: .top){
                 let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                let title = "Treatment History"
+                let title = "Treatment History: "
                 CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
             
                 Spacer()
@@ -449,7 +449,7 @@ struct SideEffectStats: View{
     var logList: [UnifiedLog]
     
     let screenWidth = UIScreen.main.bounds.width
-    @State var showStats: Bool = true
+    @State var showStats: Bool = false
     
     //get what percent of side effects are caused by each med
     var sideEffectStats: [String] {

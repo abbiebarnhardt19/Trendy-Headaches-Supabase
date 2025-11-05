@@ -5,46 +5,38 @@
 //  Created by Abigail Barnhardt on 11/3/25.
 //
 import SwiftUI
+
+//format dates for table
 func formatDateString(dateString: String?) -> String {
-    let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateFormat = "MM/dd/yy"
-        return df
-    }()
     guard let dateString = dateString, !dateString.isEmpty else { return "N/A" }
+
     let isoFormatter = DateFormatter()
     isoFormatter.dateFormat = "yyyy-MM-dd"
-    if let date = isoFormatter.date(from: dateString) {
-        return dateFormatter.string(from: date)
-    } else {
-        return dateString
-    }
+
+    let outputFormatter = DateFormatter()
+    outputFormatter.dateFormat = "MM/dd/yy"
+
+    return isoFormatter.date(from: dateString).map { outputFormatter.string(from: $0) } ?? dateString
 }
+
 
 func calculateColumnWidths(medicationList: [Medication]) -> [CGFloat] {
     let font = UIFont.systemFont(ofSize: 14)
-    var widths: [CGFloat] = []
     
-    // Name: 10 chars of the longest name
-    if let maxName = medicationList.map({ $0.medicationName }).max(by: { $1.count > $0.count }) {
-        widths.append(maxName.width(usingFont: font) + 15)
-    } else {
-        widths.append(10 * 10) // fallback
-    }
+    //Medication Name Column
+    let maxName = medicationList.map { $0.medicationName }.max(by: { $0.count < $1.count }) ?? ""
+    let nameWidth = maxName.width(usingFont: font) + 15
     
-    // Cat.: 5 chars max
-    widths.append("emerg".width(usingFont: font) + 15)
+    //Category Column (static: "emerg")
+    let categoryWidth = "emerg".width(usingFont: font) + 15
     
-    // Start & End: date width
-    let dateSample = "11/11/11"
-    widths.append(dateSample.width(usingFont: font) + 15)
-    widths.append(dateSample.width(usingFont: font) + 15)
+    //Start & End Dates (static width)
+    let dateWidth = "11/11/11".width(usingFont: font) + 15
     
-    // Reason: max 50 characters or "Reason", whichever is larger
-    let maxReason = medicationList.map { ($0.endReason ?? "") }.max(by: { $1.count > $0.count }) ?? ""
+    //Reason Column (up to 50 chars max or "Reason")
+    let maxReason = medicationList.map { $0.endReason ?? "" }.max(by: { $0.count < $1.count }) ?? ""
     let reasonText = String(maxReason.prefix(50))
-    let reasonWidth = max("Reason ".width(usingFont: font), reasonText.width(usingFont: font))
-    widths.append(reasonWidth + 20)
+    let reasonWidth = max("Reason".width(usingFont: font), reasonText.width(usingFont: font)) + 20
     
-    return widths
+    return [nameWidth, categoryWidth, dateWidth, dateWidth, reasonWidth]
 }

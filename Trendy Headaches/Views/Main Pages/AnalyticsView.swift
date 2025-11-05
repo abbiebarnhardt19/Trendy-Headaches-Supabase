@@ -15,64 +15,49 @@ struct AnalyticsView: View {
     
     @State var selectedView: String = "Statistics"
     
-    @State var logs: [UnifiedLog] = []
-    @State var allLogs: [UnifiedLog] = []
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
-    @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
-    @State private var hideCalendar: Bool = true
-    @State private var hideSeverity: Bool = true
-    @State private var hideFreqChart: Bool = true
-    @State private var hideMedTimeline: Bool = true
-   
+
+    //values to be intialized on appear from database
+    @State var logs: [UnifiedLog] = []
     @State var symptomOptions: [String] = []
     @State var selectedSymptoms: [String] = []
-    
     @State var startDate: Date = Date()
-    @State var endDate: Date = Date()
-
-    
     @State var medData: [Medication] = []
     @State var triggerOptions: [String] = []
     
+    //set end date for filter for the end of the current date
+    @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
+    
+    //filter logs based date and symptom
     var filteredLogs: [UnifiedLog] {
         
-        if selectedSymptoms.isEmpty {
-            return []
-        } else {
-            let filtered = logs.filter { log in
-                guard let name = log.symptom_name else {
-                    return false
-                }
-                
-                let withinDateRange = log.date >= startDate && log.date <= endDate
-                let symptomMatch = selectedSymptoms.contains(name)
-                
-                if log.trigger_names != nil {
-                }
-                
-                return symptomMatch && withinDateRange
-            }
-            return filtered
+        let filtered = logs.filter { log in
+            
+            let withinDateRange = log.date >= startDate && log.date <= endDate
+            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
+
+            return symptomMatch && withinDateRange
         }
+        return filtered
     }
     
     var body: some View {
         NavigationStack{
             ZStack {
+                //things that are present regardless of analytics type
                 AnalyticsBGComps(bg: bg, accent: accent)
                 
                 ScrollView{
                     HStack{
                         Spacer()
+                        //change analytics type
                         AnalyticsDropdown(accent: accent, bg: bg, options: ["Graphs", "Statistics", "Comparison"],selected: $selectedView)
                             .padding(.trailing, 20)
                             .padding(.top, 20)
                     }
-                    
-                    if selectedView == "Graphs"{
                         
-                        VStack(spacing: 0) {
-                            
+                    VStack{
+                        if selectedView == "Graphs"{
                             filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate)
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
@@ -94,14 +79,9 @@ struct AnalyticsView: View {
                             AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.trigger_names, chartName: "Trigger Frequency", accent: accent, bg: bg)
                             
                             AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.symptom_description, chartName: "Symptom Description Key Words", accent: accent, bg: bg)
-                            
-                            
                         }
-                        .padding(.bottom, 170)
-                    }
-                    
-                    else if selectedView == "Statistics"{
-                        VStack{
+                        
+                        else if selectedView == "Statistics"{
                             LogFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
                             
                             SeverityStats(accent: accent, bg: bg, logList: filteredLogs)
@@ -118,25 +98,22 @@ struct AnalyticsView: View {
                             
                             SideEffectStats(accent: accent, bg: bg, logList: logs)
                         }
-                        .padding(.bottom, 170)
-                        
+                        //else comparison
+                        else{
+                            CustomText(text: "Compairison Screen", color: accent)
+                        }
                     }
-                    else{
-                        CustomText(text: "New Screen", color: accent)
-                    }
+                    .padding(.bottom, 170)
                 }
     
+                //nav bar
                 VStack {
                     Spacer()
                     NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(2))
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
-                .onAppear {
-                    // Set endDate when view first appears
-                    let calendar = Calendar.current
-                    endDate = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
-                }
+                //get valies from daabase
                 .task {
                     do {
                         let result = try await fetchAnalyticsData(userID: Int(userID))

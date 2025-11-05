@@ -225,6 +225,7 @@ struct CustomButton: View {
     }
 }
 
+//resuable component for stats cards
 struct StatsCard: View {
     var title: String
     var items: [String]
@@ -243,6 +244,7 @@ struct StatsCard: View {
             
                 Spacer()
                 
+                //hide button
                 Button(action: { show.toggle() }) {
                     Image(systemName: "eye.slash.circle")
                         .resizable()
@@ -255,7 +257,7 @@ struct StatsCard: View {
             .frame(width: screenWidth - 50 - 15 * 2)
             .padding(.bottom, 5)
             
-            // Display items
+            // Display each stat
             ForEach(items, id: \.self) { item in
                 CustomText(text: item, color: bg, textSize: screenWidth * 0.045)
             }
