@@ -8,15 +8,15 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "C3D96ECB-0A2E-4BB3-B2F1-4E4E84F5445C"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Trendy Headaches/Styles/Custom Analytics Components/Custom Analytics Components.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
-            landmarkName = "filterSymptom"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "AnalyticsFilter"
             landmarkType = "14">
          </BreakpointContent>
       </BreakpointProxy>

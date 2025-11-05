@@ -21,6 +21,7 @@ struct AnalyticsView: View {
     @State var logs: [UnifiedLog] = []
     @State var symptomOptions: [String] = []
     @State var selectedSymptoms: [String] = []
+    @State var selectedTypes: [String] = ["Symptom", "Side Effect"]
     @State var startDate: Date = Date()
     @State var medData: [Medication] = []
     @State var triggerOptions: [String] = []
@@ -28,15 +29,16 @@ struct AnalyticsView: View {
     //set end date for filter for the end of the current date
     @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
     
-    //filter logs based date and symptom
+    //filter logs based date, symptom, and log type
     var filteredLogs: [UnifiedLog] {
         
         let filtered = logs.filter { log in
             
             let withinDateRange = log.date >= startDate && log.date <= endDate
             let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
+            let typeMatch = selectedTypes.contains(log.log_type)
 
-            return symptomMatch && withinDateRange
+            return symptomMatch && withinDateRange && typeMatch
         }
         return filtered
     }
@@ -58,7 +60,7 @@ struct AnalyticsView: View {
                         
                     VStack{
                         if selectedView == "Graphs"{
-                            filterSymptom(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate)
+                            AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
                             
@@ -82,6 +84,9 @@ struct AnalyticsView: View {
                         }
                         
                         else if selectedView == "Statistics"{
+                            
+                            AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
+                            
                             LogFrequencyStats(accent: accent, bg: bg, logList: filteredLogs)
                             
                             SeverityStats(accent: accent, bg: bg, logList: filteredLogs)
@@ -90,13 +95,13 @@ struct AnalyticsView: View {
                             
                             MedicationTable(accent: accent, bg: bg, medList: medData)
                             
-                            EmergencyMedStats(accent: accent, bg: bg, logList: logs)
+                            EmergencyMedStats(accent: accent, bg: bg, logList: filteredLogs)
                             
-                            TriggerStats(accent: accent, bg: bg, logList: logs, triggerOptions: triggerOptions)
+                            TriggerStats(accent: accent, bg: bg, logList: filteredLogs, triggerOptions: triggerOptions)
                             
-                            DescriptionStats(accent: accent, bg: bg, logList: logs)
+                            DescriptionStats(accent: accent, bg: bg, logList: filteredLogs)
                             
-                            SideEffectStats(accent: accent, bg: bg, logList: logs)
+                            SideEffectStats(accent: accent, bg: bg, logList: filteredLogs)
                         }
                         //else comparison
                         else{

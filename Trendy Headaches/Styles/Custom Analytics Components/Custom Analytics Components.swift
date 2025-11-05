@@ -24,13 +24,14 @@ struct HiddenChart: View {
     }
 }
 
-struct filterSymptom: View {
+struct AnalyticsFilter: View {
     var bg: String
     var accent: String
     @Binding var symptomOptions: [String]
     @Binding var selectedSymptom : [String]
     @Binding var startDate: Date
     @Binding var endDate: Date
+    @Binding var selectedTypes:[String]
     
     @State private var showSymptomFilter: Bool = false
     
@@ -44,6 +45,8 @@ struct filterSymptom: View {
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     
+    @State var typeOptions = ["Symptom", "Side Effect"]
+    
     var body: some View {
         
         @State var startDateString = formatter.string(from: startDate)
@@ -52,7 +55,7 @@ struct filterSymptom: View {
         if showSymptomFilter {
             VStack(alignment: .leading, spacing: 10) {
                 HStack{
-                    CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                    CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     
                     Button(action: { showSymptomFilter.toggle() }) {
                         Image(systemName: "eye.slash.circle")
@@ -63,7 +66,12 @@ struct filterSymptom: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
+
+                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
+                    .padding(.bottom, 5)
                 
+                CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+
                 MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
                 

@@ -7,6 +7,55 @@
 
 import SwiftUI
 
+//resuable component for stats cards
+struct StatsCard: View {
+    var title: String
+    var items: [String]
+    var accent: String
+    var bg: String
+    @Binding var show: Bool
+
+    let screenWidth = UIScreen.main.bounds.width
+    
+    @State var typeFilter = "All Types"
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // Header
+            HStack(alignment: .top){
+                let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+            
+                Spacer()
+                
+                //hide button
+                Button(action: { show.toggle() }) {
+                    Image(systemName: "eye.slash.circle")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(Color(hex: bg))
+                        .frame(width: 25, height: 25)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
+            .frame(width: screenWidth - 50 - 15 * 2)
+            .padding(.bottom, 5)
+            
+            // Display each stat
+            ForEach(items, id: \.self) { item in
+                CustomText(text: item, color: bg, textSize: screenWidth * 0.045)
+            }
+        }
+        .padding(.horizontal, 15)
+        .padding(.top, 10)
+        .padding(.bottom, 20)
+        .background(Color(hex: accent))
+        .cornerRadius(20)
+        .frame(width: screenWidth - 50, alignment: .leading)
+        .padding(.bottom, 10)
+    }
+}
+
 //shows how many logs a user has total and weekly and monthly average
 struct LogFrequencyStats: View{
     var accent: String
@@ -16,45 +65,32 @@ struct LogFrequencyStats: View{
     let screenWidth = UIScreen.main.bounds.width
 
     @State var showStats: Bool = false
-    @State var typeFilter: String = "All Types"
-    
-    //filter the log based on type, default to both types
-    var filteredLogs: [UnifiedLog] {
-        switch typeFilter {
-        case "Symptom":
-            return logList.filter { $0.log_type == "Symptom" }
-        case "Side Effect":
-            return logList.filter { $0.log_type == "Side Effect" }
-        default:
-            return logList
-        }
-    }
-    
+
     //get the totals and averages
     var frequencyStats: [String] {
         
         //display a no data message if there are no logs
-        guard !filteredLogs.isEmpty else { return ["No log data available"] }
+        guard !logList.isEmpty else { return ["No data available"] }
         
         //get all the log dates
-        let dates = filteredLogs.map { $0.date }
+        let dates = logList.map { $0.date }
         
         //initalize results with total logs
-        var results = ["Total Logs: \(filteredLogs.count)"]
+        var results = ["Total Logs: \(logList.count)"]
         
         //calcuate average logs per week
         let calendar = Calendar.current
         let weeks = calendar.dateComponents([.weekOfYear], from: dates.min() ?? Date(), to: dates.max() ?? Date()).weekOfYear ?? 0
         
         let weekCount = max(weeks, 1)
-        let weeklyAverage = Double(filteredLogs.count) / Double(weekCount)
+        let weeklyAverage = Double(logList.count) / Double(weekCount)
         results.append("Weekly Average: \(String(format: "%.1f", weeklyAverage))")
         
         //calculate average logs per month
         let months = calendar.dateComponents([.month], from: dates.min() ?? Date(), to: dates.max() ?? Date()).month ?? 0
         
         let monthCount = max(months, 1)
-        let monthlyAverage = Double(filteredLogs.count) / Double(monthCount)
+        let monthlyAverage = Double(logList.count) / Double(monthCount)
         results.append("Monthly Average: \(String(format: "%.1f", monthlyAverage))")
         
         return results
@@ -86,26 +122,14 @@ struct SeverityStats: View{
     let screenWidth = UIScreen.main.bounds.width
 
     @State var showStats: Bool = false
-    @State var typeFilter: String = "All Types"
     
-    // Filtered logs based on type
-    var filteredLogs: [UnifiedLog] {
-        switch typeFilter {
-        case "Symptom":
-            return logList.filter { $0.log_type == "Symptom" }
-        case "Side Effect":
-            return logList.filter { $0.log_type == "Side Effect" }
-        default:
-            return logList
-        }
-    }
     
     var averageSeverity: [String] {
         //no data message
-        guard filteredLogs.count > 0 else { return ["No data available"] }
+        guard logList.count > 0 else { return ["No data available"] }
         
-        let totalSeverity = filteredLogs.reduce(0) { $0 + $1.severity }
-        let averageSeverity = Double(totalSeverity) / Double(filteredLogs.count)
+        let totalSeverity = logList.reduce(0) { $0 + $1.severity }
+        let averageSeverity = Double(totalSeverity) / Double(logList.count)
         return ["Average Log Severity: \(String(format: "%.1f", averageSeverity))"]
     }
     
@@ -135,8 +159,9 @@ struct OnsetStats: View{
     
     var onsetPercents: [String] {
         // Filter to only logs where onset_time is not nil and not empty
+        //also has to be symptom
         let filteredLogs = logList.filter { log in
-            if let onset = log.onset_time, !onset.isEmpty {
+            if let onset = log.onset_time, !onset.isEmpty, log.log_type == "Symptom" {
                 return true
             }
             return false
@@ -289,10 +314,10 @@ struct EmergencyMedStats: View{
     //get the percent effective for each med
     var medicationEffectiveness: [String] {
         // Filter to only logs where medication was taken and effectivness recorded
-        let medLogs = logList.filter { $0.med_taken == true && $0.med_worked != nil}
+        let medLogs = logList.filter { $0.med_taken == true && $0.med_worked != nil && $0.log_type == "Symptom"}
         
         // No data warning
-        guard !medLogs.isEmpty else { return ["No medication data available"] }
+        guard !medLogs.isEmpty else { return ["No data available"] }
         
         // Group logs by medication_name
         let groupedByMedication = Dictionary(grouping: medLogs) { log in
@@ -340,15 +365,15 @@ struct TriggerStats: View{
     
     //get the percent of logs with each trigger
     var triggerStats: [String] {
-
+        let symptomLogs = logList.filter {$0.log_type == "Symptom"}
         //no data message
-        guard !logList.isEmpty else { return ["No data available"] }
+        guard !symptomLogs .isEmpty else { return ["No data available"] }
         
         // Count how many logs contain each trigger
         var triggerCounts: [String: Int] = [:]
         
         //see if a trigger is present in a logs trigger array, if so , count it
-        for log in logList {
+        for log in symptomLogs  {
             guard let triggers = log.trigger_names else { continue }
             for trigger in Set(triggers) {
                 triggerCounts[trigger, default: 0] += 1
@@ -356,12 +381,12 @@ struct TriggerStats: View{
         }
         
         //initialize result array with total
-        var result: [String] = ["Total Logs: \(logList.count)"]
+        var result: [String] = ["Total Logs: \(symptomLogs.count)"]
         
         //  Loop through every trigger option and get its prevelency
         for trigger in triggerOptions {
             let count = triggerCounts[trigger] ?? 0
-            let percent = (Double(count) / Double(logList.count)) * 100
+            let percent = (Double(count) / Double(symptomLogs.count)) * 100
             result.append("\(trigger): \(String(format: "%.1f", percent))% of logs")
         }
         
@@ -396,10 +421,13 @@ struct DescriptionStats: View{
     //ge the prevelence of each phrase
     var descriptionStats: [String] {
         //only get logs where descrioption is entered
-        let descriptionLogs = logList.filter { $0.symptom_description != nil && !$0.symptom_description!.isEmpty}
+        let descriptionLogs = logList.filter { $0.symptom_description != nil && !$0.symptom_description!.isEmpty && $0.log_type == "Symptom"}
+        
+        //no data warning
+        guard !descriptionLogs .isEmpty else { return ["No data available"] }
         
         //initalize results with total logs
-        var results = ["Total Side Effect Logs: \(descriptionLogs.count)"]
+        var results = ["Logs With Description: \(descriptionLogs.count)"]
         
         var values: [String] = []
 
@@ -455,6 +483,8 @@ struct SideEffectStats: View{
     var sideEffectStats: [String] {
         //only use side effect logs
         let sideEffectLogs = logList.filter { $0.log_type == "Side Effect"}
+        
+        guard !sideEffectLogs .isEmpty else { return ["No data available"] }
         
         //initalize results with total
         var results = ["Logs With Description: \(sideEffectLogs.count)"]
