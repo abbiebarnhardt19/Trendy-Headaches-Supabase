@@ -7,6 +7,7 @@
  
 import SwiftUI
 
+//add, edit, and drop list
 struct EditableList: View {
     @Binding var items: [String]
     var title, bg, accent: String
@@ -25,14 +26,16 @@ struct EditableList: View {
     @State private var itemToDelete: String? = nil
     @State private var medEndReason: String = ""
 
-
     var body: some View {
         VStack(spacing: 0) {
+            //go through and do all the items
             ForEach(items.indices.filter { items[$0] != "None entered" }, id: \.self) { i in
                 itemRow(index: i)
             }
+            //extra from for new item
             addNewItemRow
         }
+        //for medications, ask why stop
         .alert(
             requiresReason ? "Please list a reason for stopping this medication" : "Are you sure you want to delete this item?",
             isPresented: $showDeleteConfirmation,
@@ -41,9 +44,9 @@ struct EditableList: View {
             if requiresReason {
                 TextField("Enter reason", text: $medEndReason)
                 Button("Submit", role: .destructive) {
-                    onDelete(item, medEndReason) // pass them separately
+                    onDelete(item, medEndReason)
                     items.removeAll { $0 == item }
-                    medEndReason = "" // reset
+                    medEndReason = ""
                 }
                 Button("Cancel", role: .cancel) {
                     medEndReason = ""
@@ -66,10 +69,12 @@ struct EditableList: View {
         .padding(.bottom, 5)
     }
 
+    //text field for each item
     @ViewBuilder
     private func itemRow(index i: Int) -> some View {
         let item = items[i]
         ZStack(alignment: .trailing) {
+            //field with current value, can edit
             TextField("", text: editingIndex == i ? $items[i] : .constant(item))
                 .padding(.vertical, 10)
                 .padding(.trailing, 90)
@@ -82,17 +87,20 @@ struct EditableList: View {
                 .disabled(editingIndex != i ? true : false)
 
             HStack {
+                //button to save edited value
                 if editingIndex == i {
                     actionButton(systemName: "checkmark.circle.fill") {
                         if items[i] != originalValue { onEdit(originalValue, items[i]) }
                         editingIndex = nil
                     }
+                    //button to edit value
                 } else {
                     actionButton(systemName: "pencil.circle.fill") {
                         originalValue = items[i]
                         editingIndex = i
                     }
                 }
+                //button to end value
                 actionButton(systemName: "minus.circle.fill") {
                     itemToDelete = items[i]
                     showDeleteConfirmation = true
@@ -102,6 +110,7 @@ struct EditableList: View {
         }
     }
 
+    //different text field and button for adding item
     private var addNewItemRow: some View {
         HStack {
             ZStack(alignment: .trailing) {
@@ -123,7 +132,8 @@ struct EditableList: View {
                 .background(Color(hex: accent))
                 .cornerRadius(8)
                 .frame(height: rowHeight)
-
+                
+                //add the new value to the db
                 Button {
                     let trimmed = newItemText.trimmingCharacters(in: .whitespaces)
                     guard !trimmed.isEmpty else { return }
@@ -152,12 +162,14 @@ struct EditableList: View {
     }
 }
 
+//button that produces more buttons
 struct FloatButton: View {
     var accent: String
     var bg: String
     var options: [String]
     var actions: [() -> Void]
     
+    //position values
     let xList: [CGFloat] = [-20, -100, -100, -20]
     let yList: [CGFloat] = [-90, -40, 10, 60]
     
@@ -165,6 +177,7 @@ struct FloatButton: View {
     
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
+            //initial button
             Button {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                     showMenu.toggle()
@@ -179,6 +192,7 @@ struct FloatButton: View {
             }
             .buttonStyle(.plain)
             
+            //show the options
             ForEach(Array(options.enumerated()), id: \.offset) { index, option in
                 Button {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {

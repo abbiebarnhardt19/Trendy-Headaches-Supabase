@@ -95,7 +95,7 @@ struct ListView: View {
                     //page label
                     VStack{
                         HStack{
-                            FilterDropDown(accent: accent, bg: bg, popUp: $showFilter, width: screenWidth * 0.12)
+                            FilterButton(accent: accent, bg: bg, popUp: $showFilter, width: screenWidth * 0.12)
                                 .padding(.trailing, 5)
                             let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
                             CustomText(text: "Log List", color: accent, width: "Log List".width(usingFont: font), textSize: screenWidth * 0.1)
@@ -124,7 +124,7 @@ struct ListView: View {
                 if showFilter {
                     VStack {
                         HStack {
-                            filterPopUp(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                            FilterOptions(accent: accent, bg: bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
                                 .padding(.leading, 38)
                                 .padding(.top, 90)
                             Spacer()

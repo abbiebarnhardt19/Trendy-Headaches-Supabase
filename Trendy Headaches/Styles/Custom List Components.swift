@@ -7,15 +7,18 @@
 
 import SwiftUI
 
-struct FilterDropDown: View {
+//button to trigger filter dropdown
+struct FilterButton: View {
     @State var accent: String
     @State var bg: String
     @Binding var popUp: Bool
     var width: CGFloat
     
     var body: some View {
+        //when clicked, toggle showing of filter optioms
         Button(action: { popUp.toggle() }) {
             ZStack {
+                //circle with lines in it to indicate filter
                 Circle()
                     .fill(Color(hex: bg))
                     .frame(width: width * 0.9, height: width * 0.9)
@@ -30,7 +33,8 @@ struct FilterDropDown: View {
     }
 }
 
-struct filterPopUp: View {
+//adjust filter values
+struct FilterOptions: View {
     @State var accent: String
     @State var bg: String
     @State var colOptions: [String]
@@ -46,8 +50,7 @@ struct filterPopUp: View {
     @Binding var sympOptions: [String]
     @Binding var selectedSymps: [String]
 
-    @State private var expandedWidth: CGFloat = 215
-    @State private var unexpandedWidth: CGFloat = 255
+
     
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
@@ -56,26 +59,29 @@ struct filterPopUp: View {
         case none, columns, logType, date, severity, symptoms
     }
 
+    //sections expand when clicked, with differernt width
+    @State private var expandedWidth: CGFloat = 215
+    @State private var unexpandedWidth: CGFloat = 255
     @State private var expandedSection: FilterSection = .none
     @State private var dropdownWidths: [FilterSection: (collapsed: CGFloat, expanded: CGFloat)] = [.columns: (100, 250), .logType: (100, 160),  .date: (55, 280),  .severity: (90, 190),  .symptoms: (120, 300)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // MARK: Columns
+            //column section
                 sectionButton(title: "Columns", section: .columns) {
                     MultipleCheckboxWrapped(options: $colOptions, selected: $selectedCols, accent: accent, bg: bg, width: (dropdownWidths[.columns]?.expanded ?? 250) - 30, textSize: screenWidth * 0.045)
                     .padding(.top, 10)
                     .padding(.leading, 5)
                 }
             
-            // MARK: Log Type
+            // log type section
             sectionButton(title: "Log Type", section: .logType) {
                 MultipleCheckboxWrapped(options: $typeOptions, selected: $type, accent: accent, bg: bg, width: (dropdownWidths[.logType]?.expanded ?? 250) - 20, textSize: screenWidth * 0.045)
                 .padding(.top, 10)
                 .padding(.leading, 2)
             }
 
-            // MARK: Date
+            //date section
             sectionButton(title: "Date", section: .date) {
                 VStack {
                     DateTextField(date: $start, textValue: $stringStart, bg: $accent,  accent: $bg, width: 250, label: "Start:")
@@ -86,7 +92,7 @@ struct filterPopUp: View {
                 .padding(.leading, 5)
             }
 
-            // MARK: Severity
+            //severity section
             sectionButton(title: "Severity", section: .severity) {
                 HStack {
                     CustomTextField(bg: accent,  accent: bg, placeholder: "", text: Binding(get: { String(sevStart) }, set: { sevStart = Int64($0) ?? 0 }),
@@ -104,7 +110,7 @@ struct filterPopUp: View {
                 .padding(.leading, 10)
             }
 
-            // MARK: Symptoms
+            // symptom section
             sectionButton(title: "Symptoms", section: .symptoms) {
                 MultipleCheckboxWrapped(options: $sympOptions, selected: $selectedSymps, accent: accent, bg: bg, width: (dropdownWidths[.symptoms]?.expanded ?? 250) - 30 , textSize: screenWidth * 0.045)
                 .padding(.top, 10)
@@ -118,17 +124,19 @@ struct filterPopUp: View {
         .cornerRadius(20)
     }
         
-    // MARK: Section Button Helper
+    // resuable section button
     @ViewBuilder
     private func sectionButton<Content: View>(
         title: String,
         section: FilterSection,
         @ViewBuilder content: () -> Content
     ) -> some View {
+        //get the widths for that section
         let widths = dropdownWidths[section] ?? (300, 300)
-        let sectionExpandedWidth = widths.expanded  // ← Renamed to avoid shadowing
+        let sectionExpandedWidth = widths.expanded
         let isExpanded = expandedSection == section
         
+        //set width based on currently expanded
         let currentWidth: CGFloat = {
             if let activeWidths = dropdownWidths[expandedSection] {
                 return expandedSection == .none ? widths.collapsed : activeWidths.expanded
@@ -139,8 +147,10 @@ struct filterPopUp: View {
         
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 5) {
+                //label
                 CustomText(text: title, color: bg,  width: currentWidth, textAlign: .leading, bold: true)
                 
+                //expansion button
                 Button(action: {
                     withAnimation(.easeInOut) {
                         self.expandedSection = isExpanded ? .none : section
@@ -155,6 +165,7 @@ struct filterPopUp: View {
             }
             .padding(.horizontal, 5)
                 
+            //adjust content to expanded width
             if isExpanded {
                 content()
                     .frame(width: sectionExpandedWidth, alignment: .leading)
@@ -165,6 +176,7 @@ struct filterPopUp: View {
     }
 }
 
+//table for displaying all logs
 struct ScrollableLogTable: View {
     var userID: Int64
     var list: [UnifiedLog]
@@ -196,6 +208,7 @@ struct ScrollableLogTable: View {
         return f
     }
     
+    //set the width of the table
     var tableWidth: CGFloat {
         let contentWidth = selectedCols.reduce(0) { sum, col in
             sum + (columnWidths[col] ?? defaultWidths[col] ?? 100)
@@ -203,6 +216,7 @@ struct ScrollableLogTable: View {
         return min(width, contentWidth)
     }
 
+    //set minimum widths for columns that have fixed content
     private func minWidth(for column: String) -> CGFloat {
         let padding: CGFloat = 25
         
@@ -220,6 +234,7 @@ struct ScrollableLogTable: View {
         }
     }
 
+    //func to size the columns
     private func autoWidth(for column: String) -> CGFloat {
         let charWidth: CGFloat = 9.5
         let padding: CGFloat = 25
@@ -237,14 +252,17 @@ struct ScrollableLogTable: View {
                 Color.clear // takes no extra space
                 ScrollView([.vertical, .horizontal], showsIndicators: true) {
                     LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                        //top row frozen at top
                         Section(header:
                             VStack(spacing: 0) {
                                 headerRow
+                            //top row slightly differrent color
                             Rectangle()
                                 .fill(Color(hex: bg).opacity(0.4))
                                 .frame(height: 2)
                             } )
                         {
+                            //make each individual row
                             ForEach(list, id: \.id) { log in
                                 row(for: log)
                                 Rectangle()
@@ -285,6 +303,7 @@ struct ScrollableLogTable: View {
                 defaultWidths[col] = width
             }
         }
+        //for deleting log
         .alert("Delete Log?", isPresented: $showDeleteAlert, presenting: logToDelete) { log in
             Button("Delete", role: .destructive) {
                 Task {
@@ -298,7 +317,7 @@ struct ScrollableLogTable: View {
         }
     }
 
-    // MARK: - Header
+    //top row
     private var headerRow: some View {
         HStack(spacing: 0) {
             ForEach(selectedCols.indices, id: \.self) { index in
@@ -306,13 +325,15 @@ struct ScrollableLogTable: View {
                 let isLastColumn = index == selectedCols.count - 1
                 
                 ZStack(alignment: .trailing) {
+                    //column name
                     CustomText(text: column, color: bg,  textAlign: .center, multiAlign: .center, bold: true, textSize: screenWidth * 0.045)
                         .frame(width: effectiveWidth(for: column), height: headerHeight)
                         .padding(.trailing, isLastColumn ? 5 : 0)
                         .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
 
-                    //for resizing
+                    //all but last column resizing
                     if !isLastColumn {
+                        //invisiable rectangle for dragging
                         Rectangle()
                             .fill(Color.clear)
                             .frame(width: 10)
@@ -353,15 +374,17 @@ struct ScrollableLogTable: View {
         .background(Color(hex: accent))
     }
 
-    // MARK: - Row
+    //row template
     private func row(for log: UnifiedLog) -> some View {
         let isLastRow = log.id == list.last?.id
 
         return HStack(spacing: 0) {
+            //go through each column
             ForEach(selectedCols.indices, id: \.self) { index in
                 let column = selectedCols[index]
                 let isLastColumn = index == selectedCols.count - 1
 
+                //get column value
                 CustomText(text: value(for: column, in: log), color: bg,  textAlign: .center, textSize: screenWidth * 0.04)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -382,19 +405,22 @@ struct ScrollableLogTable: View {
                 }
             }
         }
+        //add extra padding on last row for horizontal scroll indicator
         .padding(.bottom, isLastRow ? 7 : 0)
         .contentShape(Rectangle())
+        //on hold delete row
         .onLongPressGesture(minimumDuration: 1.0) {
             logToDelete = log
             showDeleteAlert = true
         }
+        //on tap move to log page
         .simultaneousGesture(
             TapGesture().onEnded {
                 onLogTap?(log.log_id, log.log_type)
             })
     }
 
-    // MARK: - Width Logic
+    // adjusting width
     private func effectiveWidth(for column: String) -> CGFloat {
         let minWidth = minWidth(for: column)
         if column == activeColumn {
@@ -405,7 +431,7 @@ struct ScrollableLogTable: View {
         }
     }
 
-    // MARK: - Value Mapping
+    // value mapping
     private func value(for column: String, in log: UnifiedLog) -> String {
         switch column {
         case "Log Type": return log.log_type
