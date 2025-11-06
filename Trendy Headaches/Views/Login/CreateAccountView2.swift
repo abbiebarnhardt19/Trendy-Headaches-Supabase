@@ -31,7 +31,7 @@ struct CreateAccountView2: View {
                         .padding(.leading, leadPad)
 
                     // Theme dropdown
-                    CustomDropdown(theme: $theme, bg: $bg, accent: $accent, options: themeOptions,  width: screenWidth - 50, height: 50, corner: 30, fontSize: 22)
+                    ThemeDropdown(theme: $theme, bg: $bg, accent: $accent, options: themeOptions,  width: screenWidth - 50, height: 50, corner: 30, fontSize: 22)
 
                     // Custom theme input fields
                     if theme == "Custom" {

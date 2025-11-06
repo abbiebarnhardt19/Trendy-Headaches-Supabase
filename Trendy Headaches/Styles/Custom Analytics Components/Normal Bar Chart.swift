@@ -54,6 +54,7 @@ struct AnalyticsBarChart: View {
         return counts.map { ($0.key, $0.value) }.sorted { $0.count > $1.count }
     }
     
+    //get the width of the longest key so all are set the same
     var longestKeyWidth: CGFloat {
         let longestKey = frequencyData.max(by: { $0.key.count < $1.key.count })?.key ?? ""
         let font = UIFont.systemFont(ofSize: 12)
@@ -61,7 +62,6 @@ struct AnalyticsBarChart: View {
         return width + 10
     }
 
-    // MARK: - Body
     var body: some View {
         if showVisual {
             ZStack {
@@ -73,20 +73,15 @@ struct AnalyticsBarChart: View {
                 VStack(alignment: .leading, spacing: 12) {
                     // Header
                     HStack {
+                        //chart title
                         let font = UIFont.systemFont(ofSize: 19, weight: .bold)
                         CustomText(text: chartName, color: bg, width: chartName.width(usingFont: font) + 15, textAlign: .leading, bold: true, textSize: 19)
                             .padding(.leading, 35)
 
                         Spacer()
 
-                        Button(action: { showVisual.toggle() }) {
-                            Image(systemName: "eye.slash.circle")
-                                .resizable() // Add this!
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundStyle(Color(hex: bg))
-                                .frame(width: 25, height: 25)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                        //hide the chart
+                        HideButton(accent: accent, bg: bg, show: $showVisual)
                         .padding(.trailing, 25)
                     }
 
@@ -94,7 +89,7 @@ struct AnalyticsBarChart: View {
                         VStack {
                             ForEach(frequencyData, id: \.key) { item in
                                 HStack(spacing: 0) {
-                                    // Label column
+                                    // bar label
                                     let font = UIFont.systemFont(ofSize: 12)
                                     CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font) + 10, textSize: 12)
                                         .frame(width: longestKeyWidth, alignment: .trailing)
@@ -108,14 +103,17 @@ struct AnalyticsBarChart: View {
                                         let barWidth = geo.size.width * ratio - 5
 
                                         ZStack(alignment: .leading) {
+                                            //bar with full width, hidden
                                             RoundedRectangle(cornerRadius: 12)
                                                 .fill(Color(hex: accent))
                                                 .frame(height: 25)
 
+                                            //actual bar
                                             RoundedRectangle(cornerRadius: 12)
                                                 .fill(Color(hex: bg))
                                                 .frame(width: barWidth, height: 25)
                                             
+                                            //text in the bar
                                             CustomText(text: "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth, textAlign: .center, textSize: 12)
                                                 .clipped()
                                         }
@@ -126,6 +124,7 @@ struct AnalyticsBarChart: View {
                         }
                         .padding(.horizontal)
                     }
+                    //no data warning
                     else{
                         CustomText(text: "No Data", color: bg, textAlign: .center, bold: true)
                             .padding(.bottom, 10)
@@ -137,6 +136,7 @@ struct AnalyticsBarChart: View {
             .frame(width: width)
             .padding(.bottom, 10)
         } else {
+            //show chart button
             HiddenChart(bg: bg, accent: accent, chart: chartName, hideChart: $showVisual)
         }
     }

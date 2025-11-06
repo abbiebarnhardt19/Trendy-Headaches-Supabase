@@ -159,7 +159,7 @@ struct ProfileView: View {
                 CustomTextField(bg: newBG, accent: newAcc, placeholder: "",  text: $newSQ,  width: colWidth - 15, height: 50, corner: 8, textSize: 20,  multiline: true)
                 
                 sectionTitle("Color Theme", width: colWidth)
-                CustomDropdown(theme: $newTN, bg: $newBG, accent: $newAcc, options: themeOptions, width: colWidth - 15, height: 50,  corner: 8, fontSize: 20)
+                ThemeDropdown(theme: $newTN, bg: $newBG, accent: $newAcc, options: themeOptions, width: colWidth - 15, height: 50,  corner: 8, fontSize: 20)
                 
                 //conditionally show hex code text boxes
                 if newTN == "Custom" {
