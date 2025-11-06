@@ -370,14 +370,13 @@ struct Slider: View {
                         .fill(Color(hex: color))
                         .frame(width: 28, height: 28)
                         .position(x: margin + CGFloat(index) * spacing, y: geo.size.height / 2)
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { gesture in
-                                    let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
-                                    let nearestIndex = Int(round(clampedX / spacing))
-                                    let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
-                                    value = steps[safeIndex]
-                                })
+                        .gesture(DragGesture(minimumDistance: 0)
+                            .onChanged { gesture in
+                                let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
+                                let nearestIndex = Int(round(clampedX / spacing))
+                                let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
+                                value = steps[safeIndex]
+                            })
                 }
             }
             .frame(height: 30)
@@ -406,7 +405,7 @@ struct MultipleChoice: View {
     let spacing: CGFloat = 20
 
     var body: some View {
-        let rows = computeRows()
+        let rows = computeRowsForForm(options: options, textSize: textSize ?? 20, width: width, itemHeight: 20)
         
         VStack(alignment: .leading, spacing: 12) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -442,32 +441,6 @@ struct MultipleChoice: View {
                 selected = options[0]
             }
         }
-    }
-    
-    private func computeRows() -> [[String]] {
-        var rows: [[String]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: textSize ?? 20, weight: .regular)
-        let itemSpacing: CGFloat = 12
-        
-        for option in options {
-            let textWidth = option.width(usingFont: font)
-            // For options > 10 chars, cap the width to prevent overflow
-            let maxTextWidth = option.count > 10 ? width - circleWidth - 8 - 50 : textWidth
-            let itemWidth = circleWidth + 8 + min(textWidth, maxTextWidth)
-            
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
-                rows.append([option])
-                currentRowWidth = itemWidth
-            } else {
-                rows[rows.count - 1].append(option)
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
     }
 }
 
@@ -537,7 +510,7 @@ struct MultipleCheckboxWrapped: View {
     var textSize: CGFloat = 14
     
     var body: some View {
-        let rows = computeRows()
+        let rows = computeRowsForForm(options: options, textSize: textSize, width: width, itemHeight: itemHeight)
         
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -590,31 +563,5 @@ struct MultipleCheckboxWrapped: View {
             }
         }
         .frame(width: width, alignment: .leading)
-    }
-    
-    private func computeRows() -> [[String]] {
-        var rows: [[String]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: textSize, weight: .regular)
-        let itemSpacing: CGFloat = 8
-        
-        for option in options {
-            let textWidth = option.width(usingFont: font)
-            // For options > 10 chars, cap the width to prevent overflow
-            let maxTextWidth = option.count > 10 ? width - itemHeight - 4 - 50 : textWidth
-            let itemWidth = itemHeight + 4 + min(textWidth, maxTextWidth)
-            
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
-                rows.append([option])
-                currentRowWidth = itemWidth
-            } else {
-                rows[rows.count - 1].append(option)
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
     }
 }

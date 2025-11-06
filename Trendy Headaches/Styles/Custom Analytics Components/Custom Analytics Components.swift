@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+//button with chart/stat name to show it
 struct HiddenChart: View {
     var bg: String
     var accent: String
@@ -24,6 +25,7 @@ struct HiddenChart: View {
     }
 }
 
+//filter by symptom, log type, and date
 struct AnalyticsFilter: View {
     var bg: String
     var accent: String
@@ -54,6 +56,7 @@ struct AnalyticsFilter: View {
         
         if showSymptomFilter {
             VStack(alignment: .leading, spacing: 10) {
+                //top section in h stack so label and hide button on same line
                 HStack{
                     CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     
@@ -67,16 +70,20 @@ struct AnalyticsFilter: View {
                     .buttonStyle(PlainButtonStyle())
                 }
 
+                //log type checkbox
                 MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
                 
+                //symptom checkbox
                 CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
 
                 MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
                 
+                //date fields
                 CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     .padding(.bottom, 5)
+                
                 DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
 
                 DateTextField(date: $endDate, textValue: $endDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "End: ", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
@@ -89,10 +96,9 @@ struct AnalyticsFilter: View {
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
         }
-
+        //button for when hidden
         else {
             HStack {
-                
                 CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showSymptomFilter.toggle() } )
             }
             .frame(width: screenWidth)
@@ -100,6 +106,7 @@ struct AnalyticsFilter: View {
     }
 }
 
+//dropdown with no background
 struct AnalyticsDropdown: View {
     var accent: String
     var bg: String
@@ -111,6 +118,7 @@ struct AnalyticsDropdown: View {
     @State private var isExpanded = false
     
     var body: some View {
+        //used for different sized dropdowns
         let optionTextSize = max(textSize*0.5, 14)
         let labelFont = UIFont.systemFont(ofSize: textSize, weight: .regular)
         let dropdownFont = UIFont.systemFont(ofSize: optionTextSize, weight: .regular)
@@ -118,20 +126,15 @@ struct AnalyticsDropdown: View {
         
         
         VStack(alignment: .trailing, spacing: 6) {
-            // Button
+            // Button, can click on label or chevron
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isExpanded.toggle()
                 }
             }) {
+                //text for current view
                 HStack(spacing: 5) {
-                    CustomText(
-                        text: selected,
-                        color: accent,
-                        width: selected.width(usingFont: labelFont)+15,
-                        textAlign: .leading,
-                        textSize: textSize
-                    )
+                    CustomText(text: selected, color: accent, width: selected.width(usingFont: labelFont)+15, textAlign: .leading, textSize: textSize )
                     
                     Image(systemName: "chevron.down")
                         .resizable()
@@ -145,7 +148,7 @@ struct AnalyticsDropdown: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            // Expanded menu (appears below button)
+            // Dropdown options
             if isExpanded {
                 VStack(spacing: 0) {
                     ForEach(options.indices, id: \.self) { index in
@@ -157,18 +160,15 @@ struct AnalyticsDropdown: View {
                                 isExpanded = false
                             }
                         }) {
+                            //each option
                             HStack {
-                                CustomText(
-                                    text: option,
-                                    color: bg,
-                                    width: longestWidthForDropdown + 10,
-                                    textAlign: .center,
-                                    textSize: optionTextSize
-                                )
+                                CustomText( text: option, color: bg, width: longestWidthForDropdown + 10, textAlign: .center, textSize: optionTextSize)
+                                
                                 Spacer()
                             }
                             .padding(.horizontal, 14)
                             .padding(.vertical, 10)
+                            //make selected different color
                             .background(option == selected ? Color(hex: accent).opacity(0.55) :  Color(hex: accent) )
                         }
                         .buttonStyle(.plain)
@@ -186,6 +186,7 @@ struct AnalyticsDropdown: View {
                 )
                 .frame(width: longestWidthForDropdown + 14 * 2 + 15)
                 .transition(.move(edge: .top).combined(with: .opacity))
+                .padding(.bottom, 7)
             }
         }
     }

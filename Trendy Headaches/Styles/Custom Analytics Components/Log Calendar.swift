@@ -158,8 +158,11 @@ struct SymptomKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
-        let rows = computeRows()
-        
+        let sortedSymp = symptomToIcon.sorted(by: { $0.key < $1.key })
+        let rows = rowsForKey(items: sortedSymp, width: width, text: { $0.key },  iconWidth: itemHeight, iconTextGap: 4, horizontalPadding: 8, font: .systemFont(ofSize: 12), mapResult: { pair in
+                (pair.key, pair.value)
+            }) as! [[(String, String)]]
+
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
                 HStack(spacing: 10) {
@@ -188,39 +191,6 @@ struct SymptomKey: View {
         }
         .frame(width: width, alignment: .leading)
     }
-    
-    private func computeRows() -> [[(String, String)]] {
-        var rows: [[(String, String)]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        let itemSpacing: CGFloat = 10
-        let horizontalPadding: CGFloat = 8
-        let iconTextGap: CGFloat = 4
-        
-        for symptom in symptomToIcon.keys.sorted() {
-            let iconName = symptomToIcon[symptom] ?? "questionmark.square.fill"
-            let displayText = String(symptom.prefix(12))
-            let textWidth = displayText.width(usingFont: font)
-            // icon + gap + text + padding
-            let itemWidth = itemHeight + iconTextGap + textWidth + horizontalPadding
-            
-            // Calculate what the new width would be if we add this item
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            // Wrap to new row if needed
-            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
-                // Start a new row
-                rows.append([(symptom, iconName)])
-                currentRowWidth = itemWidth
-            } else {
-                // Add to current row
-                rows[rows.count - 1].append((symptom, iconName))
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
-    }
 }
 
 
@@ -230,10 +200,7 @@ struct SeverityKeyBar: View {
     var width: CGFloat = 300
     var height: CGFloat = 20
 
-    private let severityColors: [Color] = [
-        "#FFB950", "#FFAD33", "#FF931F", "#FF7E33", "#FA5E1F",
-        "#EC3F13", "#B81702", "#A50104", "#8E0103", "#7A0103"
-    ].map(Color.init(hex:))
+    private let severityColors: [Color] = [ "#FFB950", "#FFAD33", "#FF931F", "#FF7E33", "#FA5E1F",  "#EC3F13", "#B81702", "#A50104", "#8E0103", "#7A0103"].map(Color.init(hex:))
 
     var body: some View {
         VStack(spacing: 4) {

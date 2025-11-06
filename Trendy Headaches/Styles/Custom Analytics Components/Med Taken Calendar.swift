@@ -183,7 +183,7 @@ struct MedicationKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
-        let rows = computeRows()
+        let rows = rowsForKey( items: medicationColors.sorted(by: { $0.key < $1.key }), width: width, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8, mapResult: { (key, color) in (key, color) }) as! [[(String, Color)]]
         
         VStack(alignment: .leading, spacing: 8) {
             
@@ -214,39 +214,5 @@ struct MedicationKey: View {
         .frame(width: width, alignment: .leading)
         .cornerRadius(10)
         .padding(.leading, 10)
-    }
-    
-    private func computeRows() -> [[(String, Color)]] {
-        var rows: [[(String, Color)]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        let itemSpacing: CGFloat = 10
-        let horizontalPadding: CGFloat = 8
-        let iconTextGap: CGFloat = 4
-        let circleWidth: CGFloat = 10
-        
-        for med in medicationColors.keys.sorted() {
-            guard let color = medicationColors[med] else { continue }
-            let displayText = String(med.prefix(12))
-            let textWidth = displayText.width(usingFont: font)
-            // circle + gap + text + padding
-            let itemWidth = circleWidth + iconTextGap + textWidth + horizontalPadding
-            
-            // Calculate what the new width would be if we add this item
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            // Wrap to new row if needed
-            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
-                // Start a new row
-                rows.append([(med, color)])
-                currentRowWidth = itemWidth
-            } else {
-                // Add to current row
-                rows[rows.count - 1].append((med, color))
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
     }
 }

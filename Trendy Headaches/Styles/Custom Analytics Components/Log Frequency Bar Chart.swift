@@ -350,7 +350,7 @@ struct BarSymptomKey: View {
     var width: CGFloat
     
     var body: some View {
-        let rows = computeRows()
+        let rows = rowsForKey(items: sympOrder, width: width, text: { $0.capitalizedWords.count > 10 ? String($0.capitalizedWords.prefix(10)) + "…" : $0.capitalizedWords }, iconWidth: 10,  iconTextGap: 5, horizontalPadding: 0, font: .systemFont(ofSize: 14), mapResult: { symptom in symptom }) as! [[String]]
         
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -378,37 +378,5 @@ struct BarSymptomKey: View {
             }
         }
         .frame(width: width, alignment: .leading)
-    }
-    
-    private func computeRows() -> [[String]] {
-        var rows: [[String]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        let itemSpacing: CGFloat = 10
-        
-        for symptom in sympOrder {
-            let displayText = symptom.capitalizedWords.count > 10
-                ? String(symptom.capitalizedWords.prefix(10)) + "…"
-                : symptom.capitalizedWords
-            let textWidth = displayText.width(usingFont: font)
-            // Circle + gap + text
-            let itemWidth = 10 + 5 + textWidth
-            
-            // Calculate what the new width would be if we add this item
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            // Allow going significantly over to pack more items
-            if newRowWidth > width  && !rows[rows.count - 1].isEmpty {
-                // Start a new row
-                rows.append([symptom])
-                currentRowWidth = itemWidth
-            } else {
-                // Add to current row
-                rows[rows.count - 1].append(symptom)
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
     }
 }

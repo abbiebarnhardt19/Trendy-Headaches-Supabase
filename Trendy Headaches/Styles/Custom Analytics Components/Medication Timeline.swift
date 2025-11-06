@@ -246,7 +246,7 @@ struct MedKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
-        let rows = computeRows()
+        let rows = rowsForKey(items: colorMap.sorted(by: { $0.key < $1.key }), width: width, text: { $0.key }, iconWidth: 10, iconTextGap: 4, horizontalPadding: 8, mapResult: { (key, color) in (key, color) }) as! [[(String, Color)]]
         
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -275,33 +275,5 @@ struct MedKey: View {
         }
         .frame(width: width, alignment: .leading)
         .padding(.bottom, 10)
-    }
-    
-    private func computeRows() -> [[(String, Color)]] {
-        var rows: [[(String, Color)]] = [[]]
-        var currentRowWidth: CGFloat = 0
-        let font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        let itemSpacing: CGFloat = 10
-        let horizontalPadding: CGFloat = 8
-        let iconTextGap: CGFloat = 4
-        
-        for symptom in colorMap.keys.sorted() {
-            guard let iconColor = colorMap[symptom] else { continue }
-            let displayText = String(symptom.prefix(12))
-            let textWidth = displayText.width(usingFont: font)
-            let itemWidth = itemHeight + iconTextGap + textWidth + horizontalPadding
-            
-            let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
-            
-            if newRowWidth > width && !rows[rows.count - 1].isEmpty {
-                rows.append([(symptom, iconColor)])
-                currentRowWidth = itemWidth
-            } else {
-                rows[rows.count - 1].append((symptom, iconColor))
-                currentRowWidth = newRowWidth
-            }
-        }
-        
-        return rows
     }
 }
