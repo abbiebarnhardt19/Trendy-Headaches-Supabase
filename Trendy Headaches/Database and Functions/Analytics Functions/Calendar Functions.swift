@@ -9,18 +9,18 @@ import SwiftUI
 import Foundation
 
 
-// MARK: - Calendar / Analytics Utility Functions
-
+//function for mapping symptoms to icons
 func generateSymptomToIconMap(from logs: [UnifiedLog]) -> [String: String] {
-    let icons = [
-        "circle.fill", "square.fill", "triangle.fill",
-        "star.fill", "diamond.fill", "hexagon.fill",
-        "heart.fill", "bolt.fill", "leaf.fill", "flame.fill"
-    ]
+    //icon options
+    let icons = ["circle.fill", "square.fill", "triangle.fill",  "star.fill", "diamond.fill", "hexagon.fill", "heart.fill", "bolt.fill", "leaf.fill", "flame.fill"]
 
+    //empty dictionary, symtpom name -> icon
     var mapping: [String: String] = [:]
+    
+    //get rid of duplicate symptoms
     let uniqueSymptoms = Set(logs.compactMap { $0.symptom_name }).sorted()
 
+    //map each symptom to icon
     for (index, symptom) in uniqueSymptoms.enumerated() {
         mapping[symptom] = icons[index % icons.count]
     }

@@ -7,12 +7,13 @@
 
 import Foundation
 
-
-func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication], [String], Date?) {
+//get logs, meds, symptoms, triggers, and earliest log date
+func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication], [String], [String], Date?) {
     
     var logs: [UnifiedLog] = []
     var medData: [Medication] = []
     var symptomOptions: [String] = []
+    var triggerOptions: [String] = []
     var earliestLogDate: Date? = nil
     
     // Fetch logs
@@ -40,24 +41,22 @@ func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication]
         }
     }
     
-    // Fetch symptom options
+    // Fetch symptom + trigger options
     do {
-        let symptoms = try await Database.shared.getListVals(
-            userId: Int64(userID),
-            table: "Symptoms",
-            col: "symptom_name",
-            includeInactive: true
-        )
+        //get symptom list
+        let symptoms = try await Database.shared.getListVals(userId: Int64(userID), table: "Symptoms", col: "symptom_name",  includeInactive: true)
         
-        let sideEffects = try await Database.shared.getListVals(
-            userId: Int64(userID),
-            table: "Side_Effects",
-            col: "side_effect_name",
-            includeInactive: true
-        )
+        //get side effect list
+        let sideEffects = try await Database.shared.getListVals(userId: Int64(userID), table: "Side_Effects", col: "side_effect_name", includeInactive: true)
         
-        // Combine and remove duplicates
+        // Combine symptoms and side effects and remove duplicates
         symptomOptions = Array(Set(symptoms + sideEffects)).sorted()
+        
+        //get triggers
+        let triggers = try await Database.shared.getListVals(userId: Int64(userID), table: "Triggers", col: "trigger_name", includeInactive: true )
+        
+        //remove duplicates
+        triggerOptions = Array(Set(triggers)).sorted()
         
     } catch let error as NSError {
         if error.code != NSURLErrorCancelled {
@@ -65,5 +64,5 @@ func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication]
         }
     }
     
-    return (logs, medData, symptomOptions, earliestLogDate)
+    return (logs, medData, symptomOptions, triggerOptions, earliestLogDate)
 }

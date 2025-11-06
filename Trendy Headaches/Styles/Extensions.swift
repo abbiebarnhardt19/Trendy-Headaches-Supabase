@@ -66,6 +66,7 @@ extension Color {
             return brightness < 0.5 // lower = darker
         }
     
+    //combine two colors
     static func blend(_ color1: Color, _ color2: Color, ratio: CGFloat) -> Color {
         let uiColor1 = UIColor(color1)
         let uiColor2 = UIColor(color2)
@@ -84,6 +85,7 @@ extension Color {
         )
     }
     
+    //mildly adjust color
     func adjusted(by amount: Double) -> Color {
         // Convert to UIColor to modify brightness/saturation
         let uiColor = UIColor(self)
@@ -98,6 +100,7 @@ extension Color {
         return Color(hue: hue, saturation: saturation, brightness: newBrightness)
     }
     
+    //color to hex
     func toHex() -> String? {
         let uiColor = UIColor(self)
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -106,6 +109,7 @@ extension Color {
         return String(format: "#%06x", rgb)
     }
 
+    //get a list of hex codes similar to a given hex code
     func generateColors(from baseColor: Color, count: Int) -> [Color] {
         let uiColor = UIColor(baseColor)
         var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
@@ -132,27 +136,19 @@ extension Color {
     }
 }
 
-extension DateFormatter {
-    static var monthYear: DateFormatter {
-        let df = DateFormatter()
-        df.dateFormat = "MMMM yyyy"
-        return df
-    }
-    
-    
-}
+
+
 
 extension String {
+    //capitalize each word in a string
     var capitalizedWords: String {
         self
             .split(separator: " ")
             .map { $0.prefix(1).uppercased() + $0.dropFirst() }
             .joined(separator: " ")
     }
-//    func width(usingFont font: UIFont) -> CGFloat {
-//        let attributes = [NSAttributedString.Key.font: font]
-//        return (self as NSString).size(withAttributes: attributes).width
-//    }
+
+    //measure the width of a string based on font
     func width(usingFont font: UIFont) -> CGFloat {
         let attributes = [NSAttributedString.Key.font: font]
         let size = (self as NSString).size(withAttributes: attributes)
@@ -160,3 +156,10 @@ extension String {
     }
 }
 
+extension DateFormatter {
+    static var monthYear: DateFormatter {
+        let df = DateFormatter()
+        df.dateFormat = "MMMM yyyy"
+        return df
+    }
+}

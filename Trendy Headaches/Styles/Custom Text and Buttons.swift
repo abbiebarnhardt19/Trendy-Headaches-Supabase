@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+//styling on text field
 struct CustomTextField: View {
     let bg: String
     let accent: String
@@ -22,6 +23,7 @@ struct CustomTextField: View {
     var align: TextAlignment = .leading
     
     var body: some View {
+        //different types of text field
         Group {
             if multiline {
                 TextField(placeholder, text: $text, axis: .vertical)
@@ -49,6 +51,7 @@ struct CustomTextField: View {
     }
 }
 
+//stylized display text
 struct CustomText: View {
     var text: String
     var color: String
@@ -69,6 +72,7 @@ struct CustomText: View {
     }
 }
 
+//custom bullet point list
 struct CustomList: View {
     var items: [String]
     var color: String
@@ -79,11 +83,12 @@ struct CustomList: View {
         // estimate width per character and find the widest item
         let charWidth: CGFloat = 12
         let maxItemWidth = items
-            .map { CGFloat($0.count + 2) * charWidth } // +2 for bullet + padding
+            .map { CGFloat($0.count + 2) * charWidth }
             .max() ?? (charWidth * 3)
         
         let columnCount = Int(max(1, maxItemWidth / maxWidth))
 
+        //stack text items
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: columnCount), spacing: 3) {
             ForEach(items, id: \.self) { item in
                 Text("• \(item)")
@@ -101,6 +106,7 @@ struct CustomList: View {
     }
 }
 
+//stylized navigation button
 struct CustomNavButton<Destination: View>: View {
     var label: String
     var dest: Destination
@@ -126,6 +132,7 @@ struct CustomNavButton<Destination: View>: View {
     }
 }
 
+//"link", small underlined text that brings you somewhere when clicked
 struct CustomLink<Destination: View>: View {
     var destination: Destination
     var text: String
@@ -146,6 +153,7 @@ struct CustomLink<Destination: View>: View {
     }
 }
 
+//small red text
 struct CustomWarningText: View {
     var text: String
     var body: some View {
@@ -159,6 +167,7 @@ struct CustomWarningText: View {
     }
 }
 
+//stylized button
 struct CustomButton: View {
     var text: String? = nil
     var systemImage: String? = nil

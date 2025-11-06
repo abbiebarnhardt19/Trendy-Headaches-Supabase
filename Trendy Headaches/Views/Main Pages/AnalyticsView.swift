@@ -124,9 +124,8 @@ struct AnalyticsView: View {
                         medData = result.1
                         symptomOptions = result.2
                         selectedSymptoms = result.2
-                        startDate = result.3 ?? Date()
-                        
-                        triggerOptions = try await Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
+                        triggerOptions = result.3
+                        startDate = result.4 ?? Date()
                         
                     } catch {
                         print("Error fetching all data:", error)
