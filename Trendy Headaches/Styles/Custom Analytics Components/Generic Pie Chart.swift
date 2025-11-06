@@ -140,14 +140,8 @@ struct GenericPieChart<T: Hashable>: View {
                         
                         Spacer()
                         
-                        Button(action: { showVisual.toggle() }) {
-                            Image(systemName: "eye.slash.circle")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundStyle(Color(hex: bg))
-                                .frame(width: 25, height: 25)
-                        }
-                        .buttonStyle(PlainButtonStyle())
+                        //button to hide chart
+                        HideButton(accent: accent, bg: bg, show: $showVisual)
                         .padding(.trailing, 20)
                     }
                     .frame(width: UIScreen.main.bounds.width - 30)

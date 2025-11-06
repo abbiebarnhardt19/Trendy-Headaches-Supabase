@@ -13,7 +13,7 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
-    @State var selectedView: String = "Statistics"
+    @State var selectedView: String = "Graphs"
     
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
 
@@ -67,8 +67,6 @@ struct AnalyticsView: View {
                             GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Log Severity", groupBy: \.severity)
                             
                             CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
-                            
-                            MedicationTimeline(medications: medData, bg: bg, accent: accent, width: screenWidth - 40)
                             
                             MedTakenCalendarView(logs: filteredLogs, bg: bg, accent: accent)
                             

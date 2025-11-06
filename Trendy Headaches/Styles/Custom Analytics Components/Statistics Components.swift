@@ -29,14 +29,7 @@ struct StatsCard: View {
                 Spacer()
                 
                 //hide button
-                Button(action: { show.toggle() }) {
-                    Image(systemName: "eye.slash.circle")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(Color(hex: bg))
-                        .frame(width: 25, height: 25)
-                }
-                .buttonStyle(PlainButtonStyle())
+                HideButton(accent: accent, bg: bg, show: $show)
             }
             .frame(width: screenWidth - 50 - 15 * 2)
             .padding(.bottom, 5)

@@ -47,10 +47,11 @@ struct AnalyticsFilter: View {
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     
+    //dont need to pass in because always the same
     @State var typeOptions = ["Symptom", "Side Effect"]
     
     var body: some View {
-        
+        //dont need to pass in, just generate from the passed in date
         @State var startDateString = formatter.string(from: startDate)
         @State var endDateString = formatter.string(from: endDate)
         
@@ -60,6 +61,7 @@ struct AnalyticsFilter: View {
                 HStack{
                     CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
                     
+                    //hide filter button
                     Button(action: { showSymptomFilter.toggle() }) {
                         Image(systemName: "eye.slash.circle")
                             .resizable() // Add this!
@@ -106,7 +108,7 @@ struct AnalyticsFilter: View {
     }
 }
 
-//dropdown with no background
+//dropdown with no background, for switching analytics view
 struct AnalyticsDropdown: View {
     var accent: String
     var bg: String
@@ -130,12 +132,12 @@ struct AnalyticsDropdown: View {
             Button(action: {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isExpanded.toggle()
-                }
-            }) {
+                }}) {
                 //text for current view
                 HStack(spacing: 5) {
                     CustomText(text: selected, color: accent, width: selected.width(usingFont: labelFont)+15, textAlign: .leading, textSize: textSize )
                     
+                    //shape to indicate dropdown
                     Image(systemName: "chevron.down")
                         .resizable()
                         .frame(width: textSize * 0.6, height: textSize * 0.3)
@@ -148,12 +150,13 @@ struct AnalyticsDropdown: View {
             }
             .buttonStyle(PlainButtonStyle())
             
-            // Dropdown options
+            //Show dropdown options when clicked
             if isExpanded {
                 VStack(spacing: 0) {
                     ForEach(options.indices, id: \.self) { index in
                         let option = options[index]
                         
+                        //make each option a button with text, when clicked, it changes selected view and collapses the dropdown
                         Button(action: {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 selected = option
@@ -180,14 +183,47 @@ struct AnalyticsDropdown: View {
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color(hex: accent).opacity(0.6), lineWidth: 1)
-                )
+                .overlay(RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color(hex: accent).opacity(0.6), lineWidth: 1) )
                 .frame(width: longestWidthForDropdown + 14 * 2 + 15)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .padding(.bottom, 7)
             }
         }
+    }
+}
+
+struct HideButton: View{
+    var accent: String
+    var bg: String
+    @Binding var show: Bool
+    
+    var body: some View{
+        Button(action: { show.toggle() }) {
+            Image(systemName: "eye.slash.circle")
+                .resizable() // Add this!
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color(hex: bg))
+                .frame(width: 25, height: 25)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct ShowKeyButton: View{
+    var accent: String
+    var bg: String
+    @Binding var show: Bool
+    
+    var body: some View{
+        Button(action: { show.toggle() }) {
+            Image(systemName: "info.circle")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .foregroundStyle(Color(hex:bg))
+                .frame(width: 25, height: 25)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .padding(.trailing, 5)
     }
 }
