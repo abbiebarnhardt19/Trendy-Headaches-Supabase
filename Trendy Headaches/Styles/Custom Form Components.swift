@@ -56,19 +56,11 @@ struct ColorTextField: View {
             .padding(.bottom, 8)
         }
         .onChange(of: selectedColor, initial: false) { oldColor, newColor in
-            update = colorToHex(newColor)
+            update = newColor.toHex() ?? "FFFFFF"
         }
         .onAppear {
             selectedColor = Color(hex: update)
         }
-    }
-    
-    //convert color to hex code
-    private func colorToHex(_ color: Color) -> String {
-        let uiColor = UIColor(color)
-        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-        uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        return String(format: "#%02X%02X%02X", Int(red * 255),  Int(green * 255), Int(blue * 255))
     }
 }
 
@@ -314,10 +306,12 @@ struct SingleCheckbox: View {
                 let font = UIFont.systemFont(ofSize: textSize, weight: .bold)
                 CustomText(text: text, color: color,width: text.width(usingFont: font) + 15, textAlign: .center, bold: true, textSize: textSize)
                     .padding(.trailing, 15)
+                
                 Image(systemName: isOn ? "checkmark.square.fill" : "square")
                     .resizable()
                     .frame(width: textSize, height: textSize)
                     .foregroundColor(Color(hex: color))
+                
                 Spacer()
             }
             .frame(width: UIScreen.main.bounds.width)
@@ -336,8 +330,7 @@ struct Slider: View {
     var width: CGFloat
 
     private var steps: [Int64] {
-        stride(from: range.lowerBound, through: range.upperBound, by: step).map { $0 }
-    }
+        stride(from: range.lowerBound, through: range.upperBound, by: step).map {$0}}
     
     var body: some View {
         VStack(spacing: 8) {
@@ -375,8 +368,7 @@ struct Slider: View {
                                 let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
                                 let nearestIndex = Int(round(clampedX / spacing))
                                 let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
-                                value = steps[safeIndex]
-                            })
+                                value = steps[safeIndex] })
                 }
             }
             .frame(height: 30)
@@ -474,7 +466,6 @@ struct CustomDropdown: View {
                         .padding(.leading, 5)
                 }
             }
-            
         } label: {
             HStack {
                 Text(theme)
@@ -500,6 +491,7 @@ struct CustomDropdown: View {
         .padding(.bottom, 20)
     }
 }
+
 struct MultipleCheckboxWrapped: View {
     @Binding var options: [String]
     @Binding var selected: [String]
@@ -520,10 +512,8 @@ struct MultipleCheckboxWrapped: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 4)
                                     .stroke(Color(hex: bg), lineWidth: 2)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(selected.contains(option) ? Color(hex: bg) : Color.clear)
-                                    )
+                                    .background(RoundedRectangle(cornerRadius: 4)
+                                            .fill(selected.contains(option) ? Color(hex: bg) : Color.clear))
                                     .frame(width: itemHeight, height: itemHeight)
                                 
                                 if selected.contains(option) {
@@ -533,11 +523,7 @@ struct MultipleCheckboxWrapped: View {
                                 }
                             }
                             
-                            CustomText(
-                                text: option,
-                                color: bg,
-                                textSize: textSize
-                            )
+                            CustomText( text: option, color: bg, textSize: textSize)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .if(option.count <= 15) { view in

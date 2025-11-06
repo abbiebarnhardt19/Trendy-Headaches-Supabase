@@ -160,68 +160,37 @@ struct CustomWarningText: View {
 }
 
 struct CustomButton: View {
-    var text: String?
-    var systemImage: String?
+    var text: String? = nil
+    var systemImage: String? = nil
     var bg: String
     var accent: String
-    var height: CGFloat?
-    var width: CGFloat?
-    var corner: CGFloat?
+    var height: CGFloat = 50
+    var width: CGFloat = 150
+    var corner: CGFloat = 30
     var bold: Bool = false
-    var textSize: CGFloat? = 20
+    var textSize: CGFloat = 20
     var disabled: Bool = false
     var botPad: CGFloat = 10
     var action: () -> Void
 
-    init(
-        text: String? = nil,
-        systemImage: String? = nil,
-        bg: String,
-        accent: String,
-        height: CGFloat? = 50,
-        width: CGFloat? = 150,
-        corner: CGFloat? = 30,
-        bold: Bool = false,
-        textSize: CGFloat? = 20,
-        disabled: Bool = false,
-        botPad: CGFloat = 10,
-        action: @escaping () -> Void
-    ) {
-        self.text = text
-        self.systemImage = systemImage
-        self.bg = bg
-        self.accent = accent
-        self.height = height
-        self.width = width
-        self.corner = corner
-        self.bold = bold
-        self.textSize = textSize
-        self.disabled = disabled
-        self.botPad = botPad
-        self.action = action
-    }
-
     var body: some View {
         Button(action: action) {
-            Group {
-                if let systemImage = systemImage {
-                    Image(systemName: systemImage)
-                        .font(.system(size: textSize ?? 20))
-                } else if let text = text {
-                    Text(text)
-                        .font(.system(size: textSize ?? 20, design: .serif))
-                        .fontWeight(bold ? .bold : .regular)
-                }
+            if let systemImage = systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: textSize))
+            } else if let text = text {
+                Text(text)
+                    .font(.system(size: textSize, design: .serif))
+                    .fontWeight(bold ? .bold : .regular)
             }
-            .frame(width: width, height: height)
-            .foregroundColor(Color(hex: bg))
-            .background(Color(hex: accent))
-            .cornerRadius(corner ?? 30)
-            .opacity(disabled ? 0.3 : 1)
         }
+        .frame(width: width, height: height)
+        .foregroundColor(Color(hex: bg))
+        .background(Color(hex: accent))
+        .cornerRadius(corner)
+        .opacity(disabled ? 0.3 : 1)
         .buttonStyle(.plain)
         .disabled(disabled)
         .padding(.bottom, botPad)
     }
 }
-
