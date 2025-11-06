@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+//calendar for tracking emegency treatments
 struct MedTakenCalendarView: View {
     let logs: [UnifiedLog]
     var bg: String
@@ -14,21 +15,21 @@ struct MedTakenCalendarView: View {
 
     @State private var currentMonth = Date()
     @State private var showKey = false
+    @State var showVisual: Bool = false
+    
+    //constants
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
     private let width = UIScreen.main.bounds.width - 80
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
     
-    @State var showVisual: Bool = false
-    
     // Generate medication colors based on unique medications
     private var medicationColors: [String: Color] {
         
-        
+        //get all the treatments that are used
         let uniqueMeds = Array(Set(logs.compactMap { log -> String? in
             guard log.med_taken == true, let medName = log.medication_name else { return nil }
-            return medName
-        })).sorted()
+            return medName })).sorted()
         
         guard !uniqueMeds.isEmpty else { return [:] }
         
@@ -37,9 +38,11 @@ struct MedTakenCalendarView: View {
             // For a single medication, use the base accent color
             colors = [Color(hex: bg)]
         } else {
+            //get a color for each symptom
             colors = Color(hex: accent).generateColors(from: Color(hex: accent), count: uniqueMeds.count)
         }
         
+        //map meds to colors
         var result: [String: Color] = [:]
         for i in 0..<min(uniqueMeds.count, colors.count) {
             result[uniqueMeds[i]] = colors[i]
@@ -71,36 +74,26 @@ struct MedTakenCalendarView: View {
     //calendar parts
     private var TopBar: some View {
         HStack(spacing: 8) {
+            //move back one month
             CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
             
+            //current month label
             let font = UIFont.systemFont(ofSize: 19, weight: .bold)
             let title = monthYearString(for: currentMonth)
             CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, bold: true, textSize: 19)
                 .padding(.bottom, 9)
             
+            //more forward one month
             CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: currentMonth >= maxMonth) {currentMonth = changeMonth(currentMonth: currentMonth, by: 1)}
             
             Spacer()
             
-            Button(action: { showKey.toggle() }) {
-                Image(systemName: "info.circle")
-                    .resizable() // Add this!
-                    .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(Color(hex:bg))
-                    .frame(width: 25, height: 25)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .padding(.trailing, 5)
+            //show the symbol key
+            ShowKeyButton(accent: accent, bg: bg, show: $showKey)
             .padding(.bottom, 5)
             
-            Button(action: { showVisual.toggle() }) {
-                Image(systemName: "eye.slash.circle")
-                    .resizable() // Add this!
-                    .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(Color(hex: bg))
-                    .frame(width: 25, height: 25)
-            }
-            .buttonStyle(PlainButtonStyle())
+            //show the hide button
+            HideButton(accent: accent, bg: bg, show: $showVisual)
             .padding(.bottom, 5)
         }
         .frame(height: 20)
@@ -127,6 +120,7 @@ struct MedTakenCalendarView: View {
                         log.med_taken == true &&
                         log.medication_name != nil
                     }
+                    //add the cell with the date and occurances
                     MedTakenDayCell(date: date, logs: dayLogs, bg: bg, calendar: calendar, medicationColors: medicationColors)
                 } else {
                     Spacer().frame(height: 20)
@@ -136,44 +130,33 @@ struct MedTakenCalendarView: View {
     }
 }
 
-//make each day
+//make each day with the treatment instances
 struct MedTakenDayCell: View {
     let date: Date
     let logs: [UnifiedLog]
     let bg: String
     let calendar: Calendar
     let medicationColors: [String: Color]
+    let radius: CGFloat = 12
 
     var body: some View {
         ZStack {
             // Day number
             CustomText(text: "\(calendar.component(.day, from: date))", color: bg, textAlign: .center, textSize: 14)
 
-            // Med icons - circles colored by medication
+            // circles colored by medication
             ForEach(Array(logs.enumerated()), id: \.offset) { i, log in
-                MedIcon(log: log, index: i, total: logs.count, medicationColors: medicationColors)
+                let angle = Double(i)/Double(logs.count) * 360
+                Circle()
+                    .frame(width: 6, height: 6)
+                    .foregroundColor(medicationColors[log.medication_name ?? ""] ?? .gray)
+                    .offset(x: cos(angle * .pi / 180) * radius, y: sin(angle * .pi / 180) * radius)
             }
         }
         .frame(height: 25)
     }
 }
 
-//medication icon - always a circle, color based on medication
-struct MedIcon: View {
-    let log: UnifiedLog
-    let index: Int
-    let total: Int
-    let medicationColors: [String: Color]
-
-    var body: some View {
-        let angle = Double(index)/Double(total) * 360
-        let radius: CGFloat = 12
-        Circle()
-            .frame(width: 6, height: 6)
-            .foregroundColor(medicationColors[log.medication_name ?? ""] ?? .gray)
-            .offset(x: cos(angle * .pi / 180) * radius, y: sin(angle * .pi / 180) * radius)
-    }
-}
 // Key showing medication colors
 struct MedicationKey: View {
     let bg: String
@@ -183,23 +166,23 @@ struct MedicationKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
+        //split medications onto rows
         let rows = rowsForKey( items: medicationColors.sorted(by: { $0.key < $1.key }), width: width, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8, mapResult: { (key, color) in (key, color) }) as! [[(String, Color)]]
         
         VStack(alignment: .leading, spacing: 8) {
-            
+            //go through each row
             ForEach(0..<rows.count, id: \.self) { rowIndex in
                 HStack(spacing: 10) {
+                    //go through each med
                     ForEach(rows[rowIndex], id: \.0) { item in
                         HStack(spacing: 4) {
+                            //circle with that med's color
                             Circle()
                                 .frame(width: 10, height: 10)
                                 .foregroundColor(item.1)
                             
-                            CustomText(
-                                text: String(item.0.prefix(12)),
-                                color: bg,
-                                textSize: 12
-                            )
+                            //med label
+                            CustomText(text: String(item.0.prefix(12)),  color: bg, textSize: 12)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .fixedSize(horizontal: true, vertical: false)
