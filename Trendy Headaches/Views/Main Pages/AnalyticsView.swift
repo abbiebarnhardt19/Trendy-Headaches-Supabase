@@ -13,7 +13,7 @@ struct AnalyticsView: View {
     @Binding var bg: String
     @Binding var accent: String
     
-    @State var selectedView: String = "Graphs"
+    @State var selectedView: String = "Compare"
     
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
 
@@ -53,7 +53,7 @@ struct AnalyticsView: View {
                     HStack{
                         Spacer()
                         //change analytics type
-                        AnalyticsDropdown(accent: accent, bg: bg, options: ["Graphs", "Statistics", "Comparison"],selected: $selectedView)
+                        AnalyticsDropdown(accent: accent, bg: bg, options: ["Graphs", "Statistics", "Compare"],selected: $selectedView)
                             .padding(.trailing, 20)
                             .padding(.top, 20)
                     }
@@ -103,7 +103,7 @@ struct AnalyticsView: View {
                         }
                         //else comparison
                         else{
-                            CustomText(text: "Compairison Screen", color: accent)
+                            CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions)
                         }
                     }
                     .padding(.bottom, 170)
@@ -126,6 +126,8 @@ struct AnalyticsView: View {
                         selectedSymptoms = result.2
                         triggerOptions = result.3
                         startDate = result.4 ?? Date()
+                        
+                        print(symptomOptions)
                         
                     } catch {
                         print("Error fetching all data:", error)
