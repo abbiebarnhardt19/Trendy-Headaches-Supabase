@@ -12,6 +12,8 @@ struct ProfileView: View {
     @Binding var bg: String
     @Binding var accent: String
     
+    @EnvironmentObject var userSession: UserSession
+    
     //  UI State
     @State private var isEditing = false
     @State private var logOut = false
@@ -71,6 +73,7 @@ struct ProfileView: View {
                 Button("Delete", role: .destructive) {
                     Task {
                         await Database.shared.deleteUser(userID: userID)
+                        userSession.logout()
                         logOut = true
                     }
                 }
@@ -259,7 +262,8 @@ struct ProfileView: View {
                 //options button
                 HStack {
                     Spacer()
-                    let buttonActions: [() -> Void] = [ { isEditing = true },  { showPolicy = true },  { logOut = true },  { showDelete = true } ]
+                    let buttonActions: [() -> Void] = [ { isEditing = true },  { showPolicy = true },  {userSession.logout()
+                        logOut = true },  { showDelete = true } ]
                     
                     FloatButton( accent: newAcc,  bg: newBG,  options: buttonNames, actions: buttonActions)
                         .padding(.top, 20)

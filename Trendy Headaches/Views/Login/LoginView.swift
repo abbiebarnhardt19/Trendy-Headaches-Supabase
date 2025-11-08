@@ -56,23 +56,15 @@ struct LoginView: SwiftUI.View {
                             let result = await Database.shared.attemptLogin(email: email, password: password)
                             userId = result.userId
                             error = result.error
+                            
+                            if let userId = result.userId {
+                                // Login successful - save session
+                                userSession.login(userID: userId, username: email)
+                            }
+                            
                             loggedIn = userId != nil
                         }
                     }
-//                    CustomButton(text: "Log In", bg: bg, accent: accent) {
-//                        Task {
-//                            let result = await Database.shared.attemptLogin(email: email, password: password)
-//                            userId = result.userId
-//                            error = result.error
-//                            
-//                            if let userId = result.userId {
-//                                // Login successful - save session
-//                                userSession.login(userID: userId, username: email)
-//                            }
-//                            
-//                            loggedIn = userId != nil
-//                        }
-//                    }
                     
                     // Error Message
                     if let error = error {
