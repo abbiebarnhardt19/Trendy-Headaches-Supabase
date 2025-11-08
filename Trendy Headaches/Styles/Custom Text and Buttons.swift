@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//styling on text field
+//stylized and secure text field
 struct CustomTextField: View {
     let bg: String
     let accent: String
@@ -22,6 +22,9 @@ struct CustomTextField: View {
     var botPad: CGFloat? = 8
     var align: TextAlignment = .leading
     
+    // Security parameters
+    var maxLength: Int = 1000
+    
     var body: some View {
         //different types of text field
         Group {
@@ -32,7 +35,6 @@ struct CustomTextField: View {
             else if secure{
                 SecureField(placeholder, text: $text)
             }
-            
             else {
                 TextField(placeholder, text: $text)
                     .multilineTextAlignment(align)
@@ -48,6 +50,18 @@ struct CustomTextField: View {
         .tint(Color(hex: bg))
         .textContentType(nil)
         .padding(.bottom,  botPad ?? 8)
+        //check and restrict values for security
+        .onChange(of: text) { oldValue, newValue in
+            var filtered = newValue
+            
+            // Apply max length, cant use giant blocks of text
+                filtered = String(filtered.prefix(maxLength))
+            
+            // Update text if it was filtered
+            if filtered != newValue {
+                text = filtered
+            }
+        }
     }
 }
 

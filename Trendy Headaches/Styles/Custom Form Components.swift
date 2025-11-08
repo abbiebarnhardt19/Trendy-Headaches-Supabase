@@ -39,7 +39,7 @@ struct ColorTextField: View {
     
     var body: some View {
         //text field to type hex code
-        CustomTextField(bg: bg, accent: accent, placeholder: placeholder, text: $update, width: width, corner: corner ?? 30)
+        CustomTextField(bg: bg, accent: accent, placeholder: placeholder, text: $update, width: width, corner: corner ?? 30, maxLength: 7)
         .frame(height: 40)
         .overlay(alignment: .trailing) {
             //button to click to get color picker

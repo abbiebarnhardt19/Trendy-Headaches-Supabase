@@ -96,7 +96,7 @@ struct FilterOptions: View {
             sectionButton(title: "Severity", section: .severity) {
                 HStack {
                     CustomTextField(bg: accent,  accent: bg, placeholder: "", text: Binding(get: { String(sevStart) }, set: { sevStart = Int64($0) ?? 0 }),
-                        width: min(screenWidth * 0.15, 65), height: min(screenHeight * 0.05, 45), textSize: screenHeight * 0.045 / 2.2, align: .center)
+                                    width: min(screenWidth * 0.15, 65), height: min(screenHeight * 0.05, 45), textSize: screenHeight * 0.045 / 2.2, align: .center)
                     .padding(.top, 10)
                     
                     VStack(alignment: .center){
