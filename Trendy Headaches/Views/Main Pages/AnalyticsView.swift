@@ -25,6 +25,17 @@ struct AnalyticsView: View {
     @State var startDate: Date = Date()
     @State var medData: [Medication] = []
     @State var triggerOptions: [String] = []
+    @State var prevMedOptions: [String] = []
+    
+    //for comparison
+    @State var selectedSymptom1: String? = ""
+    @State var selectedSymptom2: String? = ""
+    @State var range1Start: Date = Date()
+    @State var range1End: Date = Date()
+    @State var range2Start: Date = Date()
+    @State var range2End: Date = Date()
+    @State var selectedMed1: String? = ""
+    @State var selectedMed2: String? = ""
     
     //set end date for filter for the end of the current date
     @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
@@ -103,7 +114,7 @@ struct AnalyticsView: View {
                         }
                         //else comparison
                         else{
-                            CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions)
+                            CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions, prevMedOptions: $prevMedOptions, selectedSymptom1: $selectedSymptom1, selectedSymptom2: $selectedSymptom2, range1Start: $range1Start, range1End: $range1End, range2Start: $range2Start, range2End: $range2End, selectedMed1: $selectedMed1, selectedMed2: $selectedMed2)
                         }
                     }
                     .padding(.bottom, 170)
@@ -125,9 +136,8 @@ struct AnalyticsView: View {
                         symptomOptions = result.2
                         selectedSymptoms = result.2
                         triggerOptions = result.3
-                        startDate = result.4 ?? Date()
-                        
-                        print(symptomOptions)
+                        prevMedOptions = result.4
+                        startDate = result.5 ?? Date()
                         
                     } catch {
                         print("Error fetching all data:", error)

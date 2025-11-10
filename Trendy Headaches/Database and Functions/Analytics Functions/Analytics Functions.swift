@@ -8,12 +8,13 @@
 import Foundation
 
 //get logs, meds, symptoms, triggers, and earliest log date
-func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication], [String], [String], Date?) {
+func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication], [String], [String], [String], Date?) {
     
     var logs: [UnifiedLog] = []
     var medData: [Medication] = []
     var symptomOptions: [String] = []
     var triggerOptions: [String] = []
+    var prevMedOptions: [String] = []
     var earliestLogDate: Date? = nil
     
     // Fetch logs
@@ -64,5 +65,14 @@ func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication]
         }
     }
     
-    return (logs, medData, symptomOptions, triggerOptions, earliestLogDate)
+    do {
+        prevMedOptions = try await Database.shared.getListVals(userId: Int64(userID), table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
+    }
+    catch let error as NSError {
+        if error.code != NSURLErrorCancelled {
+            print("Error fetching prev meds: \(error)")
+        }
+    }
+    
+    return (logs, medData, symptomOptions, triggerOptions, prevMedOptions, earliestLogDate)
 }
