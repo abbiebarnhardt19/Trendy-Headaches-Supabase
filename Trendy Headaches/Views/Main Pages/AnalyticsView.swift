@@ -37,6 +37,7 @@ struct AnalyticsView: View {
     @State var selectedMed1: String? = ""
     @State var selectedMed2: String? = ""
     
+    
     //set end date for filter for the end of the current date
     @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
     
@@ -54,6 +55,110 @@ struct AnalyticsView: View {
         return filtered
     }
     
+    var compareLogs1: [UnifiedLog] {
+        //go through each log and return the ones that match the conditions
+        return logs.filter { log in
+
+            let logDate: Date = log.date
+
+            //  Date range filter (only if user selected a range)
+            if range1End.timeIntervalSince(range1Start) > 1 {
+                return logDate >= range1Start && logDate <= range1End
+            }
+
+            // Symptom filter
+            if let symptom = selectedSymptom1, !symptom.isEmpty {
+                print("Running symptom filter for:", symptom)
+                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            }
+
+            // Medication filter
+            else if let medName = selectedMed1, !medName.isEmpty {
+                
+                // Find the medication object
+                guard let med = medData.first(where: {
+                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    == medName.lowercased()
+                }) else {
+                    return false
+                }
+                
+                // Convert medication start/end
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                
+                guard let startDate = formatter.date(from: med.medicationStart) else {
+                    print("Could not parse start date for \(med.medicationName)")
+                    return false
+                }
+                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
+
+                
+                // Compare logDate against med dates
+                if let end = endDate {
+                    return logDate >= startDate && logDate <= end
+                } else {
+                    return logDate >= startDate
+                }
+            }
+            // Default
+            return false
+        }
+    }
+    
+    var compareLogs2: [UnifiedLog] {
+        //go through each log and return the ones that match the conditions
+        return logs.filter { log in
+
+            let logDate: Date = log.date
+
+            //  Date range filter (only if user selected a range)
+            if range2End.timeIntervalSince(range2Start) > 1 {
+                return logDate >= range2Start && logDate <= range2End
+            }
+
+            // Symptom filter
+            if let symptom = selectedSymptom2, !symptom.isEmpty {
+                print("Running symptom filter for:", symptom)
+                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            }
+
+            // Medication filter
+            else if let medName = selectedMed2, !medName.isEmpty {
+                
+                // Find the medication object
+                guard let med = medData.first(where: {
+                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    == medName.lowercased()
+                }) else {
+                    return false
+                }
+                
+                // Convert medication start/end
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                
+                guard let startDate = formatter.date(from: med.medicationStart) else {
+                    print("Could not parse start date for \(med.medicationName)")
+                    return false
+                }
+                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
+
+                
+                // Compare logDate against med dates
+                if let end = endDate {
+                    return logDate >= startDate && logDate <= end
+                } else {
+                    return logDate >= startDate
+                }
+            }
+            // Default
+            return false
+        }
+    }
+
     var body: some View {
         NavigationStack{
             ZStack {
@@ -115,6 +220,8 @@ struct AnalyticsView: View {
                         //else comparison
                         else{
                             CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions, prevMedOptions: $prevMedOptions, selectedSymptom1: $selectedSymptom1, selectedSymptom2: $selectedSymptom2, range1Start: $range1Start, range1End: $range1End, range2Start: $range2Start, range2End: $range2End, selectedMed1: $selectedMed1, selectedMed2: $selectedMed2)
+                            
+                            LogCalendarView(logs: compareLogs2, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: compareLogs2))
                         }
                     }
                     .padding(.bottom, 170)

@@ -186,6 +186,37 @@ struct CompareComponents: View {
             .cornerRadius(20)
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
+            //reset values when new comparison is selected
+            .onChange(of: compareMetric) { oldValue, newValue in
+                switch newValue {
+                case "Symptom":
+                    selectedMed1 = ""
+                    selectedMed2 = ""
+                    range1Start = Date()
+                    range1End = Date()
+                    range2Start = Date()
+                    range2End = Date()
+
+                case "Dates":
+                    selectedSymptom1 = ""
+                    selectedSymptom2 = ""
+                    selectedMed1 = ""
+                    selectedMed2 = ""
+
+                case "Preventative Treatment":
+                    selectedSymptom1 = ""
+                    selectedSymptom2 = ""
+                    range1Start = Date()
+                    range1End = Date()
+                    range2Start = Date()
+                    range2End = Date()
+
+                default:
+                    break
+                }
+            }
+
+
         }
         //button for when hidden
         else {
