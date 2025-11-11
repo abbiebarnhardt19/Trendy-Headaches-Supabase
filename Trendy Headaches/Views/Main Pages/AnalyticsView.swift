@@ -28,6 +28,7 @@ struct AnalyticsView: View {
     @State var prevMedOptions: [String] = []
     
     //for comparison
+    @State var selectedMetric: String? = ""
     @State var selectedSymptom1: String? = ""
     @State var selectedSymptom2: String? = ""
     @State var range1Start: Date = Date()
@@ -328,10 +329,10 @@ struct AnalyticsView: View {
                             SideEffectStats(accent: accent, bg: bg, logList: filteredLogs)
                         }
                         //else comparison
-                        else{
-                            CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions, prevMedOptions: $prevMedOptions, selectedSymptom1: $selectedSymptom1, selectedSymptom2: $selectedSymptom2, range1Start: $range1Start, range1End: $range1End, range2Start: $range2Start, range2End: $range2End, selectedMed1: $selectedMed1, selectedMed2: $selectedMed2)
+                        else if selectedView == "Compare"{
+                            CompareMetric(accent: accent, bg: bg, compareMetric: $selectedMetric, symptomOptions: $symptomOptions, prevMedOptions: $prevMedOptions, selectedSymptom1: $selectedSymptom1, selectedSymptom2: $selectedSymptom2, range1Start: $range1Start, range1End: $range1End, range2Start: $range2Start, range2End: $range2End, selectedMed1: $selectedMed1, selectedMed2: $selectedMed2)
                             
-                            AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
+                            CompareFilter(bg: bg, accent: accent, selectedMetric: $selectedMetric, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
                             
                             LogCalendarView(logs: filteredCompareLogs.1, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredCompareLogs.1))
                         }

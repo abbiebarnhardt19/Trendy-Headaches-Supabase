@@ -35,7 +35,7 @@ struct AnalyticsFilter: View {
     @Binding var endDate: Date
     @Binding var selectedTypes:[String]
     
-    @State private var showSymptomFilter: Bool = false
+    @State private var showFilter: Bool = false
     
     // Date Formatter
     private let formatter: DateFormatter = {
@@ -55,32 +55,46 @@ struct AnalyticsFilter: View {
         @State var startDateString = formatter.string(from: startDate)
         @State var endDateString = formatter.string(from: endDate)
         
-        if showSymptomFilter {
+        if showFilter {
             VStack(alignment: .leading, spacing: 10) {
                 //top section in h stack so label and hide button on same line
                 HStack{
-                    CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
+                    CustomText(text:"Filters", color: bg, width: "Filters ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                        .padding(.trailing, 10)
                     
-                    //hide filter button
-                    Button(action: { showSymptomFilter.toggle() }) {
-                        Image(systemName: "eye.slash.circle")
-                            .resizable() // Add this!
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex: bg))
-                            .frame(width: 25, height: 25)
-                    }
-                    .buttonStyle(PlainButtonStyle())
+                    Spacer()
+                    HideButton(accent: accent, bg: bg, show: $showFilter)
+                    
                 }
+                .padding(.top, 5)
+                
+                Divider()
+                    .frame(height: 1)
+                    .overlay(Color(hex: bg))
+                    .padding(.bottom, 3)
+                
+                CustomText(text:"Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
 
                 //log type checkbox
                 MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
                 
+                Divider()
+                    .frame(height: 1)
+                    .overlay(Color(hex: bg))
+                    .padding(.bottom, 3)
+                
                 //symptom checkbox
-                CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text:"Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
 
                 MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
+                
+                Divider()
+                    .frame(height: 1)
+                    .overlay(Color(hex: bg))
+                    .padding(.bottom, 3)
                 
                 //date fields
                 CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
@@ -101,7 +115,7 @@ struct AnalyticsFilter: View {
         //button for when hidden
         else {
             HStack {
-                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showSymptomFilter.toggle() } )
+                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showFilter.toggle() } )
             }
             .frame(width: screenWidth)
         }

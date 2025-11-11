@@ -7,9 +7,10 @@
 
 import SwiftUI
 
-struct CompareComponents: View {
+struct CompareMetric: View {
     var accent: String
     var bg: String
+    @Binding var compareMetric: String?
     @Binding var symptomOptions: [String]
     @Binding var prevMedOptions: [String]
     @Binding var selectedSymptom1: String?
@@ -22,8 +23,8 @@ struct CompareComponents: View {
     @Binding var selectedMed2: String?
     
     @State var dropdownOption: [String] = ["Symptom", "Dates", "Preventative Treatment"]
-    @State var showFilter: Bool = true
-    @State var compareMetric: String?
+    @State var showFilter: Bool = false
+    
     
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
@@ -64,7 +65,6 @@ struct CompareComponents: View {
                     CustomText(text:"Comparison Metric", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
                         .padding(.trailing, 10)
                     
-                    
                     Spacer()
                     HideButton(accent: accent, bg: bg, show: $showFilter)
                     
@@ -76,10 +76,10 @@ struct CompareComponents: View {
                 Divider()
                     .frame(height: 1)
                     .overlay(Color(hex: bg))
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 5)
                 
                 
-                CustomText(text: "Comparison Type", color: bg, width: screenWidth - 80, bold: true, textSize: screenWidth*0.05)
+                CustomText(text: "Comparison Metric", color: bg, width: screenWidth - 80, bold: true, textSize: screenWidth*0.05)
                 
                 MultipleChoice(options: $dropdownOption, selected: $compareMetric, accent: bg, width: screenWidth-80, textSize: screenWidth * 0.05)
                     .padding(.bottom, 10)
@@ -91,7 +91,7 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                     
                     VStack{
                         CustomText(text: "Symptom 1", color: bg, bold: true, textSize: screenWidth * 0.05)
@@ -102,7 +102,7 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                     
                     VStack{
                         CustomText(text: "Symptom 2", color: bg, bold: true, textSize: screenWidth * 0.05)
@@ -117,17 +117,17 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                     
                     VStack{
                         CustomText(text: "Range 1", color: bg, bold: true, textSize: screenWidth * 0.05)
                         
                         HStack{
-                            DateTextField(date: $range1Start, textValue: .constant(range1String[0]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "Start:", height: 45, labelTextSize: screenWidth * 0.05)
+                            DateTextField(date: $range1Start, textValue: .constant(range1String[0]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "Start:", height: 40, labelTextSize: screenWidth * 0.05)
                             Spacer()
                         }
                         HStack{
-                            DateTextField(date: $range1End, textValue: .constant(range1String[1]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "End:", height: 45, labelTextSize: screenWidth * 0.05)
+                            DateTextField(date: $range1End, textValue: .constant(range1String[1]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "End:", height: 40, labelTextSize: screenWidth * 0.05)
                             Spacer()
                         }
                     }
@@ -135,19 +135,19 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                        
                     VStack{
                         CustomText(text: "Range 2", color: bg, bold: true, textSize: screenWidth * 0.05)
                         
                         HStack{
                             
-                            DateTextField(date: $range2Start, textValue: .constant(range2String[0]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "Start:", height: 45, labelTextSize: screenWidth * 0.05)
+                            DateTextField(date: $range2Start, textValue: .constant(range2String[0]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "Start:", height: 40, labelTextSize: screenWidth * 0.05)
                             Spacer()
                         }
                         
                         HStack{
-                            DateTextField(date: $range2End, textValue: .constant(range2String[1]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "End:", height: 45,  labelTextSize: screenWidth * 0.05)
+                            DateTextField(date: $range2End, textValue: .constant(range2String[1]), bg: .constant(accent), accent: .constant(bg), width: fieldWidth, label: "End:", height: 40,  labelTextSize: screenWidth * 0.05)
                             Spacer()
                         }
                     }
@@ -158,7 +158,7 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                     
                     VStack{
                         CustomText(text: "Preventative Treament 1", color: bg, bold: true, textSize: screenWidth * 0.055)
@@ -169,7 +169,7 @@ struct CompareComponents: View {
                     Divider()
                         .frame(height: 1)
                         .overlay(Color(hex: bg))
-                        .padding(.vertical, 7)
+                        .padding(.bottom, 3)
                     
                     VStack{
                         CustomText(text: "Preventative Treament 2", color: bg, bold: true, textSize: screenWidth * 0.055)
@@ -215,8 +215,6 @@ struct CompareComponents: View {
                     break
                 }
             }
-
-
         }
         //button for when hidden
         else {
@@ -228,9 +226,106 @@ struct CompareComponents: View {
     }
 }
 
+struct CompareFilter: View{
+    var bg: String
+    var accent: String
+    @Binding var selectedMetric: String?
+    @Binding var symptomOptions: [String]
+    @Binding var selectedSymptom : [String]
+    @Binding var startDate: Date
+    @Binding var endDate: Date
+    @Binding var selectedTypes:[String]
+    
+    @State private var showFilter: Bool = false
+    
+    // Date Formatter
+    private let formatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        return f
+    }()
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    
+    //dont need to pass in because always the same
+    @State var typeOptions = ["Symptom", "Side Effect"]
+    
+    var body: some View {
+        //dont need to pass in, just generate from the passed in date
+        @State var startDateString = formatter.string(from: startDate)
+        @State var endDateString = formatter.string(from: endDate)
+        
+        if showFilter {
+            VStack(alignment: .leading, spacing: 10) {
+                //top section in h stack so label and hide button on same line
+                HStack{
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
+                    CustomText(text:"Other Filters", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                        .padding(.trailing, 10)
+                    
+                    Spacer()
+                    HideButton(accent: accent, bg: bg, show: $showFilter)
+                    
+                }
+                .padding(.top, 5)
+                
+                Divider()
+                    .frame(height: 1)
+                    .overlay(Color(hex: bg))
+                    .padding(.bottom, 3)
+                
+                CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
 
-struct CompareFrequency: View{
-    var body: some View{
-        Text("Compare Frequency")
+                //log type checkbox
+                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
+                    .padding(.bottom, 5)
+
+                
+                if selectedMetric != "Symptom"{
+                    
+                    Divider()
+                        .frame(height: 1)
+                        .overlay(Color(hex: bg))
+                        .padding(.bottom, 3)
+                    //symptom checkbox
+                    CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                    
+                    MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
+                        .padding(.bottom, 5)
+                    
+                }
+                
+                if selectedMetric != "Dates"{
+                    
+                    Divider()
+                        .frame(height: 1)
+                        .overlay(Color(hex: bg))
+                        .padding(.bottom, 3)
+                    
+                    //date fields
+                    CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                        .padding(.bottom, 5)
+                    
+                    DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
+                    
+                    DateTextField(date: $endDate, textValue: $endDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "End: ", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        //button for when hidden
+        else {
+            HStack {
+                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showFilter.toggle() } )
+            }
+            .frame(width: screenWidth)
+        }
     }
 }
