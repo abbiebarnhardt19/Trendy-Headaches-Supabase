@@ -11,7 +11,7 @@ struct UnifiedLog {
     // Common fields
     var log_id: Int64
     var user_id: Int64
-    var log_type: String          // "Symptom" or "SideEffect"
+    var log_type: String 
     var date: Date
     var severity: Int64
     var submit_time: Date

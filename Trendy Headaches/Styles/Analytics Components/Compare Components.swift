@@ -61,7 +61,7 @@ struct CompareComponents: View {
                 //header section
                 HStack{
                     let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
-                    CustomText(text:"Comparison Filters ", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                    CustomText(text:"Comparison Metric", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
                         .padding(.trailing, 10)
                     
                     
@@ -221,9 +221,16 @@ struct CompareComponents: View {
         //button for when hidden
         else {
             HStack {
-                CustomButton( text: "Comparison Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showFilter.toggle() } )
+                CustomButton( text: "Comparison Metric",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showFilter.toggle() } )
             }
             .frame(width: screenWidth)
         }
+    }
+}
+
+
+struct CompareFrequency: View{
+    var body: some View{
+        Text("Compare Frequency")
     }
 }

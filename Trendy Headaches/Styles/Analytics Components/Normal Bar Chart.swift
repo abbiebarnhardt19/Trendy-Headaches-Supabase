@@ -18,39 +18,54 @@ struct AnalyticsBarChart: View {
     @State private var showVisual = false
     let width = UIScreen.main.bounds.width - 50
     
+    //get the dats that determines bar size
     var frequencyData: [(key: String, count: Int)] {
         // Filter by category if provided
-        let filteredLogs: [UnifiedLog] = {
-            let category = categoryColumn.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            if category == "all" || category.isEmpty {
-                return logs
-            } else {
-                return logs.filter { ($0.log_type).lowercased() == category }
-            }
-        }()
+        let category = categoryColumn.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         
-        // Extract the values dynamically using the groupBy keyPath
+        // Special case for med effectiveness, since calculating a percent and getting a count
+        if category == "med_worked" {
+            // Only include logs that have a non-nil med_worked value
+            let validLogs = logs.filter { $0.med_worked != nil }
+            
+            // Group by medication name
+            let grouped = Dictionary(grouping: validLogs) { log in
+                log.medication_name ?? "Unknown"
+            }
+            
+            // Calculate percent effectiveness per medication
+            var results: [(key: String, count: Int)] = []
+            for (medName, medLogs) in grouped {
+                
+                let total = medLogs.count
+                let workedCount = medLogs.filter { $0.med_worked == true }.count
+                let percentage = Int(Double(workedCount) / Double(total) * 100)
+                
+                results.append((key: medName, count: percentage))
+            }
+            
+            // Sort descending by percent
+            return results.sorted { $0.count > $1.count }
+        }
+        
+        //section for getting frequency count
         var values: [String] = []
         
+        //cases for a single string vs a list of strings
         if let stringKeyPath = groupColumn as? KeyPath<UnifiedLog, String?> {
-            // Handle String? KeyPath - filter out nil and empty strings, split by comma
-            values = filteredLogs.flatMap { log -> [String] in
+            values = logs.flatMap { log -> [String] in
                 guard let value = log[keyPath: stringKeyPath], !value.isEmpty else { return [] }
-                // Split by comma and trim whitespace
                 return value.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
             }
         } else if let arrayKeyPath = groupColumn as? KeyPath<UnifiedLog, [String]?> {
-            // Handle [String]? KeyPath - flatten the arrays and filter out nil/empty
-            values = filteredLogs.flatMap { log -> [String] in
+            values = logs.flatMap { log -> [String] in
                 guard let array = log[keyPath: arrayKeyPath], !array.isEmpty else { return [] }
-                return array.filter { !$0.isEmpty } // Also filter out empty strings within the array
+                return array.filter { !$0.isEmpty }
             }
         }
         
-        // Count occurrences of each unique value
+        //get the counts for each value
         let counts = Dictionary(values.map { ($0, 1) }, uniquingKeysWith: +)
-        
-        // Sort descending by count
         return counts.map { ($0.key, $0.value) }.sorted { $0.count > $1.count }
     }
     
@@ -113,8 +128,8 @@ struct AnalyticsBarChart: View {
                                                 .fill(Color(hex: bg))
                                                 .frame(width: barWidth, height: 25)
                                             
-                                            //text in the bar
-                                            CustomText(text: "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth, textAlign: .center, textSize: 12)
+                                            //text in the bar, figure out if it needs % or log, and if log needs an s
+                                            CustomText(text: categoryColumn.lowercased() == "med_worked"  ? "\(item.count)% " : "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth,  textAlign: .center,  textSize: 12)
                                                 .clipped()
                                         }
                                     }

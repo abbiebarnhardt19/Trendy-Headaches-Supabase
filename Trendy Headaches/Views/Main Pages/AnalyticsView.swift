@@ -54,110 +54,219 @@ struct AnalyticsView: View {
         }
         return filtered
     }
+//    
+//    var filteredCompareLogs: ([UnifiedLog], [UnifiedLog]){
+//        let filtered1 = compareLogs1.filter { log in
+//            
+//            let withinDateRange = log.date >= startDate && log.date <= endDate
+//            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
+//            let typeMatch = selectedTypes.contains(log.log_type)
+//
+//            return symptomMatch && withinDateRange && typeMatch
+//        }
+//        
+//        let filtered2 = compareLogs2.filter { log in
+//            
+//            let withinDateRange = log.date >= startDate && log.date <= endDate
+//            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
+//            let typeMatch = selectedTypes.contains(log.log_type)
+//
+//            return symptomMatch && withinDateRange && typeMatch
+//        }
+//        return (filtered1, filtered2)
+//    }
+//    
+//    var compareLogs1: [UnifiedLog] {
+//        //go through each log and return the ones that match the conditions
+//        return logs.filter { log in
+//
+//            let logDate: Date = log.date
+//
+//            //  Date range filter (only if user selected a range)
+//            if range1End.timeIntervalSince(range1Start) > 1 {
+//                return logDate >= range1Start && logDate <= range1End
+//            }
+//
+//            // Symptom filter
+//            if let symptom = selectedSymptom1, !symptom.isEmpty {
+//                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+//                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+//            }
+//
+//            // Medication filter
+//            else if let medName = selectedMed1, !medName.isEmpty {
+//                
+//                // Find the medication object
+//                guard let med = medData.first(where: {
+//                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+//                    == medName.lowercased()
+//                }) else {
+//                    return false
+//                }
+//                
+//                // Convert medication start/end
+//                let formatter = DateFormatter()
+//                formatter.dateFormat = "yyyy-MM-dd"
+//                
+//                guard let startDate = formatter.date(from: med.medicationStart) else {
+//                    print("Could not parse start date for \(med.medicationName)")
+//                    return false
+//                }
+//                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
+//
+//                
+//                // Compare logDate against med dates
+//                if let end = endDate {
+//                    return logDate >= startDate && logDate <= end
+//                } else {
+//                    return logDate >= startDate
+//                }
+//            }
+//            // Default
+//            return false
+//        }
+//    }
+//    
+//    var compareLogs2: [UnifiedLog] {
+//        //go through each log and return the ones that match the conditions
+//        return logs.filter { log in
+//
+//            let logDate: Date = log.date
+//
+//            //  Date range filter (only if user selected a range)
+//            if range2End.timeIntervalSince(range2Start) > 1 {
+//                return logDate >= range2Start && logDate <= range2End
+//            }
+//
+//            // Symptom filter
+//            if let symptom = selectedSymptom2, !symptom.isEmpty {
+//                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+//                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+//            }
+//
+//            // Medication filter
+//            else if let medName = selectedMed2, !medName.isEmpty {
+//                
+//                // Find the medication object
+//                guard let med = medData.first(where: {
+//                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+//                    == medName.lowercased()
+//                }) else {
+//                    return false
+//                }
+//                
+//                // Convert medication start/end
+//                let formatter = DateFormatter()
+//                formatter.dateFormat = "yyyy-MM-dd"
+//                
+//                guard let startDate = formatter.date(from: med.medicationStart) else {
+//                    print("Could not parse start date for \(med.medicationName)")
+//                    return false
+//                }
+//                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
+//
+//                // Compare logDate against med dates
+//                if let end = endDate {
+//                    return logDate >= startDate && logDate <= end
+//                } else {
+//                    return logDate >= startDate
+//                }
+//            }
+//            // Default
+//            return false
+//        }
+//    }
     
-    var compareLogs1: [UnifiedLog] {
-        //go through each log and return the ones that match the conditions
+    var filteredCompareLogs: ([UnifiedLog], [UnifiedLog]) {
+        let filtered1 = filterCompareLogs(
+            logs: logs,
+            medData: medData,
+            rangeStart: range1Start,
+            rangeEnd: range1End,
+            selectedSymptom: selectedSymptom1,
+            selectedMed: selectedMed1,
+            startDate: startDate,
+            endDate: endDate,
+            selectedSymptoms: selectedSymptoms,
+            selectedTypes: selectedTypes
+        )
+        
+        let filtered2 = filterCompareLogs(
+            logs: logs,
+            medData: medData,
+            rangeStart: range2Start,
+            rangeEnd: range2End,
+            selectedSymptom: selectedSymptom2,
+            selectedMed: selectedMed2,
+            startDate: startDate,
+            endDate: endDate,
+            selectedSymptoms: selectedSymptoms,
+            selectedTypes: selectedTypes
+        )
+        
+        return (filtered1, filtered2)
+    }
+
+    func filterCompareLogs(
+        logs: [UnifiedLog],
+        medData: [Medication],
+        rangeStart: Date,
+        rangeEnd: Date,
+        selectedSymptom: String?,
+        selectedMed: String?,
+        startDate: Date,
+        endDate: Date,
+        selectedSymptoms: [String],
+        selectedTypes: [String]
+    ) -> [UnifiedLog] {
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        
         return logs.filter { log in
-
-            let logDate: Date = log.date
-
-            //  Date range filter (only if user selected a range)
-            if range1End.timeIntervalSince(range1Start) > 1 {
-                return logDate >= range1Start && logDate <= range1End
+            let logDate = log.date
+            
+            // --- Apply Global Filters First ---
+            let withinMainDateRange = logDate >= startDate && logDate <= endDate
+            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
+            let typeMatch = selectedTypes.contains(log.log_type)
+            guard withinMainDateRange && symptomMatch && typeMatch else { return false }
+            
+            // --- Compare-specific Filters ---
+            
+            // If user picked a custom date range
+            if rangeEnd.timeIntervalSince(rangeStart) > 1 {
+                return logDate >= rangeStart && logDate <= rangeEnd
             }
-
-            // Symptom filter
-            if let symptom = selectedSymptom1, !symptom.isEmpty {
-                print("Running symptom filter for:", symptom)
+            
+            // If user picked a symptom
+            if let symptom = selectedSymptom, !symptom.isEmpty {
                 let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
                 return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             }
-
-            // Medication filter
-            else if let medName = selectedMed1, !medName.isEmpty {
-                
-                // Find the medication object
+            
+            // If user picked a medication
+            if let medName = selectedMed, !medName.isEmpty {
                 guard let med = medData.first(where: {
                     $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
                     == medName.lowercased()
-                }) else {
-                    return false
-                }
+                }) else { return false }
                 
-                // Convert medication start/end
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
+                guard let startMed = formatter.date(from: med.medicationStart) else { return false }
+                let endMed = med.medicationEnd.flatMap { formatter.date(from: $0) }
                 
-                guard let startDate = formatter.date(from: med.medicationStart) else {
-                    print("Could not parse start date for \(med.medicationName)")
-                    return false
-                }
-                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
-
-                
-                // Compare logDate against med dates
-                if let end = endDate {
-                    return logDate >= startDate && logDate <= end
+                if let end = endMed {
+                    return logDate >= startMed && logDate <= end
                 } else {
-                    return logDate >= startDate
+                    return logDate >= startMed
                 }
             }
-            // Default
+            
+            // Default (if no compare condition applies)
             return false
         }
     }
-    
-    var compareLogs2: [UnifiedLog] {
-        //go through each log and return the ones that match the conditions
-        return logs.filter { log in
 
-            let logDate: Date = log.date
-
-            //  Date range filter (only if user selected a range)
-            if range2End.timeIntervalSince(range2Start) > 1 {
-                return logDate >= range2Start && logDate <= range2End
-            }
-
-            // Symptom filter
-            if let symptom = selectedSymptom2, !symptom.isEmpty {
-                print("Running symptom filter for:", symptom)
-                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
-                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            }
-
-            // Medication filter
-            else if let medName = selectedMed2, !medName.isEmpty {
-                
-                // Find the medication object
-                guard let med = medData.first(where: {
-                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                    == medName.lowercased()
-                }) else {
-                    return false
-                }
-                
-                // Convert medication start/end
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                
-                guard let startDate = formatter.date(from: med.medicationStart) else {
-                    print("Could not parse start date for \(med.medicationName)")
-                    return false
-                }
-                let endDate = med.medicationEnd.flatMap { formatter.date(from: $0) }
-
-                
-                // Compare logDate against med dates
-                if let end = endDate {
-                    return logDate >= startDate && logDate <= end
-                } else {
-                    return logDate >= startDate
-                }
-            }
-            // Default
-            return false
-        }
-    }
 
     var body: some View {
         NavigationStack{
@@ -176,6 +285,7 @@ struct AnalyticsView: View {
                         
                     VStack{
                         if selectedView == "Graphs"{
+
                             AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
@@ -184,17 +294,17 @@ struct AnalyticsView: View {
                             
                             CustomStackedBarChart(logList: filteredLogs, accent: accent, bg: bg)
                             
-                            MedTakenCalendarView(logs: filteredLogs, bg: bg, accent: accent)
-                            
-                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Emergency Treatment Effective", groupBy: \.med_worked)
-                            
-                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Symptom Onset", groupBy: \.onset_time)
-                            
-                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Side Effect", groupColumn: \UnifiedLog.side_effect_med, chartName: "Side Effect Medication", accent: accent, bg: bg)
-                            
                             AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.trigger_names, chartName: "Trigger Frequency", accent: accent, bg: bg)
                             
                             AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Symptom", groupColumn: \UnifiedLog.symptom_description, chartName: "Symptom Description Key Words", accent: accent, bg: bg)
+                            
+                            GenericPieChart(logList: filteredLogs, accent: accent, bg: bg, chartTitle: "Symptom Onset", groupBy: \.onset_time)
+                            
+                            MedTakenCalendarView(logs: filteredLogs, bg: bg, accent: accent)
+                            
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "med_worked", groupColumn: "medication_name", chartName: "Emergency Treatment Effective", accent: accent, bg: bg)
+                            
+                            AnalyticsBarChart(logs: filteredLogs, categoryColumn: "Side Effect", groupColumn: \UnifiedLog.side_effect_med, chartName: "Side Effect Medication", accent: accent, bg: bg)
                         }
                         
                         else if selectedView == "Statistics"{
@@ -207,13 +317,13 @@ struct AnalyticsView: View {
                             
                             OnsetStats(accent: accent, bg: bg, logList: filteredLogs)
                             
-                            MedicationTable(accent: accent, bg: bg, medList: medData)
-                            
-                            EmergencyMedStats(accent: accent, bg: bg, logList: filteredLogs)
-                            
                             TriggerStats(accent: accent, bg: bg, logList: filteredLogs, triggerOptions: triggerOptions)
                             
                             DescriptionStats(accent: accent, bg: bg, logList: filteredLogs)
+                            
+                            MedicationTable(accent: accent, bg: bg, medList: medData)
+                            
+                            EmergencyMedStats(accent: accent, bg: bg, logList: filteredLogs)
                             
                             SideEffectStats(accent: accent, bg: bg, logList: filteredLogs)
                         }
@@ -221,7 +331,9 @@ struct AnalyticsView: View {
                         else{
                             CompareComponents(accent: accent, bg: bg, symptomOptions: $symptomOptions, prevMedOptions: $prevMedOptions, selectedSymptom1: $selectedSymptom1, selectedSymptom2: $selectedSymptom2, range1Start: $range1Start, range1End: $range1End, range2Start: $range2Start, range2End: $range2End, selectedMed1: $selectedMed1, selectedMed2: $selectedMed2)
                             
-                            LogCalendarView(logs: compareLogs2, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: compareLogs2))
+                            AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
+                            
+                            LogCalendarView(logs: filteredCompareLogs.1, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredCompareLogs.1))
                         }
                     }
                     .padding(.bottom, 170)
@@ -234,7 +346,7 @@ struct AnalyticsView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
-                //get valies from daabase
+                //get values from daabase
                 .task {
                     do {
                         let result = try await fetchAnalyticsData(userID: Int(userID))
@@ -245,7 +357,6 @@ struct AnalyticsView: View {
                         triggerOptions = result.3
                         prevMedOptions = result.4
                         startDate = result.5 ?? Date()
-                        
                     } catch {
                         print("Error fetching all data:", error)
                     }
