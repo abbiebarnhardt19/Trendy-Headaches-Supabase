@@ -59,38 +59,11 @@ struct LogFrequencyStats: View{
 
     @State var showStats: Bool = false
 
-    //get the totals and averages
-    var frequencyStats: [String] {
-        
-        //display a no data message if there are no logs
-        guard !logList.isEmpty else { return ["No data available"] }
-        
-        //get all the log dates
-        let dates = logList.map { $0.date }
-        
-        //initalize results with total logs
-        var results = ["Total Logs: \(logList.count)"]
-        
-        //calcuate average logs per week
-        let calendar = Calendar.current
-        let weeks = calendar.dateComponents([.weekOfYear], from: dates.min() ?? Date(), to: dates.max() ?? Date()).weekOfYear ?? 0
-        
-        let weekCount = max(weeks, 1)
-        let weeklyAverage = Double(logList.count) / Double(weekCount)
-        results.append("Weekly Average: \(String(format: "%.1f", weeklyAverage))")
-        
-        //calculate average logs per month
-        let months = calendar.dateComponents([.month], from: dates.min() ?? Date(), to: dates.max() ?? Date()).month ?? 0
-        
-        let monthCount = max(months, 1)
-        let monthlyAverage = Double(logList.count) / Double(monthCount)
-        results.append("Monthly Average: \(String(format: "%.1f", monthlyAverage))")
-        
-        return results
-    }
-
-    
     var body: some View{
+        
+        //get the total, weekly average, and monthly average
+        let frequencyStats = getFrequencyValues(logList: logList)
+        
         //show the data
         if showStats{
             //card with header+data
@@ -116,17 +89,8 @@ struct SeverityStats: View{
 
     @State var showStats: Bool = false
     
-    
-    var averageSeverity: [String] {
-        //no data message
-        guard logList.count > 0 else { return ["No data available"] }
-        
-        let totalSeverity = logList.reduce(0) { $0 + $1.severity }
-        let averageSeverity = Double(totalSeverity) / Double(logList.count)
-        return ["Average Log Severity: \(String(format: "%.1f", averageSeverity))"]
-    }
-    
     var body: some View{
+        let averageSeverity = getSeverityValues(logList: logList)
         //card with the header+ data
         if showStats{
             StatsCard(title: "Average Severity:", items: averageSeverity, accent: accent, bg: bg, show: $showStats)

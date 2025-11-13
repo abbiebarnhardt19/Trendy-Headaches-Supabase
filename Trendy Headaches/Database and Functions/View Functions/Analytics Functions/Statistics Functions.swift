@@ -40,3 +40,64 @@ func calculateColumnWidths(medicationList: [Medication]) -> [CGFloat] {
     
     return [nameWidth, categoryWidth, dateWidth, dateWidth, reasonWidth]
 }
+
+
+func getFrequencyValues(logList: [UnifiedLog], prefix: String = "Average ") -> [String]{
+        
+        //display a no data message if there are no logs
+        guard !logList.isEmpty else { return ["No data available"] }
+        
+        //get all the log dates
+        let dates = logList.map { $0.date }
+        
+        //initalize results with total logs
+        var results = ["Total Logs: \(logList.count)"]
+        
+        //calcuate average logs per week
+        let calendar = Calendar.current
+        let weeks = calendar.dateComponents([.weekOfYear], from: dates.min() ?? Date(), to: dates.max() ?? Date()).weekOfYear ?? 0
+        
+        let weekCount = max(weeks, 1)
+        let weeklyAverage = Double(logList.count) / Double(weekCount)
+        results.append("\(prefix)Per Week: \(String(format: "%.1f", weeklyAverage))")
+        
+        //calculate average logs per month
+        let months = calendar.dateComponents([.month], from: dates.min() ?? Date(), to: dates.max() ?? Date()).month ?? 0
+        
+        let monthCount = max(months, 1)
+        let monthlyAverage = Double(logList.count) / Double(monthCount)
+        results.append("\(prefix)Per Month: \(String(format: "%.1f", monthlyAverage))")
+        
+        return results
+}
+
+func getSeverityValues(logList: [UnifiedLog], prefix: String = "Average Log Severity") -> [String]{
+        //no data message
+        guard logList.count > 0 else { return ["No data available"] }
+        
+        let totalSeverity = logList.reduce(0) { $0 + $1.severity }
+        let averageSeverity = Double(totalSeverity) / Double(logList.count)
+        return ["\(prefix): \(String(format: "%.1f", averageSeverity))"]
+}
+
+func getEmergTreatmentFreq(logList: [UnifiedLog]) -> [String]{
+    let filteredLogs = logList.filter { $0.med_taken == true }
+    
+    guard !filteredLogs .isEmpty else { return ["No data available"] }
+    
+    //get all the log dates
+    let dates = filteredLogs .map { $0.date }
+    
+    //initalize results with total logs
+    var results = ["Total: \(filteredLogs .count)"]
+    
+    //calcuate average logs per week
+    let calendar = Calendar.current
+    let weeks = calendar.dateComponents([.weekOfYear], from: dates.min() ?? Date(), to: dates.max() ?? Date()).weekOfYear ?? 0
+    
+    let weekCount = max(weeks, 1)
+    let weeklyAverage = Double(filteredLogs.count) / Double(weekCount)
+    results.append("Per Week: \(String(format: "%.1f", weeklyAverage))")
+    
+    return results
+}

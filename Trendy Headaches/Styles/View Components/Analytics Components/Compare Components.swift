@@ -329,3 +329,92 @@ struct CompareFilter: View{
         }
     }
 }
+
+//resuable card for comparing stats
+struct CompareStatCard: View {
+    var accent: String
+    var bg: String
+    var statName: String
+    var data: ([String], [String])
+    var dataLabels: (String, String)
+    
+    let screenWidth = UIScreen.main.bounds.width
+    let screenHeight = UIScreen.main.bounds.height
+    
+    @State var showStats: Bool = false
+    
+    var body: some View {
+        if showStats{
+            VStack(spacing: 0){
+                //header section
+                HStack{
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
+                    CustomText(text:statName, color: bg, width: statName.width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                        .padding(.trailing, 10)
+                    
+                    Spacer()
+                    HideButton(accent: accent, bg: bg, show: $showStats)
+                    
+                }
+                .padding(.top, 5)
+                .padding(.bottom, 10)
+                
+                //line dividing the header and the data
+                Divider()
+                    .frame(height: 1)
+                    .overlay(Color(hex: bg))
+                
+                //vertical line filling gap between horiztonal line and vertical line
+                Divider()
+                    .frame(width: 1, height: 12)
+                    .overlay(Color(hex: bg))
+                
+                //metric 1
+                HStack(alignment: .top){
+                    VStack(spacing: 5){
+                        //title of metric
+                        CustomText(text: dataLabels.0, color: bg, textAlign: .center, bold: true, textSize: screenWidth * 0.0475)
+                            .padding(.bottom, 5)
+                        
+                        //data
+                        ForEach(data.0, id: \.self) { item in
+                            CustomText(text: item, color: bg, textAlign: .center, textSize: screenWidth * 0.045)
+                        }
+                    }
+                    
+                    //vertical line dividing metrics
+                    Divider()
+                        .frame(width: 1)
+                        .overlay(Color(hex: bg))
+                    
+                    //metric 2
+                    VStack(spacing: 5){
+                        //metric title
+                        CustomText(text: dataLabels.1, color: bg, textAlign: .center, bold: true,  textSize: screenWidth * 0.0475)
+                            .padding(.bottom, 5)
+                        
+                        //data
+                        ForEach(data.1, id: \.self) { item in
+                            CustomText(text: item, color: bg, textAlign: .center, textSize: screenWidth * 0.045)
+                        }
+                    }
+                    
+                }
+            }
+            .padding(.horizontal, 15)
+            .padding(.top, 10)
+            .padding(.bottom, 20)
+            .background(Color(hex:accent))
+            .cornerRadius(20)
+            .frame(width: screenWidth - 50, alignment: .leading)
+            .padding(.bottom, 10)
+        }
+        //if hidden, show show button
+        else{
+            HStack {
+                CustomButton( text: statName,  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showStats.toggle() } )
+            }
+            .frame(width: screenWidth)
+        }
+    }
+}
