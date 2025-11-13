@@ -91,6 +91,7 @@ struct LogView: View {
         NavigationStack {
             ZStack {
                 LogBGComps(bg: bg, accent: accent)
+                
                 if showPopup, !oldLogIDs.isEmpty {
                     EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
                     .zIndex(5)

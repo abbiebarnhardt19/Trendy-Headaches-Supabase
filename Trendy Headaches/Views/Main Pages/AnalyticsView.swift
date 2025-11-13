@@ -16,6 +16,7 @@ struct AnalyticsView: View {
     @State var selectedView: String = "Compare"
     
     @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
+    @EnvironmentObject var tutorialManager: TutorialManager
 
     //values to be intialized on appear from database
     @State var logs: [UnifiedLog] = []
@@ -156,6 +157,8 @@ struct AnalyticsView: View {
                 //things that are present regardless of analytics type
                 AnalyticsBGComps(bg: bg, accent: accent)
                 
+
+                
                 ScrollView{
                     HStack{
                         Spacer()
@@ -233,6 +236,22 @@ struct AnalyticsView: View {
                         }
                     }
                     .padding(.bottom, 170)
+                    
+                    
+                }
+
+                if tutorialManager.showTutorial {
+                    TutorialPopup(
+                        title: "Analytics Page",
+                        message: "View your headache patterns and compare trends over time.",
+                        buttonText: "Next",
+                        accent: accent,
+                        onNext: { tutorialManager.endTutorial() }
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity) // occupy full ZStack
+                    .contentShape(Rectangle())                        // make the whole frame tappable
+                    .zIndex(100)
+                    .allowsHitTesting(true)                           // crucial
                 }
     
                 //nav bar
@@ -258,10 +277,20 @@ struct AnalyticsView: View {
                     }
                 }
             }
+
         }
+
+
+
     }
 }
 
+//#Preview {
+//    AnalyticsView(userID:12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+//}
+
 #Preview {
-    AnalyticsView(userID:12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    AnalyticsView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+        .environmentObject(TutorialManager())
 }
+
