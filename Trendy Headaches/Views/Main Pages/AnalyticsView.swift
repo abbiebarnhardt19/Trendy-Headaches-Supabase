@@ -218,17 +218,17 @@ struct AnalyticsView: View {
                             let set1Frequency = getFrequencyValues(logList: filteredCompareLogs.0, prefix: "")
                             let set2Frequency = getFrequencyValues(logList: filteredCompareLogs.1, prefix: "")
                             
-                            CompareStatCard(accent: accent, bg: bg, statName: "Compare Frequency ", data: (set1Frequency, set2Frequency), dataLabels: compareLables)
+                            CompareStatCard(accent: accent, bg: bg, statName: "Average Frequency ", data: (set1Frequency, set2Frequency), dataLabels: compareLables)
                             
                             let set1Severity = getSeverityValues(logList: filteredCompareLogs.0, prefix: "Avg. Severity")
                             let set2Severity = getSeverityValues(logList: filteredCompareLogs.1, prefix: "Avg. Severity")
                             
-                            CompareStatCard(accent: accent, bg: bg, statName: "Compare Severity ", data: (set1Severity, set2Severity), dataLabels: compareLables)
+                            CompareStatCard(accent: accent, bg: bg, statName: "Average Severity ", data: (set1Severity, set2Severity), dataLabels: compareLables)
                             
                             let set1Emerg = getEmergTreatmentFreq(logList: filteredCompareLogs.0)
                             let set2Emerg = getEmergTreatmentFreq(logList: filteredCompareLogs.1)
                             
-                            CompareStatCard(accent: accent, bg: bg, statName: "Compare Emergency Treatment Frequency ", data: (set1Emerg, set2Emerg), dataLabels: compareLables)
+                            CompareStatCard(accent: accent, bg: bg, statName: "Emergency Treatment Frequency ", data: (set1Emerg, set2Emerg), dataLabels: compareLables)
                             
                         }
                     }

@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-//format dates for table
+//format dates
 func formatDateString(dateString: String?) -> String {
     guard let dateString = dateString, !dateString.isEmpty else { return "N/A" }
 
@@ -41,7 +41,7 @@ func calculateColumnWidths(medicationList: [Medication]) -> [CGFloat] {
     return [nameWidth, categoryWidth, dateWidth, dateWidth, reasonWidth]
 }
 
-
+//get total logs, average per week, and average per month
 func getFrequencyValues(logList: [UnifiedLog], prefix: String = "Average ") -> [String]{
         
         //display a no data message if there are no logs
@@ -72,17 +72,22 @@ func getFrequencyValues(logList: [UnifiedLog], prefix: String = "Average ") -> [
 }
 
 func getSeverityValues(logList: [UnifiedLog], prefix: String = "Average Log Severity") -> [String]{
-        //no data message
-        guard logList.count > 0 else { return ["No data available"] }
+    //no data message
+    guard logList.count > 0 else { return ["No data available"] }
         
-        let totalSeverity = logList.reduce(0) { $0 + $1.severity }
-        let averageSeverity = Double(totalSeverity) / Double(logList.count)
-        return ["\(prefix): \(String(format: "%.1f", averageSeverity))"]
+    //get average severity level
+    let totalSeverity = logList.reduce(0) { $0 + $1.severity }
+    let averageSeverity = Double(totalSeverity) / Double(logList.count)
+    return ["\(prefix): \(String(format: "%.1f", averageSeverity))"]
 }
 
+
+//function to get the average times emergency treatment is administrated in a week
 func getEmergTreatmentFreq(logList: [UnifiedLog]) -> [String]{
+    //only get logs where emergency treatment was administered
     let filteredLogs = logList.filter { $0.med_taken == true }
     
+    //no data warning
     guard !filteredLogs .isEmpty else { return ["No data available"] }
     
     //get all the log dates

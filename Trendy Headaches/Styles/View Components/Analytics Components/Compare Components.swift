@@ -226,6 +226,7 @@ struct CompareMetric: View {
     }
 }
 
+//other analytics filter, but doesnt show the section for the selected compare metric
 struct CompareFilter: View{
     var bg: String
     var accent: String
@@ -275,13 +276,14 @@ struct CompareFilter: View{
                     .overlay(Color(hex: bg))
                     .padding(.bottom, 3)
                 
+                //alays show this because this isnt a compare metric
                 CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
 
                 //log type checkbox
                 MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
                     .padding(.bottom, 5)
 
-                
+                //dont show symptom selection if thats the selected metric
                 if selectedMetric != "Symptom"{
                     
                     Divider()
@@ -296,6 +298,7 @@ struct CompareFilter: View{
                     
                 }
                 
+                //dont show date selection if thats the selected metric
                 if selectedMetric != "Dates"{
                     
                     Divider()
