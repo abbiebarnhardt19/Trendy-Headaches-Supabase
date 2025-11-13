@@ -241,17 +241,8 @@ struct AnalyticsView: View {
                 }
 
                 if tutorialManager.showTutorial {
-                    TutorialPopup(
-                        title: "Analytics Page",
-                        message: "View your headache patterns and compare trends over time.",
-                        buttonText: "Next",
-                        accent: accent,
-                        onNext: { tutorialManager.endTutorial() }
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity) // occupy full ZStack
-                    .contentShape(Rectangle())                        // make the whole frame tappable
+                    AnalyticsTutorialPopup( bg: bg, accent: accent, onNext: { tutorialManager.endTutorial() })
                     .zIndex(100)
-                    .allowsHitTesting(true)                           // crucial
                 }
     
                 //nav bar
