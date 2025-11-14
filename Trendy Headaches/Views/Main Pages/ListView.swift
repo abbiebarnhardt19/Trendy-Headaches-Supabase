@@ -52,7 +52,8 @@ struct ListView: View {
     var screenWidth: CGFloat = UIScreen.main.bounds.width
     var screenHeight: CGFloat = UIScreen.main.bounds.height
     
-    //substract the blobs + header
+    //for tutorial
+    @EnvironmentObject var tutorialManager: TutorialManager
     
     
     //call this when any filter values change
@@ -132,6 +133,12 @@ struct ListView: View {
                         Spacer()
                     }
                     .zIndex(1000)
+                }
+                
+                if tutorialManager.showTutorial {
+                    ListTutorialPopup(bg: bg,  accent: accent, onNext: { tutorialManager.endTutorial() }, onClose: { tutorialManager.endTutorial() }  )
+
+                    .zIndex(100)
                 }
 
                 //nav bar
@@ -241,4 +248,5 @@ struct ListView: View {
 
 #Preview {
     ListView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+        .environmentObject(TutorialManager())
 }

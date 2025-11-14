@@ -109,26 +109,25 @@ struct AnalyticsView: View {
         return logs.filter { log in
             let logDate = log.date
             
-            // --- Apply Global Filters First ---
+            // global filters First
             let withinMainDateRange = logDate >= startDate && logDate <= endDate
             let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
             let typeMatch = selectedTypes.contains(log.log_type)
             guard withinMainDateRange && symptomMatch && typeMatch else { return false }
             
-            // --- Compare-specific Filters ---
-            
-            // If user picked a custom date range
+            //compare-specific filters
+            // custom date range
             if rangeEnd.timeIntervalSince(rangeStart) > 1 {
                 return logDate >= rangeStart && logDate <= rangeEnd
             }
             
-            // If user picked a symptom
+            // symptom
             if let symptom = selectedSymptom, !symptom.isEmpty {
                 let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
                 return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             }
             
-            // If user picked a medication
+            // medication
             if let medName = selectedMed, !medName.isEmpty {
                 guard let med = medData.first(where: {
                     $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()

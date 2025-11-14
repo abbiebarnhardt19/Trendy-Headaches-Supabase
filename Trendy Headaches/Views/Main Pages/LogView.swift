@@ -22,6 +22,7 @@ struct LogView: View {
     @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
     
     // Shared State
+    @EnvironmentObject var tutorialManager: TutorialManager
     @State private var showSymptomView = true
     @State private var logID: Int64 = 0
     @State private var showPopup: Bool = false
@@ -121,6 +122,12 @@ struct LogView: View {
                     }
                 }
                 .padding(.leading, leadPadd)
+                
+                if tutorialManager.showTutorial {
+                    LogTutorialPopup(bg: bg,  accent: accent, onNext: { tutorialManager.endTutorial() }, onClose: { tutorialManager.endTutorial() }  )
+
+                    .zIndex(100)
+                }
                 
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
                     .zIndex(1)
@@ -342,4 +349,5 @@ struct LogView: View {
 
 #Preview {
     LogView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+        .environmentObject(TutorialManager())
 }
