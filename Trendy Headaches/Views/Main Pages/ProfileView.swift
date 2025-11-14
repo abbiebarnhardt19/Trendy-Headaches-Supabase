@@ -276,14 +276,6 @@ struct ProfileView: View {
                     
                     FloatButton( accent: newAcc,  bg: newBG,  options: buttonNames, actions: buttonActions)
                         .padding(.top, 20)
-                    
-                    NavigationLink(
-                        destination: LogView(userID: userID, bg: $bg, accent: $accent)
-                            .environmentObject(tutorialManager),
-                        isActive: $showLogView
-                    ) {
-                        EmptyView()
-                    }
 
                 }
                 .padding(.trailing, 10)
