@@ -8,78 +8,81 @@
 import SwiftUI
 
 struct AnalyticsTutorialPopup: View {
-    var bg: String
-    var accent: String
+    @State var bg: String
+    @State var accent: String
+    @State var userID: Int64
     var onNext: () -> Void
     var onClose: () -> Void
 
     let screenWidth = UIScreen.main.bounds.width
     
     var body: some View {
-        ZStack {
-
-            VStack(spacing: 10){
-                HStack{
-                    CustomText(text: "Analytics Page", color: bg, textAlign: .center, bold: true, textSize: 24)
-                        .padding(.bottom, 5)
-                        .padding(.leading, 22+5)
-                    
-                    Button(action: { print("Close")
-                    onClose() }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .foregroundStyle(Color(hex:bg))
-                            .frame(width: 22, height: 22)
+        NavigationStack{
+            ZStack {
+                
+                VStack(spacing: 10){
+                    HStack{
+                        CustomText(text: "Analytics Page", color: bg, textAlign: .center, bold: true, textSize: 24)
+                            .padding(.bottom, 5)
+                            .padding(.leading, 22+5)
+                        
+                        Button(action: { print("Close")
+                            onClose() }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .foregroundStyle(Color(hex:bg))
+                                    .frame(width: 22, height: 22)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.trailing, 5)
+                            .padding(.bottom, 15)
                     }
-                    .buttonStyle(PlainButtonStyle())
-                    .padding(.trailing, 5)
-                    .padding(.bottom, 15)
+                    
+                    
+                    
+                    CustomText(text: "Three sections: Graphs, Stats, and Compare. Filter by date, symptom, and log type",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
+                        .padding(.bottom, 5)
+                    
+                    
+                    (Text("Graphs:").bold() + Text(" See data visually"))
+                        .foregroundColor(Color(hex: bg))
+                        .font(.system(size: 18, design: .serif))
+                        .multilineTextAlignment(.center)
+                        .frame(width: screenWidth * 0.75)
+                    
+                    (Text("Stats:").bold() + Text(" See data numerically"))
+                        .foregroundColor(Color(hex: bg))
+                        .font(.system(size: 18, design: .serif))
+                        .multilineTextAlignment(.center)
+                        .frame(width: screenWidth * 0.75)
+                    
+                    (Text("Compare:").bold() + Text(" compare data between date range, symptom, and treatment"))
+                        .foregroundColor(Color(hex: bg))
+                        .font(.system(size: 18, design: .serif))
+                        .multilineTextAlignment(.center)
+                        .frame(width: screenWidth * 0.75)
+                        .padding(.bottom, 5)
+                    
+                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                 }
-                
-
-
-                CustomText(text: "Three sections: Graphs, Stats, and Compare. Filter by date, symptom, and log type",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
-                .padding(.bottom, 5)
-
-
-                (Text("Graphs:").bold() + Text(" See data visually"))
-                    .foregroundColor(Color(hex: bg))
-                    .font(.system(size: 18, design: .serif))
-                    .multilineTextAlignment(.center)
-                    .frame(width: screenWidth * 0.75)
-
-                (Text("Stats:").bold() + Text(" See data numerically"))
-                    .foregroundColor(Color(hex: bg))
-                    .font(.system(size: 18, design: .serif))
-                    .multilineTextAlignment(.center)
-                    .frame(width: screenWidth * 0.75)
-
-                (Text("Compare:").bold() + Text(" compare data between date range, symptom, and treatment"))
-                    .foregroundColor(Color(hex: bg))
-                    .font(.system(size: 18, design: .serif))
-                    .multilineTextAlignment(.center)
-                    .frame(width: screenWidth * 0.75)
-                    .padding(.bottom, 5)
-
-                
-                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
-            }
-            .padding()
-            .frame(width: screenWidth * 0.85)
-            .background(Color(hex: accent))
-            .cornerRadius(30)
-            .shadow(radius: 10)
-            .overlay(RoundedRectangle(cornerRadius: 30)
+                .padding()
+                .frame(width: screenWidth * 0.85)
+                .background(Color(hex: accent))
+                .cornerRadius(30)
+                .shadow(radius: 10)
+                .overlay(RoundedRectangle(cornerRadius: 30)
                     .stroke(Color(hex: bg), lineWidth: 3) )
+            }
         }
     }
 }
 
 
 struct LogTutorialPopup: View {
-    var bg: String
-    var accent: String
+    @State var bg: String
+    @State var accent: String
+    var userID: Int64
     var onNext: () -> Void
     var onClose: () -> Void
 
@@ -113,7 +116,9 @@ struct LogTutorialPopup: View {
                 CustomText(text: "If you indicated that you took an emergency treatment to help your symptom, the next time you visit the log page you’ll be prompted to record whether the treatment was effective.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
+//                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
+                
+                CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
@@ -127,8 +132,9 @@ struct LogTutorialPopup: View {
 }
 
 struct ListTutorialPopup: View {
-    var bg: String
-    var accent: String
+    @State var bg: String
+    @State var accent: String
+    @State var userID: Int64
     var onNext: () -> Void
     var onClose: () -> Void
 
@@ -161,7 +167,9 @@ struct ListTutorialPopup: View {
                 CustomText(text: "To edit a log, select it from the table. You’ll be taken to the log page, where the fields will be automatically filled with its details. Make your changes and click “Save.”",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
+//                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
+                
+                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
