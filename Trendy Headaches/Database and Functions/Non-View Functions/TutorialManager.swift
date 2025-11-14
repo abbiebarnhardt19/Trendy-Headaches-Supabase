@@ -9,15 +9,9 @@ import SwiftUI
 
 class TutorialManager: ObservableObject {
     @Published var showTutorial = true
-    @Published var currentStep = 0
 
     func startTutorial() {
-        currentStep = 0
         showTutorial = true
-    }
-
-    func nextStep() {
-        currentStep += 1
     }
 
     func endTutorial() {

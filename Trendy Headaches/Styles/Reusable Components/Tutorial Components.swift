@@ -16,7 +16,6 @@ struct AnalyticsTutorialPopup: View {
     let screenWidth = UIScreen.main.bounds.width
     
     var body: some View {
-        NavigationStack{
             ZStack {
                 
                 VStack(spacing: 10){
@@ -74,7 +73,6 @@ struct AnalyticsTutorialPopup: View {
                     .stroke(Color(hex: bg), lineWidth: 3) )
             }
         }
-    }
 }
 
 
@@ -221,5 +219,3 @@ struct ProfileTutorialPopup: View {
         }
     }
 }
-
-

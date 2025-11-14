@@ -18,7 +18,7 @@ struct ProfileView: View {
     //  UI State
     @State private var isEditing = false
     @State private var logOut = false
-    @State private var showPolicy = false
+    @State private var showLogView = false
     @State private var showDelete = false
     
     //  User Data
@@ -39,7 +39,7 @@ struct ProfileView: View {
     
     //  Constants
     private let themeOptions = ["Classic Light", "Light Pink", "Light Yellow", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
-    private let buttonNames = ["Edit Profile", "Data Policy", "Sign Out", "Delete Account"]
+    private let buttonNames = ["Edit Profile", "App Tutorial", "Sign Out", "Delete Account"]
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
     
@@ -269,16 +269,23 @@ struct ProfileView: View {
                 //options button
                 HStack {
                     Spacer()
-                    let buttonActions: [() -> Void] = [ { isEditing = true },  { showPolicy = true },  {userSession.logout()
+                    let buttonActions: [() -> Void] = [ { isEditing = true },  { tutorialManager.startTutorial()
+                    showLogView = true},  {userSession.logout()
                         logOut = true },  { showDelete = true } ]
                     
                     FloatButton( accent: newAcc,  bg: newBG,  options: buttonNames, actions: buttonActions)
                         .padding(.top, 20)
-                    .fullScreenCover(isPresented: $showPolicy) {
-                        PolicySheetView(policyFileName: "DataPolicy", showsAgreeButton: false)
+                    
+                    NavigationLink(
+                        destination: LogView(userID: userID, bg: $bg, accent: $accent)
+                            .environmentObject(tutorialManager),
+                        isActive: $showLogView
+                    ) {
+                        EmptyView()
                     }
-                    .padding(.trailing, 10)
+
                 }
+                .padding(.trailing, 10)
             }
             .frame(maxWidth: colWidth)
         }
