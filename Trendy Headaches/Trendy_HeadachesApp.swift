@@ -87,14 +87,25 @@ struct Trendy_HeadachesApp: App {
     
     var body: some Scene {
         WindowGroup {
+//            if userSession.isLoggedIn {
+//                DataLoaderView(userID: userSession.userID)
+//                    .environmentObject(userSession)
+//                    .environmentObject(tutorialManager)
+//            } else {
+//                InitialView()
+//                    .environmentObject(userSession)
+//            }
             if userSession.isLoggedIn {
-                DataLoaderView(userID: userSession.userID)
-                    .environmentObject(userSession)
-                    .environmentObject(tutorialManager)
+                NavigationStack {
+                    DataLoaderView(userID: userSession.userID)
+                }
+                .environmentObject(userSession)
+                .environmentObject(tutorialManager)
             } else {
                 InitialView()
                     .environmentObject(userSession)
             }
+
         }
     }
 }
@@ -113,17 +124,18 @@ struct DataLoaderView: View {
             if isLoading {
                 ProgressView("Loading...")
             } else {
-                LogView(userID: userID, bg: .constant(bg), accent: .constant(accent))
-                    .environmentObject(tutorialManager)
-                    .onAppear {
-                        // ✅ Only show once after successful first login/account creation
-                        if !hasSeenTutorial {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                tutorialManager.startTutorial()
-                                hasSeenTutorial = true
+
+                    LogView(userID: userID, bg: .constant(bg), accent: .constant(accent))
+                        .environmentObject(tutorialManager)
+                        .onAppear {
+                            // ✅ Only show once after successful first login/account creation
+                            if !hasSeenTutorial {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    tutorialManager.startTutorial()
+                                    hasSeenTutorial = true
+                                }
                             }
-                        }
-                    }
+                }
             }
         }
         .task {

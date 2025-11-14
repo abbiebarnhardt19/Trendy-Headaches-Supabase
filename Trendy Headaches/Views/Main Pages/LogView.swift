@@ -88,26 +88,25 @@ struct LogView: View {
     
     //  Body
     var body: some View {
-        
-        NavigationStack {
+                NavigationStack {
             ZStack {
                 LogBGComps(bg: bg, accent: accent)
                 
                 if showPopup, !oldLogIDs.isEmpty {
                     EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
-                    .zIndex(5)
-                    .onDisappear {
-                        // When the popup closes, remove the first ID
-                        if !oldLogIDs.isEmpty {
-                            medWorked = nil
-                            oldLogIDs.removeFirst()
-                            
-                            // If there are more, show the next one
+                        .zIndex(5)
+                        .onDisappear {
+                            // When the popup closes, remove the first ID
                             if !oldLogIDs.isEmpty {
-                                showPopup = true
+                                medWorked = nil
+                                oldLogIDs.removeFirst()
+                                
+                                // If there are more, show the next one
+                                if !oldLogIDs.isEmpty {
+                                    showPopup = true
+                                }
                             }
                         }
-                    }
                 }
                 
                 ScrollView {
@@ -128,6 +127,8 @@ struct LogView: View {
 
                     .zIndex(100)
                 }
+
+
                 
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
                     .zIndex(1)

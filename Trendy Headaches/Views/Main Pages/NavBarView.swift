@@ -11,7 +11,7 @@ struct NavBarView: View {
     let userID: Int64
     @Binding var bg: String
     @Binding var accent: String
-    @Binding var selected: Int
+    @Binding var selected: Int?
     
     let width = UIScreen.main.bounds.width
     let height = UIScreen.main.bounds.height
@@ -72,6 +72,7 @@ struct NavBarView: View {
                         .animation(.easeInOut(duration: 0.0), value: selected)
                     }
                     .buttonStyle(.plain)
+
                 }
                 Spacer()
             }

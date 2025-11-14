@@ -155,7 +155,7 @@ struct AnalyticsView: View {
             ZStack {
                 //things that are present regardless of analytics type
                 AnalyticsBGComps(bg: bg, accent: accent)
-
+                
                 ScrollView{
                     HStack{
                         Spacer()
@@ -164,10 +164,10 @@ struct AnalyticsView: View {
                             .padding(.trailing, 20)
                             .padding(.top, 20)
                     }
-                        
+                    
                     VStack{
                         if selectedView == "Graphs"{
-
+                            
                             AnalyticsFilter(bg: bg, accent: accent, symptomOptions: $symptomOptions, selectedSymptom: $selectedSymptoms, startDate: $startDate, endDate: $endDate, selectedTypes: $selectedTypes)
                             
                             LogCalendarView(logs: filteredLogs, bg: bg, accent: accent, sympIcon: generateSymptomToIconMap(from: filteredLogs))
@@ -236,12 +236,12 @@ struct AnalyticsView: View {
                     
                     
                 }
-
+                
                 if tutorialManager.showTutorial {
                     AnalyticsTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
-                    .zIndex(100)
+                        .zIndex(100)
                 }
-    
+                
                 //nav bar
                 VStack {
                     Spacer()
@@ -265,11 +265,7 @@ struct AnalyticsView: View {
                     }
                 }
             }
-
         }
-
-
-
     }
 }
 

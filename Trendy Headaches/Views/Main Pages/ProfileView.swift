@@ -66,6 +66,7 @@ struct ProfileView: View {
 
                     .zIndex(100)
                 }
+
                 
                 // Bottom Nav Bar
                 VStack {

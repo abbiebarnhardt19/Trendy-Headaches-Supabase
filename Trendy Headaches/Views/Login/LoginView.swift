@@ -79,7 +79,7 @@ struct LoginView: SwiftUI.View {
                 
                 //  Navigation
                 .navigationDestination(isPresented: $loggedIn) {
-                        LogView(userID: userId ?? 0, bg: .constant(bg),  accent: .constant(accent) )
+                    LogView(userID: userId ?? 0, bg: .constant(bg),  accent: .constant(accent))
                         .navigationBarBackButtonHidden(true)
                 }
             }
