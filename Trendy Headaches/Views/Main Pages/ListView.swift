@@ -136,18 +136,10 @@ struct ListView: View {
                 }
                 
                 if tutorialManager.showTutorial {
-                    ListTutorialPopup(bg: bg,  accent: accent, userID: userID, onNext: { tutorialManager.endTutorial() }, onClose: { tutorialManager.endTutorial() }  )
+                    ListTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
 
                     .zIndex(100)
                 }
-
-                //nav bar
-                VStack {
-                    Spacer()
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
-                }
-                .ignoresSafeArea(edges: .bottom)
-                .zIndex(1)
 
                 //nav bar
                 VStack {

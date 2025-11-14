@@ -11,7 +11,6 @@ struct AnalyticsTutorialPopup: View {
     @State var bg: String
     @State var accent: String
     @State var userID: Int64
-    var onNext: () -> Void
     var onClose: () -> Void
 
     let screenWidth = UIScreen.main.bounds.width
@@ -83,7 +82,6 @@ struct LogTutorialPopup: View {
     @State var bg: String
     @State var accent: String
     var userID: Int64
-    var onNext: () -> Void
     var onClose: () -> Void
 
     let screenWidth = UIScreen.main.bounds.width
@@ -134,8 +132,7 @@ struct LogTutorialPopup: View {
 struct ListTutorialPopup: View {
     @State var bg: String
     @State var accent: String
-    @State var userID: Int64
-    var onNext: () -> Void
+    var userID: Int64
     var onClose: () -> Void
 
     let screenWidth = UIScreen.main.bounds.width
@@ -167,9 +164,8 @@ struct ListTutorialPopup: View {
                 CustomText(text: "To edit a log, select it from the table. You’ll be taken to the log page, where the fields will be automatically filled with its details. Make your changes and click “Save.”",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-//                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
                 
-                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)

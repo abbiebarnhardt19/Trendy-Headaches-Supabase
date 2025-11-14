@@ -124,7 +124,7 @@ struct LogView: View {
                 .padding(.leading, leadPadd)
                 
                 if tutorialManager.showTutorial {
-                    LogTutorialPopup(bg: bg,  accent: accent, userID: userID, onNext: { tutorialManager.endTutorial() }, onClose: { tutorialManager.endTutorial() }  )
+                    LogTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
 
                     .zIndex(100)
                 }

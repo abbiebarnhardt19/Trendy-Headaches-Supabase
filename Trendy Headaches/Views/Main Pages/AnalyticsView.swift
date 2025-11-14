@@ -238,7 +238,7 @@ struct AnalyticsView: View {
                 }
 
                 if tutorialManager.showTutorial {
-                    AnalyticsTutorialPopup(bg: bg,  accent: accent, userID: userID, onNext: { tutorialManager.endTutorial() }, onClose: { tutorialManager.endTutorial() }  )
+                    AnalyticsTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
 
                     .zIndex(100)
                 }
