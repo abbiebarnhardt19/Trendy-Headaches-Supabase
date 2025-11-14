@@ -13,6 +13,7 @@ struct ProfileView: View {
     @Binding var accent: String
     
     @EnvironmentObject var userSession: UserSession
+    @EnvironmentObject var tutorialManager: TutorialManager
     
     //  UI State
     @State private var isEditing = false
@@ -59,6 +60,12 @@ struct ProfileView: View {
                     }
                 }
                 .ignoresSafeArea(edges: .bottom)
+                
+                if tutorialManager.showTutorial {
+                    ProfileTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
+
+                    .zIndex(100)
+                }
                 
                 // Bottom Nav Bar
                 VStack {
@@ -289,6 +296,8 @@ struct ProfileView: View {
             }
     }
     
+    
+    
     private func saveProfileChanges() {
         Task {
             if sQ != newSQ {
@@ -318,4 +327,5 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+        .environmentObject(TutorialManager())
 }

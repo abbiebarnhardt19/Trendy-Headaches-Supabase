@@ -114,8 +114,6 @@ struct LogTutorialPopup: View {
                 CustomText(text: "If you indicated that you took an emergency treatment to help your symptom, the next time you visit the log page you’ll be prompted to record whether the treatment was effective.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-//                CustomButton(text: "Next", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {print("Next")})
-                
                 CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
@@ -177,4 +175,51 @@ struct ListTutorialPopup: View {
         }
     }
 }
+
+struct ProfileTutorialPopup: View {
+    @State var bg: String
+    @State var accent: String
+    var userID: Int64
+    var onClose: () -> Void
+
+    let screenWidth = UIScreen.main.bounds.width
+    
+    var body: some View {
+        ZStack {
+
+            VStack(spacing: 10){
+                HStack{
+                    CustomText(text: "Profile Page", color: bg, textAlign: .center, bold: true, textSize: 24)
+                        .padding(.bottom, 5)
+                        .padding(.leading, 22+5)
+                    
+                    Button(action: { print("Close")
+                    onClose() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .foregroundStyle(Color(hex:bg))
+                            .frame(width: 22, height: 22)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .padding(.trailing, 5)
+                    .padding(.bottom, 15)
+                }
+
+                CustomText(text: "View your data. Use the floating button to edit your account, restart the tutorial, sign out, or delete your account.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
+                    .padding(.bottom, 10)
+                
+                CustomButton(text: "Finish", bg: accent, accent: bg, height: 40, width: 90, textSize: 18, action: {onClose()})
+            }
+            .padding()
+            .frame(width: screenWidth * 0.85)
+            .background(Color(hex: accent))
+            .cornerRadius(30)
+            .shadow(radius: 10)
+            .overlay(RoundedRectangle(cornerRadius: 30)
+                    .stroke(Color(hex: bg), lineWidth: 3) )
+        }
+    }
+}
+
 
