@@ -64,7 +64,6 @@ extension ListView {
             let colors = await Database.shared.getColors(userID: userID)
             bg = colors.0
             accent = colors.1
-            hasLoaded = true
     }
 
 }

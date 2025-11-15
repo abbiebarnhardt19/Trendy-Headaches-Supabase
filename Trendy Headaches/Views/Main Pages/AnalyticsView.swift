@@ -10,12 +10,13 @@ import SwiftUI
 struct AnalyticsView: View {
     
     var userID: Int64
-    @Binding var bg: String
-    @Binding var accent: String
+    
+    @State var bg: String = ""
+    @State var accent: String = ""
     
     @State var selectedView: String = "Compare"
     
-    @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
+    @State var screenWidth: CGFloat = UIScreen.main.bounds.width
     @EnvironmentObject var tutorialManager: TutorialManager
 
     //values to be intialized on appear from database
@@ -43,113 +44,8 @@ struct AnalyticsView: View {
     //set end date for filter for the end of the current date
     @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
     
-    //filter logs based date, symptom, and log type
-    var filteredLogs: [UnifiedLog] {
-        
-        let filtered = logs.filter { log in
-            
-            let withinDateRange = log.date >= startDate && log.date <= endDate
-            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
-            let typeMatch = selectedTypes.contains(log.log_type)
 
-            return symptomMatch && withinDateRange && typeMatch
-        }
-        return filtered
-    }
     
-    var filteredCompareLogs: ([UnifiedLog], [UnifiedLog]) {
-        let filtered1 = filterCompareLogs(logs: logs, medData: medData, rangeStart: range1Start, rangeEnd: range1End, selectedSymptom: selectedSymptom1, selectedMed: selectedMed1, startDate: startDate, endDate: endDate, selectedSymptoms: selectedSymptoms, selectedTypes: selectedTypes)
-        
-        let filtered2 = filterCompareLogs(logs: logs, medData: medData, rangeStart: range2Start, rangeEnd: range2End,  selectedSymptom: selectedSymptom2, selectedMed: selectedMed2,  startDate: startDate, endDate: endDate, selectedSymptoms: selectedSymptoms, selectedTypes: selectedTypes)
-        
-        return (filtered1, filtered2)
-    }
-    
-    //build the labels for each selected metric
-    var compareLables: (String, String){
-        var labelOne: String = ""
-        var labelTwo: String = ""
-        
-        if selectedMetric == "Dates"{
-            let range1StartString = "\(DateFormatter.localizedString(from: range1Start, dateStyle: .short, timeStyle: .none))"
-            let range1EndString = "\(DateFormatter.localizedString(from: range1End, dateStyle: .short, timeStyle: .none))"
-            labelOne = "\(range1StartString)-\(range1EndString)"
-            
-            let range2StartString = "\(DateFormatter.localizedString(from: range2Start, dateStyle: .short, timeStyle: .none))"
-            let range2EndString = "\(DateFormatter.localizedString(from: range2End, dateStyle: .short, timeStyle: .none))"
-            labelTwo = "\(range2StartString)-\(range2EndString)"
-        }
-        else if selectedMetric == "Symptoms"{
-            labelOne = selectedSymptom1 ?? ""
-            labelTwo = selectedSymptom2 ?? ""
-        }
-        else if selectedMetric == "Preventative Treatment"{
-            labelOne = selectedMed1 ?? ""
-            labelTwo = selectedMed2 ?? ""
-        }
-        return (labelOne, labelTwo)
-    }
-
-    func filterCompareLogs(
-        logs: [UnifiedLog],
-        medData: [Medication],
-        rangeStart: Date,
-        rangeEnd: Date,
-        selectedSymptom: String?,
-        selectedMed: String?,
-        startDate: Date,
-        endDate: Date,
-        selectedSymptoms: [String],
-        selectedTypes: [String]
-    ) -> [UnifiedLog] {
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        
-        return logs.filter { log in
-            let logDate = log.date
-            
-            // global filters First
-            let withinMainDateRange = logDate >= startDate && logDate <= endDate
-            let symptomMatch = selectedSymptoms.contains(log.symptom_name ?? "")
-            let typeMatch = selectedTypes.contains(log.log_type)
-            guard withinMainDateRange && symptomMatch && typeMatch else { return false }
-            
-            //compare-specific filters
-            // custom date range
-            if rangeEnd.timeIntervalSince(rangeStart) > 1 {
-                return logDate >= rangeStart && logDate <= rangeEnd
-            }
-            
-            // symptom
-            if let symptom = selectedSymptom, !symptom.isEmpty {
-                let logSymptom = log.symptom_name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
-                return logSymptom == symptom.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-            }
-            
-            // medication
-            if let medName = selectedMed, !medName.isEmpty {
-                guard let med = medData.first(where: {
-                    $0.medicationName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-                    == medName.lowercased()
-                }) else { return false }
-                
-                guard let startMed = formatter.date(from: med.medicationStart) else { return false }
-                let endMed = med.medicationEnd.flatMap { formatter.date(from: $0) }
-                
-                if let end = endMed {
-                    return logDate >= startMed && logDate <= end
-                } else {
-                    return logDate >= startMed
-                }
-            }
-            
-            // Default (if no compare condition applies)
-            return false
-        }
-    }
-
-
     var body: some View {
         NavigationStack{
             ZStack {
@@ -233,10 +129,9 @@ struct AnalyticsView: View {
                         }
                     }
                     .padding(.bottom, 170)
-                    
-                    
                 }
                 
+                //show tutorial if needed
                 if tutorialManager.showTutorial {
                     AnalyticsTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                         .zIndex(100)
@@ -249,20 +144,10 @@ struct AnalyticsView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
-                //get values from daabase
-                .task {
-                    do {
-                        let result = try await fetchAnalyticsData(userID: Int(userID))
-                        logs = result.0
-                        medData = result.1
-                        symptomOptions = result.2
-                        selectedSymptoms = result.2
-                        triggerOptions = result.3
-                        prevMedOptions = result.4
-                        startDate = result.5 ?? Date()
-                    } catch {
-                        print("Error fetching all data:", error)
-                    }
+                //get colors, logs, and filter values
+                .task{
+                    await fetchColors()
+                    await getAnalyticsData()
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -270,9 +155,8 @@ struct AnalyticsView: View {
     }
 }
 
-
 #Preview {
-    AnalyticsView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    AnalyticsView(userID: 12)
         .environmentObject(TutorialManager())
 }
 

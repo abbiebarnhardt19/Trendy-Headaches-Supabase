@@ -28,15 +28,11 @@ struct NavBarView: View {
                     destination: AnyView(LogView(userID: userID).navigationBarBackButtonHidden(true)),
                     padding: EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0)),
             
-//            NavItem(icon: "list.bullet", label: "List",
-//                    destination: AnyView(ListView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
-//                    padding: EdgeInsets(top: 3, leading: 0, bottom: 0, trailing: 0)),
          
          NavItem(icon: "list.bullet", label: "List", destination: AnyView(ListView(userID: userID).navigationBarBackButtonHidden(true)),padding: EdgeInsets(top: 3, leading: 0, bottom: 0, trailing: 0)),
-            
-            NavItem(icon: "chart.bar.xaxis", label: "Analytics",
-                    destination: AnyView(AnalyticsView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
-                    padding: nil),
+         
+         NavItem(icon: "chart.bar.xaxis", label: "Analytics", destination: AnyView(AnalyticsView(userID: userID).navigationBarBackButtonHidden(true)),
+                 padding: nil),
         
         NavItem(icon: "person.fill", label: "Profile",
                 destination: AnyView(ProfileView(userID: userID).navigationBarBackButtonHidden(true)),

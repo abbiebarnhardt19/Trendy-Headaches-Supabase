@@ -24,8 +24,7 @@ struct AnalyticsTutorialPopup: View {
                             .padding(.bottom, 5)
                             .padding(.leading, 22+5)
                         
-                        Button(action: { print("Close")
-                            onClose() }) {
+                        Button(action: { onClose() }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
@@ -36,8 +35,6 @@ struct AnalyticsTutorialPopup: View {
                             .padding(.trailing, 5)
                             .padding(.bottom, 15)
                     }
-                    
-                    
                     
                     CustomText(text: "Three sections: Graphs, Stats, and Compare. Filter by date, symptom, and log type",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                         .padding(.bottom, 5)
@@ -93,7 +90,7 @@ struct LogTutorialPopup: View {
                         .padding(.bottom, 5)
                         .padding(.leading, 22+5)
                     
-                    Button(action: { print("Close")
+                    Button(action: {
                     onClose() }) {
                         Image(systemName: "xmark.circle.fill")
                             .resizable()
@@ -111,8 +108,6 @@ struct LogTutorialPopup: View {
                 
                 CustomText(text: "If you indicated that you took an emergency treatment to help your symptom, the next time you visit the log page you’ll be prompted to record whether the treatment was effective.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
-                
-//                CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                 
                 CustomNavButton(label: "Next", dest:  ListView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
@@ -144,8 +139,7 @@ struct ListTutorialPopup: View {
                         .padding(.bottom, 5)
                         .padding(.leading, 22+5)
                     
-                    Button(action: { print("Close")
-                    onClose() }) {
+                    Button(action: { onClose() }) {
                         Image(systemName: "xmark.circle.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -162,7 +156,7 @@ struct ListTutorialPopup: View {
                 CustomText(text: "To edit a log, select it from the table. You’ll be taken to the log page, where the fields will be automatically filled with its details. Make your changes and click “Save.”",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
@@ -192,8 +186,7 @@ struct ProfileTutorialPopup: View {
                         .padding(.bottom, 5)
                         .padding(.leading, 22+5)
                     
-                    Button(action: { print("Close")
-                    onClose() }) {
+                    Button(action: { onClose() }) {
                         Image(systemName: "xmark.circle.fill")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
