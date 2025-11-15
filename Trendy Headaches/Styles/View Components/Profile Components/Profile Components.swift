@@ -219,3 +219,98 @@ struct FloatButton: View {
         }
     }
 }
+
+struct EditableSection: View {
+    let title: String
+    @Binding var items: [String]
+    let table: String
+    let requiresReason: Bool
+    var medCat: String? = nil
+    
+    // styling bindings
+    let bg: String
+    let accent: String
+    let colWidth: CGFloat
+    let userID: Int64
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            SectionTitle(title: title, width: colWidth, color: accent)
+            
+            EditableList(
+                items: $items,
+                title: title,
+                bg: bg,
+                accent: accent,
+                requiresReason: requiresReason,
+                onAdd: { newValue in
+                    Task {
+                        await Database.shared.insertItem(
+                            tableName: table,
+                            userID: userID,
+                            name: newValue.capitalized,
+                            medCat: medCat
+                        )
+                    }
+                },
+                onEdit: { oldValue, newValue in
+                    Task {
+                        await Database.shared.updateItem(
+                            tableName: table,
+                            userID: userID,
+                            old: oldValue,
+                            new: newValue.capitalized,
+                            medCat: medCat
+                        )
+                    }
+                },
+                onDelete: { value, reason in
+                    Task {
+                        await Database.shared.endItem(
+                            tableName: table,
+                            userID: userID,
+                            name: value,
+                            medCat: medCat,
+                            endReason: reason
+                        )
+                    }
+                }
+            )
+        }
+    }
+}
+
+struct SectionTitle: View {
+    let title: String
+    let width: CGFloat
+    let color: String
+    
+    var body: some View {
+        CustomText(
+            text: title,
+            color: color,
+            width: width - 15,
+            textAlign: .center,
+            multiAlign: .center,
+            bold: true
+        )
+    }
+}
+
+struct SectionList: View {
+    let colTitle: String
+    let items: [String]
+    let width: CGFloat
+    let color: String
+    
+    var body: some View {
+        VStack {
+            SectionTitle(title: colTitle, width: width, color: color)
+            CustomList(items: items, color: color)
+        }
+    }
+}
+
+
+
+
