@@ -87,9 +87,14 @@ struct ProfileView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
+            .navigationBarBackButtonHidden(true)
             //go to login if cancel account
             .fullScreenCover(isPresented: $logOut) {
                 InitialView()
+            }
+            .fullScreenCover(isPresented: $showLogView) {
+                LogView(userID: userID, bg: $bg, accent: $accent)
+                    .navigationBarBackButtonHidden(true)
             }
             //get data on load
             .task {

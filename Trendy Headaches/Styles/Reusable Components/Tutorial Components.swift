@@ -160,7 +160,6 @@ struct ListTutorialPopup: View {
                 CustomText(text: "To edit a log, select it from the table. You’ll be taken to the log page, where the fields will be automatically filled with its details. Make your changes and click “Save.”",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                
                 CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
