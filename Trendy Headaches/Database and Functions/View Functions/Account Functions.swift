@@ -344,4 +344,28 @@ extension Database {
             return nil
         }
     }
+    
+    //get the users colors
+    func getColors(userID: Int64) async -> (String, String) {
+        do {
+            let users: [UserColors] = try await client
+                .from("Users")
+                .select("background_color, accent_color")
+                .eq("user_id", value: Int(userID))
+                .execute()
+                .value
+
+            if let user = users.first {
+                return (user.background_color, user.accent_color)
+            } else {
+                return ("", "")
+            }
+
+        } catch {
+            print("Supabase error in getColors: \(error)")
+            return ("", "")
+        }
+    }
+
+
 }

@@ -213,3 +213,10 @@ struct LogInsert: Encodable {
     let notes: String
     let submit_time: String
 }
+
+struct UserColors: Decodable {
+    let background_color: String
+    let accent_color: String
+}
+
+

@@ -24,9 +24,16 @@ struct NavBarView: View {
     }
     
     var navItems: [NavItem] {
-        [NavItem(icon: "square.and.pencil", label: "Log",
-                    destination: AnyView(LogView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
-                    padding: EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0)),
+        [
+//            NavItem(icon: "square.and.pencil", label: "Log",
+//                    destination: AnyView(LogView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
+//                    padding: EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+            
+            NavItem(icon: "square.and.pencil", label: "Log",
+                    destination: AnyView(LogView(userID: userID).navigationBarBackButtonHidden(true)),
+                    padding: EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0))
+            
+            ,
             
             NavItem(icon: "list.bullet", label: "List",
                     destination: AnyView(ListView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
@@ -36,9 +43,13 @@ struct NavBarView: View {
                     destination: AnyView(AnalyticsView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
                     padding: nil),
             
-            NavItem(icon: "person.fill", label: "Profile",
-                    destination: AnyView(ProfileView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
-                    padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 15)) ]
+//            NavItem(icon: "person.fill", label: "Profile",
+//                    destination: AnyView(ProfileView(userID: userID, bg: $bg, accent: $accent).navigationBarBackButtonHidden(true)),
+//                    padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 15)) ]
+        
+        NavItem(icon: "person.fill", label: "Profile",
+                destination: AnyView(ProfileView(userID: userID).navigationBarBackButtonHidden(true)),
+                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 15)) ]
     }
     
     var body: some View {
@@ -82,5 +93,6 @@ struct NavBarView: View {
         .frame(maxWidth: UIScreen.main.bounds.width)
         .frame(height: height * 0.075)
         .ignoresSafeArea(edges: .bottom)
+        .zIndex(1)
     }
 }

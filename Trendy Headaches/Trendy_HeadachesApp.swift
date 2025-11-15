@@ -53,7 +53,18 @@ struct DataLoaderView: View {
             if isLoading {
                 ProgressView("Loading...")
             } else {
-                LogView(userID: userID, bg: .constant(bg), accent: .constant(accent))
+//                LogView(userID: userID, bg: .constant(bg), accent: .constant(accent))
+//                    .environmentObject(tutorialManager)
+//                    .onAppear {
+//                        // Show tutorial if first login OR user never saw it
+//                        if firstLogin || !hasSeenTutorial {
+//                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+//                                tutorialManager.startTutorial()
+//                                hasSeenTutorial = true
+//                            }
+//                        }
+//                    }
+                LogView(userID: userID)
                     .environmentObject(tutorialManager)
                     .onAppear {
                         // Show tutorial if first login OR user never saw it

@@ -13,64 +13,66 @@ struct LogView: View {
     var userID: Int64
     var existingLog: Int64? = nil
     var existingTable: String? = nil
-    @Binding var bg: String
-    @Binding var accent: String
+    
+    //color variable
+    @State var hasLoaded: Bool = false
+    @State var bg: String = ""
+    @State var accent: String = ""
     
     // Layout
-    private let leadPadd: CGFloat = 60
-    @State private var screenWidth: CGFloat = UIScreen.main.bounds.width
-    @State private var screenHeight: CGFloat = UIScreen.main.bounds.height
+    let leadPadd: CGFloat = 60
+    @State var screenWidth: CGFloat = UIScreen.main.bounds.width
+    @State  var screenHeight: CGFloat = UIScreen.main.bounds.height
     
     // Shared State
     @EnvironmentObject var tutorialManager: TutorialManager
-    
-    @State private var showSymptomView = true
-    @State private var logID: Int64 = 0
-    @State private var showPopup: Bool = false
-    @State private var date: Date = Date()
+    @State  var showSymptomView = true
+    @State  var logID: Int64 = 0
+    @State  var showPopup: Bool = false
+    @State  var date: Date = Date()
     
     //  Symptom Log variables
-    @State private var stringDate: String = ""
-    @State private var onset: String?
-    @State private var onsetOptions: [String] = ["From Wake", "Morning", "Afternoon", "Evening"]
-    @State private var symp: String?
-    @State private var sympOptions: [String] = []
-    @State private var severity: Int64 = 1
-    @State private var medTaken: Bool = false
-    @State private var emergMedOptions: [String] = []
-    @State private var medTakenName: String?
-    @State private var sympDesc: String = ""
-    @State private var notes: String = ""
-    @State private var triggOptions: [String] = []
-    @State private var selectedTriggs: [String] = []
-    @State private var sympID: Int64 = 0
-    @State private var triggIDs: [Int64] = []
-    @State private var emergMedID: Int64? = nil
+    @State  var stringDate: String = ""
+    @State  var onset: String?
+    @State  var onsetOptions: [String] = ["From Wake", "Morning", "Afternoon", "Evening"]
+    @State  var symp: String?
+    @State  var sympOptions: [String] = []
+    @State  var severity: Int64 = 1
+    @State  var medTaken: Bool = false
+    @State  var emergMedOptions: [String] = []
+    @State  var medTakenName: String?
+    @State  var sympDesc: String = ""
+    @State  var notes: String = ""
+    @State  var triggOptions: [String] = []
+    @State  var selectedTriggs: [String] = []
+    @State  var sympID: Int64 = 0
+    @State  var triggIDs: [Int64] = []
+    @State  var emergMedID: Int64? = nil
     
     //  Side Effect Log variables
-    @State private var sideEffectName: String = ""
-    @State private var sideEffectSev: Int64 = 0
-    @State private var medOptions: [String] = []
-    @State private var selectedMed: String?
-    @State private var medID: Int64 = 0
+    @State  var sideEffectName: String = ""
+    @State  var sideEffectSev: Int64 = 0
+    @State  var medOptions: [String] = []
+    @State  var selectedMed: String?
+    @State  var medID: Int64 = 0
     
     //for med popup
-    @State private var medWorked: Bool? = nil
-    @State private var oldLogIDs: [Int64] = [0]
+    @State  var medWorked: Bool? = nil
+    @State  var oldLogIDs: [Int64] = [0]
     
     //for log editing
-    @State private var medEffective: Bool = false
+    @State  var medEffective: Bool = false
     
-    @State private var listView = false
+    @State  var listView = false
     
     // Date Formatter
-    private let formatter: DateFormatter = {
+     let formatter: DateFormatter = {
         let f = DateFormatter()
         f.dateStyle = .medium
         return f
     }()
     
-    private var formValid: Bool {
+     var formValid: Bool {
         if showSymptomView{
             // Base condition for symptom log
             var isValid = symp != nil && severity > 0
@@ -92,7 +94,8 @@ struct LogView: View {
         NavigationStack {
             ZStack {
                 LogBGComps(bg: bg, accent: accent)
-                
+                    
+                //if log needs emergency treatment effective
                 if showPopup, !oldLogIDs.isEmpty {
                     EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
                         .zIndex(5)
@@ -108,34 +111,37 @@ struct LogView: View {
                                 }
                             }
                         }
-                }
-                
-                ScrollView {
-                    headerSection
-                        .padding(.top, 20)
-                        .frame(width: screenWidth)
+                    }
                     
-                    if showSymptomView {
-                        symptomLogView
-                    } else {
-                        sideEffectLogView
+                //scrollable part, header+ content
+                    ScrollView {
+                        headerSection
+                            .padding(.top, 20)
+                            .frame(width: screenWidth)
+                        
+                        if showSymptomView {
+                            symptomLogView
+                        } else {
+                            sideEffectLogView
+                        }
+                    }
+                    .padding(.leading, leadPadd)
+                  
+                //only show this once colors have loaded
+                if hasLoaded{
+                    if tutorialManager.showTutorial {
+                        LogTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                     }
                 }
-                .padding(.leading, leadPadd)
-                
-                if tutorialManager.showTutorial {
-                    LogTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
-
-                    .zIndex(100)
-                }
-
+                  
+                //nav bar
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
                     .zIndex(1)
                     .ignoresSafeArea(edges: .bottom)
             }
         }
         .task {
-            await setupData()
+            await LogSetupHelper()
             let results = await Database.shared.emergencyMedPopup(userID: userID)
             if !results.isEmpty {
                 oldLogIDs = results
@@ -147,8 +153,8 @@ struct LogView: View {
     
     //  Subviews
     
-    //header and toggle
-    private var headerSection: some View {
+    //header and toggle, used in both symptom and side effect
+     var headerSection: some View {
         HStack {
             CustomText(text: showSymptomView ? "Symptom Log" : "Side Effect Log", color: accent, textAlign: .center,  textSize: screenWidth * 0.1)
             .lineLimit(1)
@@ -163,7 +169,7 @@ struct LogView: View {
     }
     
     //symptom log view
-    private var symptomLogView: some View {
+     var symptomLogView: some View {
         ZStack(alignment: .topLeading) {
             VStack(alignment: .leading, spacing: 17) {
                 DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, width: screenWidth * 0.8, bold: true)
@@ -239,7 +245,7 @@ struct LogView: View {
     }
     
     //side effect log
-    private var sideEffectLogView: some View {
+     var sideEffectLogView: some View {
         VStack(alignment: .leading, spacing: 16) {
             DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, width: screenWidth * 0.7,  bold: true)
             
@@ -280,71 +286,19 @@ struct LogView: View {
         }
     }
     
-    // Components
     
     //text field, which is reused in both views
-    private func textFieldSection(title: String, text: Binding<String>) -> some View {
+     func textFieldSection(title: String, text: Binding<String>) -> some View {
         VStack(alignment: .leading) {
             CustomText(text: title, color: accent, bold: true, textSize: screenWidth * 0.06)
             CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: min(screenHeight * 0.065, 50), textSize: screenHeight * 0.055 / 2.2, multiline: true, botPad: 0)
                 .padding(.trailing, leadPadd + 20)
         }
     }
-    
-    //Functions
-    
-    //get profile data to fill mutliple choice options
-    private func setupData() async {
-        //get the current date
-        stringDate = formatter.string(from: Date())
-        
-        //get data from database
-        sympOptions = (try? await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")) ?? []
-        triggOptions = Database.deleteDups(list: (try? await Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")) ?? [])
-        medOptions = (try? await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name")) ?? []
-
-        emergMedOptions = (try? await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "emergency")) ?? []
-        
-        if let existingLog = existingLog {
-            if let log = await Database.shared.getUnifiedLog(by: existingLog, logType: existingTable ?? "") {
-                
-                if log.log_type == "Symptom" {
-                    severity = log.severity
-                    sympDesc = log.symptom_description ?? ""
-                    notes = log.notes ?? ""
-                    onset = log.onset_time ?? ""
-                    medTaken = log.med_taken ?? false
-                    date = log.date
-                    stringDate = formatter.string(from: date)
-                    symp = log.symptom_name
-                    sympID = log.symptom_id ?? 0
-                    medTakenName = log.medication_name ?? ""
-                    emergMedID = log.medication_id ?? 0
-                    selectedTriggs = log.trigger_names ?? []
-                    triggIDs = log.trigger_ids ?? []
-                    medEffective = log.med_worked ?? false
-                    
-                    showSymptomView = true
-
-                } else if log.log_type == "SideEffect" {
-                    stringDate = formatter.string(from: log.date)
-                    sideEffectName = log.side_effect_med ?? ""
-                    sideEffectSev = log.severity
-                    selectedMed = log.medication_name ?? ""
-                    medID = log.medication_id ?? 0
-
-                    showSymptomView = false
-                }
-            } else {
-                notes = "test"
-            }
-        }
-            
-    }
 }
 
 #Preview {
-    LogView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    LogView(userID: 12)
         .environmentObject(TutorialManager())
         .environmentObject(UserSession())
 }

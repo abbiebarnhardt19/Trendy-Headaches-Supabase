@@ -49,6 +49,7 @@ func fetchAnalyticsData(userID: Int) async throws -> ([UnifiedLog], [Medication]
         
         //get side effect list
         let sideEffects = try await Database.shared.getListVals(userId: Int64(userID), table: "Side_Effects", col: "side_effect_name", includeInactive: true)
+
         
         // Combine symptoms and side effects and remove duplicates
         symptomOptions = Array(Set(symptoms + sideEffects)).sorted()

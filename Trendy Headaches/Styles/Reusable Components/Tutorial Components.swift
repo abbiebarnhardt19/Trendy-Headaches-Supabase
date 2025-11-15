@@ -62,7 +62,8 @@ struct AnalyticsTutorialPopup: View {
                         .frame(width: screenWidth * 0.75)
                         .padding(.bottom, 5)
                     
-                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+//                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                 }
                 .padding()
                 .frame(width: screenWidth * 0.85)

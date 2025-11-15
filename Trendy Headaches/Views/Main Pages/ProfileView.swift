@@ -9,8 +9,12 @@ import SwiftUI
 struct ProfileView: View {
     // Passed-in Values
     var userID: Int64
-    @Binding var bg: String
-    @Binding var accent: String
+//    @Binding var bg: String
+//    @Binding var accent: String
+    
+    @State var isLoaded: Bool = false
+    @State var bg: String = ""
+    @State var accent: String = ""
     
     @EnvironmentObject var userSession: UserSession
     @EnvironmentObject var tutorialManager: TutorialManager
@@ -42,8 +46,7 @@ struct ProfileView: View {
     private let buttonNames = ["Edit Profile", "App Tutorial", "Sign Out", "Delete Account"]
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
-    
-    // MARK: - Body
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -61,13 +64,12 @@ struct ProfileView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
                 
-                if tutorialManager.showTutorial {
+                if tutorialManager.showTutorial && isLoaded{
                     ProfileTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
 
                     .zIndex(100)
                 }
 
-                
                 // Bottom Nav Bar
                 VStack {
                     Spacer()
@@ -92,8 +94,12 @@ struct ProfileView: View {
             .fullScreenCover(isPresented: $logOut) {
                 InitialView()
             }
+//            .fullScreenCover(isPresented: $showLogView) {
+//                LogView(userID: userID, bg: $bg, accent: $accent)
+//                    .navigationBarBackButtonHidden(true)
+//            }
             .fullScreenCover(isPresented: $showLogView) {
-                LogView(userID: userID, bg: $bg, accent: $accent)
+                LogView(userID: userID)
                     .navigationBarBackButtonHidden(true)
             }
             //get data on load
@@ -112,6 +118,8 @@ struct ProfileView: View {
                     newAcc = data.accent
                     themeName = data.theme
                     newTN = data.theme.contains("Custom") ? "Custom" : data.theme
+                    
+                    isLoaded = true
                 }
             }
         }
@@ -330,8 +338,14 @@ struct ProfileView: View {
     }
 }
 
+//#Preview {
+//    ProfileView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+//        .environmentObject(UserSession())
+//        .environmentObject(TutorialManager())
+//}
+
 #Preview {
-    ProfileView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+    ProfileView(userID: 12)
         .environmentObject(UserSession())
         .environmentObject(TutorialManager())
 }

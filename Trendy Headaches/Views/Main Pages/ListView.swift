@@ -150,18 +150,26 @@ struct ListView: View {
                 .zIndex(1)
             }
             //go to log page when log is clicked
+//            .navigationDestination(isPresented: $showLog) {
+//                LogView(userID: userID, bg: $bg, accent: $accent)
+//                    .navigationBarBackButtonHidden(true)
+//            }
             .navigationDestination(isPresented: $showLog) {
-                LogView(userID: userID, bg: $bg, accent: $accent)
+                LogView(userID: userID)
                     .navigationBarBackButtonHidden(true)
             }
             .navigationDestination(
                 isPresented: Binding(
                     get: { selectLog != nil },
                     set: { if !$0 { selectLog = nil } } ) ) {
-                if let id = selectLog, let table = selectTable {
-                    LogView(userID: userID, existingLog: id, existingTable: table, bg: $bg, accent: $accent)
-                        .navigationBarBackButtonHidden(true)
-                }
+//                if let id = selectLog, let table = selectTable {
+//                    LogView(userID: userID, existingLog: id, existingTable: table, bg: $bg, accent: $accent)
+//                        .navigationBarBackButtonHidden(true)
+//                }
+                        if let id = selectLog, let table = selectTable {
+                            LogView(userID: userID, existingLog: id, existingTable: table)
+                                .navigationBarBackButtonHidden(true)
+                        }
             }
         }
         //load in user logs
@@ -187,6 +195,8 @@ struct ListView: View {
                 do {
                     sympOptions = try await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
                     let sideEffectOptions = try await Database.shared.getListVals(userId: userID, table: "Side_Effects", col: "side_effect_name")
+
+
                     sympOptions = Array(Set(sympOptions + sideEffectOptions)).sorted()
                     selectedSymps = sympOptions
                 } catch {
