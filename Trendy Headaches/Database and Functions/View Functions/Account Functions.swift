@@ -42,10 +42,12 @@ extension Database {
     }
     
     // Add user to the database (now uses the existing addUser function)
-    static func createUser(email: String, pass: String, SQ: String, SA: String, bg: String, accent: String, symps: String, prevMeds: String, emergMeds: String, triggs: String) async throws {
+    static func createUser(email: String, pass: String, SQ: String, SA: String, bg: String, accent: String, symps: String, prevMeds: String, emergMeds: String, triggs: String) async throws -> Int64{
         let normalizedEmail = Database.normalize(email)
         
-        _ = try await Database.shared.addUser( security_question_string: SQ, security_answer_string: SA, emailAddress: normalizedEmail, passwordHash: pass, userBackground: bg, userAccent: accent, preventativeMedsCSV: prevMeds, emergencyMedsCSV: emergMeds, symptomsCSV: symps, triggersCSV: triggs)
+        let userID = try await Database.shared.addUser( security_question_string: SQ, security_answer_string: SA, emailAddress: normalizedEmail, passwordHash: pass, userBackground: bg, userAccent: accent, preventativeMedsCSV: prevMeds, emergencyMedsCSV: emergMeds, symptomsCSV: symps, triggersCSV: triggs)
+        
+        return userID
     }
     
     // Check if email and password combo is valid
@@ -145,36 +147,45 @@ extension Database {
         }
     }
     
-    // Function to load the data for the profile page
+    // Function to load the data for the profile page, multiple async calls so its faster
     func loadData(userID: Int64) async -> (symps: [String], triggs: [String], prevMeds: [String], emergMeds: [String], SQ: String, SA: String, bg: String, accent: String, theme: String)? {
-        
         do {
-            var symps = try await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
+            // Fire all async calls concurrently
+            async let sympsTask = Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
+            async let triggsTask = Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
+            async let prevMedsTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
+            async let emergMedsTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "emergency")
+            async let SQTask = Database.shared.getSingleVal(userId: userID, col: "security_question")
+            async let SATask = Database.shared.getSingleVal(userId: userID, col: "security_answer")
+            async let bgTask = Database.shared.getSingleVal(userId: userID, col: "background_color")
+            async let accentTask = Database.shared.getSingleVal(userId: userID, col: "accent_color")
+            
+            // Wait for all results
+            var symps = try await sympsTask
+            var triggs = try await triggsTask
+            var prevMeds = try await prevMedsTask
+            var emergMeds = try await emergMedsTask
+            let SQ = try await SQTask ?? "None set"
+            let SA = try await SATask ?? "None set"
+            let bg = try await bgTask ?? "#ffffff"
+            let accent = try await accentTask ?? "#000000"
+            
+            // Remove duplicates
             symps = Database.deleteDups(list: symps)
-            
-            var triggs = try await Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
             triggs = Database.deleteDups(list: triggs)
-            
-            var prevMeds = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "preventative")
             prevMeds = Database.deleteDups(list: prevMeds)
-            
-            var emergMeds = try await Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterCol: "medication_category", filterVal: "emergency")
             emergMeds = Database.deleteDups(list: emergMeds)
-            
-            let SQ = try await Database.shared.getSingleVal(userId: userID, col: "security_question") ?? "None set"
-            let SA = try await Database.shared.getSingleVal(userId: userID, col: "security_answer") ?? "None set"
-            
-            let bg = try await Database.shared.getSingleVal(userId: userID, col: "background_color") ?? "None set"
-            let accent = try await Database.shared.getSingleVal(userId: userID, col: "accent_color") ?? "None set"
             
             let theme = Database.getThemeName(background: bg, accent: accent)
             
             return (symps, triggs, prevMeds, emergMeds, SQ, SA, bg, accent, theme)
+            
         } catch {
             print("ERROR in loadData: \(error)")
             return nil
         }
     }
+
     
     // Function for users adding a value to a category
     func insertItem(tableName: String, userID: Int64, name: String, medCat: String? = nil) async {

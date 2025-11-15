@@ -17,7 +17,7 @@ struct CreateAccountView: View {
     
     private let screenWidth = UIScreen.main.bounds.width
     private let screenHeight = UIScreen.main.bounds.height
-    private let spacing = UIScreen.main.bounds.height * 0.012
+    private let spacing = UIScreen.main.bounds.height * 0.02
     
     // Computed property: form validation
     private var formIsValid: Bool {
@@ -26,7 +26,7 @@ struct CreateAccountView: View {
     var body: some View {
         GeometryReader { geometry in
             let topInsert = geometry.safeAreaInsets.top
-            let bottomInsert = geometry.safeAreaInsets.bottom  // ← Add this
+            let bottomInsert = geometry.safeAreaInsets.bottom
             NavigationStack {
                 ZStack {
                     Color(hex: bg).ignoresSafeArea()
@@ -38,17 +38,22 @@ struct CreateAccountView: View {
                     ScrollView {
                         VStack(spacing: spacing) {
                             Spacer()
-                            header
-                            emailSection
-                            passwordSection
-                            confirmPasswordSection
-                            securitySection
-                            continueButton
+                            VStack{
+                                header
+                                emailSection
+                                passwordSection
+                                confirmPasswordSection
+                                securitySection
+                                continueButton
+                            }
                             Spacer()
                         }
-                        .padding(.top, topInsert - 30)
+                        .padding(.top, topInsert - 0)
+                        .frame(height: screenHeight)
+                        .padding(.bottom, 50)
                     }
                     .zIndex(1)
+                    
                 }
                 .ignoresSafeArea(edges: .top)
                 .toolbarBackground(.hidden, for: .navigationBar)
@@ -62,12 +67,14 @@ struct CreateAccountView: View {
 private extension CreateAccountView {
     var header: some View {
         CustomText(text: "Create Account", color: accent, textAlign: .center, textSize: screenWidth*0.11)
+            .padding(.bottom, 10)
+            .padding(.top, 45)
     }
     
     var emailSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Email")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2)
                 .onChange(of: email) {
                     debounceEmailCheck()
                 }
@@ -81,7 +88,7 @@ private extension CreateAccountView {
     var passwordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2, secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2, secure: true)
             
             if !Database.passwordValid(pass_one) && !pass_one.isEmpty {
                 CustomWarningText(text: "8+ chars: uppercase, lowercase, number, & symbol")
@@ -92,7 +99,7 @@ private extension CreateAccountView {
     var confirmPasswordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Confirm Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2,  secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth - 50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2,  secure: true)
             
             if !pass_two.isEmpty && pass_two != pass_one {
                 CustomWarningText(text: "Passwords do not match.")
@@ -103,10 +110,10 @@ private extension CreateAccountView {
     var securitySection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Security Question")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SQ, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SQ, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2)
             
             fieldLabel("Security Question Answer")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SA, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $SA, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2)
         }
     }
     

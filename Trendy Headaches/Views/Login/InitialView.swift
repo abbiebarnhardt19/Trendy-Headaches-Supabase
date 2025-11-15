@@ -54,4 +54,5 @@ struct InitialView: View {
 
 #Preview {
     InitialView()
+        .environmentObject(TutorialManager())
 }

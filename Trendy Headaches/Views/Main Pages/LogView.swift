@@ -23,6 +23,7 @@ struct LogView: View {
     
     // Shared State
     @EnvironmentObject var tutorialManager: TutorialManager
+    
     @State private var showSymptomView = true
     @State private var logID: Int64 = 0
     @State private var showPopup: Bool = false
@@ -74,12 +75,12 @@ struct LogView: View {
             // Base condition for symptom log
             var isValid = symp != nil && severity > 0
             
-            // Extra check: if medTaken is true, require medTakenName
             if medTaken {
                 isValid = isValid && !(medTakenName?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
             }
             
             return isValid
+            
         } else {
             // Side effect log condition
             return !sideEffectName.isEmpty && sideEffectSev > 0 && selectedMed != nil
@@ -88,7 +89,7 @@ struct LogView: View {
     
     //  Body
     var body: some View {
-                NavigationStack {
+        NavigationStack {
             ZStack {
                 LogBGComps(bg: bg, accent: accent)
                 
@@ -128,8 +129,6 @@ struct LogView: View {
                     .zIndex(100)
                 }
 
-
-                
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
                     .zIndex(1)
                     .ignoresSafeArea(edges: .bottom)
@@ -143,6 +142,7 @@ struct LogView: View {
                 showPopup = true
             }
         }
+        .navigationBarBackButtonHidden(true)
     }
     
     //  Subviews
@@ -241,13 +241,7 @@ struct LogView: View {
     //side effect log
     private var sideEffectLogView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            DateTextField(
-                date: $date,
-                textValue: $stringDate,
-                bg: $bg,
-                accent: $accent,
-                width: screenWidth * 0.7,
-                bold: true)
+            DateTextField(date: $date, textValue: $stringDate, bg: $bg, accent: $accent, width: screenWidth * 0.7,  bold: true)
             
             textFieldSection(title: "Side Effect*", text: $sideEffectName)
             
@@ -345,10 +339,12 @@ struct LogView: View {
                 notes = "test"
             }
         }
+            
     }
 }
 
 #Preview {
     LogView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
         .environmentObject(TutorialManager())
+        .environmentObject(UserSession())
 }

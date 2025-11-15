@@ -332,5 +332,6 @@ struct ProfileView: View {
 
 #Preview {
     ProfileView(userID: 12, bg: .constant("#001d00"), accent: .constant("#b5c4b9"))
+        .environmentObject(UserSession())
         .environmentObject(TutorialManager())
 }

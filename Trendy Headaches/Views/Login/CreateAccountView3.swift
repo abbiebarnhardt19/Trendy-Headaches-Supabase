@@ -16,6 +16,9 @@ struct CreateAccountView3: View {
     @State private var emergMeds: String = ""
     @State private var triggs: String = ""
     @State private var created = false
+    @State private var userID: Int64 = -1
+    
+    @EnvironmentObject var tutorialManager: TutorialManager
     
     // Layout constants
     private let screenWidth = UIScreen.main.bounds.width
@@ -41,6 +44,7 @@ struct CreateAccountView3: View {
                         VStack(spacing: spacing) {
                             Spacer()
                             CustomText(text: "One Last Step", color: accent, textAlign: .center, textSize: screenWidth*0.11)
+                                .padding(.top, 40)
                             
                             CustomText(text: "Add multiple items by separating them with commas.", color: accent,  width: screenWidth - 30, textAlign: .center, multiAlign: .center,  textSize: screenWidth*0.05)
                             
@@ -65,8 +69,10 @@ struct CreateAccountView3: View {
                     }
                     .zIndex(1)
                     .navigationDestination(isPresented: $created) {
-                        LoginView(bg: bg, accent: accent)
+                        DataLoaderView(userID: userID, firstLogin: true)
+                            .environmentObject(tutorialManager)
                     }
+
                 }
                 .ignoresSafeArea(edges: .top)
                 .toolbarBackground(.hidden, for: .navigationBar)
@@ -84,26 +90,29 @@ struct CreateAccountView3: View {
             .frame(width: screenWidth)
             
             HStack{
-                CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: screenHeight * 0.065, textSize: screenHeight * 0.065 / 2.2)
+                CustomTextField(bg: bg, accent: accent, placeholder: "", text: text, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2)
             }
             .frame(width: screenWidth)
         }
     }
     
     private func createAccount() async {
-        do{
-            try await Database.createUser(email: email, pass: passOne,  SQ: SQ.capitalized,  SA: SA.capitalized,  bg: bg, accent: accent, symps: symps.capitalized, prevMeds: prevMeds.capitalized, emergMeds: emergMeds.capitalized, triggs: triggs.capitalized)
+        do {
+            let newUserID = try await Database.createUser(email: email, pass: passOne, SQ: SQ.capitalized, SA: SA.capitalized, bg: bg, accent: accent, symps: symps.capitalized, prevMeds: prevMeds.capitalized, emergMeds: emergMeds.capitalized, triggs: triggs.capitalized )
+            
+            // Store it in your UserSession
+            userID = newUserID
             created = true
-        }
-        catch{
-            print("Failed to create account")
-            print("Error type: \(type(of: error))")
+        } catch {
+            print("Failed to create user:", error)
         }
     }
+
 }
 
 #Preview {
     NavigationStack {
         CreateAccountView3()
+            .environmentObject(TutorialManager())
     }
 }
