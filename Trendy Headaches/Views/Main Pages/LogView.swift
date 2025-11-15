@@ -15,7 +15,7 @@ struct LogView: View {
     var existingTable: String? = nil
     
     //color variable
-    @State var hasLoaded: Bool = false
+    //@State var hasLoaded: Bool = false
     @State var bg: String = ""
     @State var accent: String = ""
     
@@ -128,11 +128,11 @@ struct LogView: View {
                     .padding(.leading, leadPadd)
                   
                 //only show this once colors have loaded
-                if hasLoaded{
+                //if hasLoaded{
                     if tutorialManager.showTutorial {
-                        LogTutorialPopup(bg: bg,  accent: accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
+                        LogTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                     }
-                }
+                //}
                   
                 //nav bar
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
@@ -235,7 +235,8 @@ struct LogView: View {
                     .padding(.trailing, 40)
                     // Navigation destination
                     .navigationDestination(isPresented: $listView) {
-                        ListView(userID: userID, bg: $bg, accent: $accent)
+//                        ListView(userID: userID, bg: $bg, accent: $accent)
+                            ListView(userID: userID)
                     }
                     Spacer()
                 }
@@ -279,7 +280,8 @@ struct LogView: View {
                 .disabled(!formValid)
                 .padding(.trailing, 40)
                 .navigationDestination(isPresented: $listView) {
-                    ListView(userID: userID, bg: $bg, accent: $accent)
+//                    ListView(userID: userID, bg: $bg, accent: $accent)
+                    ListView(userID: userID)
                 }
                 Spacer()
             }

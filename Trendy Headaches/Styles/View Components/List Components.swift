@@ -9,8 +9,8 @@ import SwiftUI
 
 //button to trigger filter dropdown
 struct FilterButton: View {
-    @State var accent: String
-    @State var bg: String
+    @Binding var accent: String
+    @Binding var bg: String
     @Binding var popUp: Bool
     var width: CGFloat
     
@@ -35,8 +35,8 @@ struct FilterButton: View {
 
 //adjust filter values
 struct FilterOptions: View {
-    @State var accent: String
-    @State var bg: String
+    @Binding var accent: String
+    @Binding var bg: String
     @State var colOptions: [String]
     @Binding var selectedCols: [String]
     @Binding var typeOptions: [String]
@@ -181,8 +181,8 @@ struct ScrollableLogTable: View {
     var userID: Int64
     var list: [UnifiedLog]
     var selectedCols: [String]
-    @State var bg: String
-    @State var accent: String
+    @Binding var bg: String
+    @Binding var accent: String
     @State var height: CGFloat
     @State var width: CGFloat
     @Binding var deleteCount: Int64

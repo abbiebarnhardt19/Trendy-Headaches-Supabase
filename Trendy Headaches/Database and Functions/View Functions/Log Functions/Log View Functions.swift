@@ -15,7 +15,7 @@ extension LogView {
             let colors = await Database.shared.getColors(userID: userID)
             bg = colors.0
             accent = colors.1
-            hasLoaded = true
+            //hasLoaded = true
 
             // Fetch lists
             async let sympTask = Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")

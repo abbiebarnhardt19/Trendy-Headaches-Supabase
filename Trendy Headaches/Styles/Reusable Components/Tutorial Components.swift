@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct AnalyticsTutorialPopup: View {
-    @State var bg: String
-    @State var accent: String
+    @Binding var bg: String
+    @Binding var accent: String
     @State var userID: Int64
     var onClose: () -> Void
 
@@ -62,7 +62,6 @@ struct AnalyticsTutorialPopup: View {
                         .frame(width: screenWidth * 0.75)
                         .padding(.bottom, 5)
                     
-//                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                     CustomNavButton(label: "Next", dest:  ProfileView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                 }
                 .padding()
@@ -78,8 +77,8 @@ struct AnalyticsTutorialPopup: View {
 
 
 struct LogTutorialPopup: View {
-    @State var bg: String
-    @State var accent: String
+    @Binding var bg: String
+    @Binding var accent: String
     var userID: Int64
     var onClose: () -> Void
 
@@ -113,7 +112,9 @@ struct LogTutorialPopup: View {
                 CustomText(text: "If you indicated that you took an emergency treatment to help your symptom, the next time you visit the log page you’ll be prompted to record whether the treatment was effective.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+//                CustomNavButton(label: "Next", dest:  ListView(userID: userID, bg: $bg, accent: $accent), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                
+                CustomNavButton(label: "Next", dest:  ListView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
@@ -127,8 +128,8 @@ struct LogTutorialPopup: View {
 }
 
 struct ListTutorialPopup: View {
-    @State var bg: String
-    @State var accent: String
+    @Binding var bg: String
+    @Binding var accent: String
     var userID: Int64
     var onClose: () -> Void
 
@@ -175,8 +176,8 @@ struct ListTutorialPopup: View {
 }
 
 struct ProfileTutorialPopup: View {
-    @State var bg: String
-    @State var accent: String
+    @Binding var bg: String
+    @Binding var accent: String
     var userID: Int64
     var onClose: () -> Void
 
