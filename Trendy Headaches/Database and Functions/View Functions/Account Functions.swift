@@ -288,7 +288,7 @@ extension Database {
             // Default reason
             let reasonToSave = (endReason?.isEmpty ?? true) ? "Unknown" : endReason!
 
-            // ✅ Only include valid dictionary keys
+            // Only include valid dictionary keys
             var updateData: [String: String] = [endColumn: endDate]
             if let endReasonColumn = endReasonColumn {
                 updateData[endReasonColumn] = reasonToSave
@@ -309,10 +309,10 @@ extension Database {
             print("Update data being sent to Supabase:", updateData)
             let result = try await query.execute()
             print("Supabase result:", result)
-            print("✅ Ended \(name) with reason: \(reasonToSave) at \(Date())")
+            print(" Ended \(name) with reason: \(reasonToSave) at \(Date())")
 
         } catch {
-            print("❌ Failed to end \(name): \(error)")
+            print(" Failed to end \(name): \(error)")
         }
     }
 

@@ -12,6 +12,9 @@ struct NavBarView: View {
     @Binding var bg: String
     @Binding var accent: String
     @Binding var selected: Int?
+    @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
     
     let width = UIScreen.main.bounds.width
     let height = UIScreen.main.bounds.height
@@ -25,17 +28,29 @@ struct NavBarView: View {
     
     var navItems: [NavItem] {
         [NavItem(icon: "square.and.pencil", label: "Log",
-                    destination: AnyView(LogView(userID: userID).navigationBarBackButtonHidden(true)),
+                    destination: AnyView(LogView(userID: userID)
+                        .environmentObject(userSession)
+                        .environmentObject(tutorialManager)
+                        .environmentObject(preloadManager)),
                     padding: EdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0)),
             
          
-         NavItem(icon: "list.bullet", label: "List", destination: AnyView(ListView(userID: userID).navigationBarBackButtonHidden(true)),padding: EdgeInsets(top: 3, leading: 0, bottom: 0, trailing: 0)),
+         NavItem(icon: "list.bullet", label: "List", destination: AnyView(ListView(userID: userID)
+            .environmentObject(userSession)
+            .environmentObject(tutorialManager)
+            .environmentObject(preloadManager)),padding: EdgeInsets(top: 3, leading: 0, bottom: 0, trailing: 0)),
          
-         NavItem(icon: "chart.bar.xaxis", label: "Analytics", destination: AnyView(AnalyticsView(userID: userID).navigationBarBackButtonHidden(true)),
+         NavItem(icon: "chart.bar.xaxis", label: "Analytics", destination: AnyView(AnalyticsView(userID: userID)
+            .environmentObject(userSession)
+            .environmentObject(tutorialManager)
+            .environmentObject(preloadManager)),
                  padding: nil),
         
         NavItem(icon: "person.fill", label: "Profile",
-                destination: AnyView(ProfileView(userID: userID).navigationBarBackButtonHidden(true)),
+                destination: AnyView(ProfileView(userID: userID)
+                    .environmentObject(userSession)
+                    .environmentObject(tutorialManager)
+                    .environmentObject(preloadManager)),
                 padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 15)) ]
     }
     

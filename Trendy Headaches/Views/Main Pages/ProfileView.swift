@@ -16,6 +16,7 @@ struct ProfileView: View {
     
     @EnvironmentObject var userSession: UserSession
     @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
     
     //  UI State
     @State  var isEditing = false
@@ -40,7 +41,7 @@ struct ProfileView: View {
     @State  var newAcc = ""
     
     //  Constants
-     let themeOptions = ["Classic Light", "Light Pink", "Light Yellow", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
+     let themeOptions = ["Classic Light", "Light Pink", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
      let buttonNames = ["Edit Profile", "App Tutorial", "Sign Out", "Delete Account"]
      let screenWidth = UIScreen.main.bounds.width
      let screenHeight = UIScreen.main.bounds.height
@@ -64,8 +65,6 @@ struct ProfileView: View {
                 
                 if tutorialManager.showTutorial{
                     ProfileTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
-
-                    .zIndex(100)
                 }
 
                 // Bottom Nav Bar
@@ -98,7 +97,13 @@ struct ProfileView: View {
             }
             //get data on load
             .task {
-                await getProfileData()
+                //wait til data is loaded
+                if !preloadManager.isFinished {
+                    await preloadManager.preloadAll(userID: userSession.userID)
+                }
+                
+                //assign the data
+                await setupProfile()
             }
         }
     }
@@ -108,4 +113,5 @@ struct ProfileView: View {
     ProfileView(userID: 12)
         .environmentObject(UserSession())
         .environmentObject(TutorialManager())
+        .environmentObject(PreloadManager())
 }

@@ -55,8 +55,9 @@ struct ListView: View {
     var screenHeight: CGFloat = UIScreen.main.bounds.height
     var maxTableHeight: CGFloat = UIScreen.main.bounds.height * 0.62
     
-    //for tutorial
     @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
 
     var body: some View {
         
@@ -108,10 +109,9 @@ struct ListView: View {
                     .zIndex(1000)
                 }
                 
+                //show tutorial if needed
                 if tutorialManager.showTutorial {
                     ListTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
-
-                    .zIndex(100)
                 }
 
                 //nav bar
@@ -126,6 +126,8 @@ struct ListView: View {
             .navigationDestination(isPresented: $showLog) {
                 LogView(userID: userID)
                     .navigationBarBackButtonHidden(true)
+                    .environmentObject(PreloadManager())
+                    .environmentObject(UserSession())
             }
             .navigationDestination(
                 isPresented: Binding(
@@ -134,26 +136,20 @@ struct ListView: View {
                         if let id = selectLog, let table = selectTable {
                             LogView(userID: userID, existingLog: id, existingTable: table)
                                 .navigationBarBackButtonHidden(true)
+                                .environmentObject(PreloadManager())
+                                .environmentObject(UserSession())
                         }
             }
         }
         .task {
-            await fetchLogsAndSetupFilters()
-            await fetchColors()
-    
-            // Also fetch symptom + side effect options
-            Task {
-                do {
-                    let symptomList = try await Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
-                    let sideEffectList = try await Database.shared.getListVals(userId: userID, table: "Side_Effects", col: "side_effect_name")
-                    sympOptions = Array(Set(symptomList + sideEffectList)).sorted()
-                    selectedSymps = sympOptions
-                } catch {
-                    if (error as NSError).code != NSURLErrorCancelled {
-                        print("Error fetching symptom options: \(error)")
-                    }
-                }
+            //wait til data is fetched
+            if !preloadManager.isFinished {
+                await preloadManager.preloadAll(userID: userSession.userID)
             }
+            
+            //get preloaded values
+            await setupListView()
+
         }
         .onChange(of: startDate) { filterLogs() }
         .onChange(of: endDate) {  filterLogs() }
@@ -162,7 +158,7 @@ struct ListView: View {
         .onChange(of: sevEnd) {  filterLogs() }
         .onChange(of: selectedSymps) {  filterLogs() }
         .onChange(of: deleteCount) {
-            Task { await fetchLogsAndSetupFilters() }
+            Task { await setupListView() }
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -171,4 +167,6 @@ struct ListView: View {
 #Preview {
     ListView(userID: 12)
         .environmentObject(TutorialManager())
+        .environmentObject(PreloadManager())
+        .environmentObject(UserSession())
 }

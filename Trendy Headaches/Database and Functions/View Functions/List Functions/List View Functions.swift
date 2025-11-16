@@ -36,35 +36,28 @@ extension ListView {
         }
     }
     
-    func fetchLogsAndSetupFilters() async {
-        do {
-            allLogs = try await Database.shared.getLogList(userID: userID)
+    //assign values from preloaded data
+    func setupListView() async {
+        // First, run the preload-based assignments on the main thread
+        await MainActor.run {
+            // Colors
+            bg = preloadManager.bg
+            accent = preloadManager.accent
+            
+            // Logs
+            allLogs = preloadManager.allLogs
             logList = allLogs
             
-            // Set start and end dates
-            if let earliest = allLogs.map({ $0.date }).min() {
-                startDate = earliest
-                stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
-            }
-            endDate = Date()
-            stringEndDate = DateFormatter.localizedString(from: endDate, dateStyle: .short, timeStyle: .none)
+            // Start and end dates
+            startDate = preloadManager.startDate
+            stringStartDate = preloadManager.stringStartDate
+            endDate = preloadManager.endDate
+            stringEndDate = preloadManager.stringEndDate
             
-            // Set symptom options
-            sympOptions = Array(Set(allLogs.compactMap { $0.symptom_name }))
-                .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+            // Initial symptom options from preloaded logs
+            sympOptions = preloadManager.symptomAndSideEffects
             selectedSymps = sympOptions
-        } catch {
-            if (error as NSError).code != NSURLErrorCancelled {
-                print("Error fetching logs: \(error)")
-            }
         }
     }
-
-    func fetchColors() async {
-            let colors = await Database.shared.getColors(userID: userID)
-            bg = colors.0
-            accent = colors.1
-    }
-
 }
 

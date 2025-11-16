@@ -17,6 +17,8 @@ struct LoginView: SwiftUI.View {
     @State private var error: String? = nil
     @State private var userId: Int64? = nil
     @EnvironmentObject var userSession: UserSession
+    @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
     
     //  Layout
     private let leadPadd: CGFloat = 25
@@ -42,7 +44,7 @@ struct LoginView: SwiftUI.View {
                     CustomText(text: "Password", color: accent)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.leading, leadPadd)
-                    
+                     
                     CustomTextField(bg: bg, accent: accent, placeholder: "", text: $password, width: screenWidth - 50, secure: true)
                     
                     // Forgot Password Link
@@ -59,9 +61,10 @@ struct LoginView: SwiftUI.View {
                             
                             if let userId = result.userId {
                                 // Login successful - save session
-                                userSession.login(userID: userId, username: email)
+                                await MainActor.run {
+                                    userSession.login(userID: userId, username: email)
+                                }
                             }
-                            
                             loggedIn = userId != nil
                         }
                     }
@@ -78,14 +81,13 @@ struct LoginView: SwiftUI.View {
                 .onAppear { _ = Database.shared }
                 
                 //  Navigation
-//                .navigationDestination(isPresented: $loggedIn) {
-//                    LogView(userID: userId ?? 0, bg: .constant(bg),  accent: .constant(accent))
-//                        .navigationBarBackButtonHidden(true)
-//                }
-                
                 .navigationDestination(isPresented: $loggedIn) {
                     LogView(userID: userId ?? 0)
                         .navigationBarBackButtonHidden(true)
+                        .environmentObject(userSession)
+                        .environmentObject(tutorialManager)
+                        .environmentObject(preloadManager)
+                    
                 }
             }
         }
@@ -95,5 +97,8 @@ struct LoginView: SwiftUI.View {
 #Preview {
     NavigationStack {
         LoginView()
+            .environmentObject(UserSession())
+            .environmentObject(TutorialManager())
+            .environmentObject(PreloadManager())
     }
 }

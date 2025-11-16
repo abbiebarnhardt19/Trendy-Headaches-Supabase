@@ -17,7 +17,10 @@ struct AnalyticsView: View {
     @State var selectedView: String = "Compare"
     
     @State var screenWidth: CGFloat = UIScreen.main.bounds.width
+    
     @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var userSession: UserSession
+    @EnvironmentObject var preloadManager: PreloadManager
 
     //values to be intialized on appear from database
     @State var logs: [UnifiedLog] = []
@@ -43,9 +46,7 @@ struct AnalyticsView: View {
     
     //set end date for filter for the end of the current date
     @State var endDate: Date = Calendar.current.date(bySettingHour: 23, minute: 59, second: 59, of: Date()) ?? Date()
-    
 
-    
     var body: some View {
         NavigationStack{
             ZStack {
@@ -144,10 +145,14 @@ struct AnalyticsView: View {
                 }
                 .ignoresSafeArea(edges: .bottom)
                 .zIndex(10)
-                //get colors, logs, and filter values
                 .task{
-                    await fetchColors()
-                    await getAnalyticsData()
+                    //wait til values are etched
+                    if !preloadManager.isFinished {
+                        await preloadManager.preloadAll(userID: userSession.userID)
+                    }
+                    
+                    //assign the values
+                    await setupAnalyticsView()
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -158,5 +163,7 @@ struct AnalyticsView: View {
 #Preview {
     AnalyticsView(userID: 12)
         .environmentObject(TutorialManager())
+        .environmentObject(PreloadManager())
+        .environmentObject(UserSession())
 }
 

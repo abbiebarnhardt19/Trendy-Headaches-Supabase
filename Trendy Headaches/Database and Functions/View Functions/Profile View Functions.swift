@@ -28,25 +28,37 @@ extension ProfileView{
                 await Database.shared.updateUser(userID: userID, value: newAcc, col: "accent_color")
                 accent = newAcc
             }
+            //refresh with new values
+            await preloadManager.preloadAll(userID: userID)
+            
             isEditing = false
         }
     }
     
-    func getProfileData() async{
-        if let data = await Database.shared.loadData(userID: userID) {
-            symps = data.symps
-            triggs = data.triggs
-            prevMeds = data.prevMeds
-            emergMeds = data.emergMeds
-            sQ = data.SQ
-            sA = data.SA
-            newSQ = data.SQ
-            bg = data.bg
-            accent = data.accent
-            newBG = data.bg
-            newAcc = data.accent
-            themeName = data.theme
-            newTN = data.theme.contains("Custom") ? "Custom" : data.theme
+    
+    //assign preloaded values
+    func setupProfile() async {
+
+        await MainActor.run {
+            // profile data
+            symps = preloadManager.symps
+            triggs = preloadManager.triggs
+            prevMeds = preloadManager.prevMeds
+            emergMeds = preloadManager.emergMeds
+            sQ = preloadManager.sQ
+            sA = preloadManager.sA
+            newSQ = preloadManager.sQ
+
+            // Colors
+            bg = preloadManager.bg
+            accent = preloadManager.accent
+            newBG = preloadManager.bg
+            newAcc = preloadManager.accent
+
+            // Theme
+            themeName = preloadManager.themeName
+            newTN = preloadManager.themeName.contains("Custom") ? "Custom" : preloadManager.themeName
         }
     }
+
 }

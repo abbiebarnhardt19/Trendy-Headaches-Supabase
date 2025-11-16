@@ -233,6 +233,8 @@ struct EditableSection: View {
     let colWidth: CGFloat
     let userID: Int64
     
+    @EnvironmentObject var preloadManager: PreloadManager
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             SectionTitle(title: title, width: colWidth, color: accent)
@@ -251,6 +253,8 @@ struct EditableSection: View {
                             name: newValue.capitalized,
                             medCat: medCat
                         )
+                        await preloadManager.preloadAll(userID: userID)
+                        
                     }
                 },
                 onEdit: { oldValue, newValue in
@@ -262,6 +266,7 @@ struct EditableSection: View {
                             new: newValue.capitalized,
                             medCat: medCat
                         )
+                        await preloadManager.preloadAll(userID: userID)
                     }
                 },
                 onDelete: { value, reason in
@@ -273,6 +278,8 @@ struct EditableSection: View {
                             medCat: medCat,
                             endReason: reason
                         )
+                        await preloadManager.preloadAll(userID: userID)
+
                     }
                 }
             )

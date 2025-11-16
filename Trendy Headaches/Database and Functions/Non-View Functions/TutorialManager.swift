@@ -7,8 +7,29 @@
 
 import SwiftUI
 
+//class TutorialManager: ObservableObject {
+//    @Published var showTutorial = true
+//
+//    func startTutorial() {
+//        showTutorial = true
+//    }
+//
+//    func endTutorial() {
+//        showTutorial = false
+//    }
+//}
+
 class TutorialManager: ObservableObject {
-    @Published var showTutorial = true
+    @Published var showTutorial: Bool {
+        didSet {
+            UserDefaults.standard.set(!showTutorial, forKey: "tutorialCompleted")
+        }
+    }
+
+    init() {
+        // If tutorialCompleted was true, showTutorial should be false
+        self.showTutorial = !UserDefaults.standard.bool(forKey: "tutorialCompleted")
+    }
 
     func startTutorial() {
         showTutorial = true

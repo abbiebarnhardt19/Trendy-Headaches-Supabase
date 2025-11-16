@@ -23,9 +23,9 @@ extension Database {
         case "Dark Green":
             return ("#001D00", "#B5C4B9")
         case "Dark Blue":
-            return ("#0b3954", "#b5c6e0")
+            return ("#003366", "#BBDCFF")
         case "Dark Purple":
-            return ("#291C2D", "#CEC5dE")
+            return ("#1C0058", "#CFD0FE")
         case "Custom":
             // Return whatever the user already has
             return (currentBackground, currentAccent)
@@ -53,10 +53,10 @@ extension Database {
         else if background == "#001D00" && accent == "#B5C4B9" {
             themeName = "Dark Green"
         }
-        else if background == "#0b3954" && accent == "#b5c6e0"{
+        else if background == "#003366" && accent == "#BBDCFF" {
             themeName = "Dark Blue"
         }
-        else if background == "#291C2D" && accent == "#CEC5dE" {
+        else if background == "#1C0058" && accent == "#CFD0FE" {
             themeName = "Dark Purple"
         }
         else{

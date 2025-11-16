@@ -27,7 +27,11 @@ struct InitialView: View {
                     CustomText( text: "Trendy Headaches", color: accent, width: screenWidth - 50, textAlign: .center, multiAlign: .center, textSize: 50 )
 
                     // Sign In Button
-                    CustomNavButton( label: "Sign In", dest: LoginView(), bg: bg, accent: accent)
+                    CustomNavButton( label: "Sign In", dest: LoginView()
+                        .environmentObject(UserSession())
+                        .environmentObject(TutorialManager())
+                        .environmentObject(PreloadManager())
+                                     , bg: bg, accent: accent)
 
                     // Sign Up Button (Shows Policy First)
                     CustomButton(text: "Sign Up", bg: bg, accent: accent,  height: 55, width: 180 ) {

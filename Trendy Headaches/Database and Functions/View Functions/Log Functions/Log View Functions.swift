@@ -9,34 +9,28 @@ import Foundation
 
 extension LogView {
     
-    func LogSetupHelper() async {
-        do {
-            // Load colors first
-            let colors = await Database.shared.getColors(userID: userID)
-            bg = colors.0
-            accent = colors.1
-            //hasLoaded = true
+    func setupLogView() async {
 
-            // Fetch lists
-            async let sympTask = Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
-            async let triggTask = Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
-            async let medTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name")
-            async let emergTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterVal: "emergency")
+        // Colors
+        bg = preloadManager.bg
+        accent = preloadManager.accent
 
-            sympOptions = try await sympTask
-            triggOptions = Database.deleteDups(list: try await triggTask)
-            medOptions = try await medTask
-            emergMedOptions = try await emergTask
+        //Log choice options
+        sympOptions = preloadManager.sympOptions
+        triggOptions = preloadManager.triggOptions
+        medOptions = preloadManager.medOptions
+        emergMedOptions = preloadManager.emergMedOptions
 
-            stringDate = formatter.string(from: Date())
+        // Today’s date
+        stringDate = preloadManager.todayString
 
-            if let log = existingLog {
-                await loadExistingLogHelper(log)
-            }
-        } catch {
-            print("Error loading data:", error)
+        // If editing an existing log, load it
+        if let log = existingLog {
+            await loadExistingLogHelper(log)
         }
     }
+
+    
 
     func loadExistingLogHelper(_ existingLog: Int64) async {
         guard let log = await Database.shared.getUnifiedLog(by: existingLog, logType: existingTable ?? "") else { return }

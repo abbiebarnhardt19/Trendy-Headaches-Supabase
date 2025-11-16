@@ -8,26 +8,30 @@
 import Foundation
 
 extension AnalyticsView {
-    func fetchColors() async {
-            let colors = await Database.shared.getColors(userID: userID)
-            bg = colors.0
-            accent = colors.1
-    }
-    
-    func getAnalyticsData() async {
-        do {
-            let result = try await fetchAnalyticsData(userID: Int(userID))
-            logs = result.0
-            medData = result.1
-            symptomOptions = result.2
-            selectedSymptoms = result.2
-            triggerOptions = result.3
-            prevMedOptions = result.4
-            startDate = result.5 ?? Date()
-        } catch {
-            print("Error fetching all data:", error)
+
+    //assign values from preloaded data
+    func setupAnalyticsView() async {
+
+        // Update everything on the main thread
+        await MainActor.run {
+
+            //colors
+            bg = preloadManager.bg
+            accent = preloadManager.accent
+
+            //logs
+            logs = preloadManager.analyticsLogs
+            
+            //filter options
+            medData = preloadManager.medData
+            symptomOptions = preloadManager.analyticsSymptoms
+            selectedSymptoms = preloadManager.analyticsSymptoms
+            triggerOptions = preloadManager.analyticsTriggers
+            prevMedOptions = preloadManager.analyticsPrevMeds
+            startDate = preloadManager.analyticsLogs.map { $0.date }.min() ?? Date()
         }
     }
+
     
     func filterCompareLogs(
         logs: [UnifiedLog],

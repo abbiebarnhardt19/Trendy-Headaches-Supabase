@@ -26,6 +26,9 @@ struct LogView: View {
     
     // Shared State
     @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
+
     @State  var showSymptomView = true
     @State  var logID: Int64 = 0
     @State  var showPopup: Bool = false
@@ -127,12 +130,10 @@ struct LogView: View {
                     }
                     .padding(.leading, leadPadd)
                   
-                //only show this once colors have loaded
-                //if hasLoaded{
+
                     if tutorialManager.showTutorial {
                         LogTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                     }
-                //}
                   
                 //nav bar
                 VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
@@ -141,7 +142,15 @@ struct LogView: View {
             }
         }
         .task {
-            await LogSetupHelper()
+            //wait til data is fetched
+            if !preloadManager.isFinished {
+                await preloadManager.preloadAll(userID: userSession.userID)
+            }
+
+            // assign the preloaded values
+            await setupLogView()
+            
+            //get popup
             let results = await Database.shared.emergencyMedPopup(userID: userID)
             if !results.isEmpty {
                 oldLogIDs = results
@@ -233,10 +242,14 @@ struct LogView: View {
                     }
                     .disabled(!formValid)
                     .padding(.trailing, 40)
+                    
                     // Navigation destination
                     .navigationDestination(isPresented: $listView) {
-//                        ListView(userID: userID, bg: $bg, accent: $accent)
                             ListView(userID: userID)
+                            .environmentObject(userSession)
+                            .environmentObject(tutorialManager)
+                            .environmentObject(preloadManager)
+                        
                     }
                     Spacer()
                 }
@@ -280,8 +293,10 @@ struct LogView: View {
                 .disabled(!formValid)
                 .padding(.trailing, 40)
                 .navigationDestination(isPresented: $listView) {
-//                    ListView(userID: userID, bg: $bg, accent: $accent)
                     ListView(userID: userID)
+                        .environmentObject(userSession)
+                        .environmentObject(tutorialManager)
+                        .environmentObject(preloadManager)
                 }
                 Spacer()
             }
@@ -303,4 +318,6 @@ struct LogView: View {
     LogView(userID: 12)
         .environmentObject(TutorialManager())
         .environmentObject(UserSession())
+        .environmentObject(PreloadManager())
+    
 }

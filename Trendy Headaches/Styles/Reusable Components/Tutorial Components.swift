@@ -12,6 +12,10 @@ struct AnalyticsTutorialPopup: View {
     @Binding var accent: String
     @State var userID: Int64
     var onClose: () -> Void
+    @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
+    
 
     let screenWidth = UIScreen.main.bounds.width
     
@@ -59,7 +63,10 @@ struct AnalyticsTutorialPopup: View {
                         .frame(width: screenWidth * 0.75)
                         .padding(.bottom, 5)
                     
-                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                    CustomNavButton(label: "Next", dest:  ProfileView(userID: userID)
+                        .environmentObject(userSession)
+                        .environmentObject(tutorialManager)
+                        .environmentObject(preloadManager), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
                 }
                 .padding()
                 .frame(width: screenWidth * 0.85)
@@ -78,6 +85,9 @@ struct LogTutorialPopup: View {
     @Binding var accent: String
     var userID: Int64
     var onClose: () -> Void
+    @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
 
     let screenWidth = UIScreen.main.bounds.width
     
@@ -109,7 +119,10 @@ struct LogTutorialPopup: View {
                 CustomText(text: "If you indicated that you took an emergency treatment to help your symptom, the next time you visit the log page you’ll be prompted to record whether the treatment was effective.",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomNavButton(label: "Next", dest:  ListView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                CustomNavButton(label: "Next", dest:  ListView(userID: userID)
+                    .environmentObject(userSession)
+                    .environmentObject(tutorialManager)
+                    .environmentObject(preloadManager), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
@@ -127,6 +140,9 @@ struct ListTutorialPopup: View {
     @Binding var accent: String
     var userID: Int64
     var onClose: () -> Void
+    @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
 
     let screenWidth = UIScreen.main.bounds.width
     
@@ -156,7 +172,10 @@ struct ListTutorialPopup: View {
                 CustomText(text: "To edit a log, select it from the table. You’ll be taken to the log page, where the fields will be automatically filled with its details. Make your changes and click “Save.”",  color: bg, width: screenWidth * 0.8, textAlign: .center, multiAlign: .center, textSize: 18)
                 .padding(.bottom, 5)
                 
-                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
+                CustomNavButton(label: "Next", dest:  AnalyticsView(userID: userID)
+                    .environmentObject(userSession)
+                    .environmentObject(tutorialManager)
+                    .environmentObject(preloadManager), bg: accent, accent: bg, width: 90, height: 40, textSize: 18)
             }
             .padding()
             .frame(width: screenWidth * 0.85)
