@@ -14,7 +14,7 @@ struct AnalyticsView: View {
     @State var bg: String = ""
     @State var accent: String = ""
     
-    @State var selectedView: String = "Compare"
+    @State var selectedView: String = "Graphs"
     
     @State var screenWidth: CGFloat = UIScreen.main.bounds.width
     
@@ -33,9 +33,9 @@ struct AnalyticsView: View {
     @State var prevMedOptions: [String] = []
     
     //for comparison
-    @State var selectedMetric: String? = "Symptoms"
-    @State var selectedSymptom1: String? = "Migraine"
-    @State var selectedSymptom2: String? = "Anxiety"
+    @State var selectedMetric: String? = ""
+    @State var selectedSymptom1: String? = ""
+    @State var selectedSymptom2: String? = ""
     @State var range1Start: Date = Date()
     @State var range1End: Date = Date()
     @State var range2Start: Date = Date()

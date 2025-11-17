@@ -106,7 +106,7 @@ struct Create2BGComps: View {
         ZStack {
             Color(hex: bg).ignoresSafeArea()
             SameAmplitudeBlob(waves: 10, amp: 20, accent: accent, x: width * 0.3, y: -height * 0.25, rotation: -180)
-            SameAmplitudeBlob(waves: 10, amp: 20, accent: accent, x: width * 0.3, y: -height * 0.25, rotation: 360)
+            SameAmplitudeBlob(waves: 10, amp: 20, accent: accent, x: width * 0.3, y: -height * 0.275, rotation: 360)
         }
     }
 }

@@ -158,7 +158,9 @@ struct ListView: View {
         .onChange(of: sevEnd) {  filterLogs() }
         .onChange(of: selectedSymps) {  filterLogs() }
         .onChange(of: deleteCount) {
-            Task { await setupListView() }
+            Task {
+                await preloadManager.preloadAll(userID: userID)
+                await setupListView() }
         }
         .navigationBarBackButtonHidden(true)
     }

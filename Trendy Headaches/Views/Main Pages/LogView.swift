@@ -222,7 +222,8 @@ struct LogView: View {
                 
                 CustomText(text: "Triggers Present", color: accent, bold: true, textSize: screenWidth * 0.06)
                 
-                MultipleCheckboxWrapped(options: $triggOptions, selected: $selectedTriggs, accent: bg,  bg: accent, width: screenWidth-60, textSize: screenHeight * 0.05 / 2.2)
+                
+                MultipleCheckboxWrapped(options: $triggOptions, selected: $selectedTriggs, accent: bg,  bg: accent, width: screenWidth-100, textSize: screenHeight * 0.05 / 2.2)
                     .padding(.leading, 5)
                 
                 textFieldSection(title: "Symptom Description", text: $sympDesc)
@@ -239,6 +240,8 @@ struct LogView: View {
                             Task{
                                 logID = await Database.shared.createLog(userID: userID, date: date, symptom_onset: onset, symptomName: symp ?? "",  severity: severity, med_taken: medTaken, medTakenName: medTakenName, symptom_desc: sympDesc, notes: notes, submit: Date(), triggerNames: selectedTriggs) ?? 0
                                 
+                                await preloadManager.preloadAll(userID: userID)
+                                
                                 listView = true
                             }
                         }
@@ -251,6 +254,8 @@ struct LogView: View {
                                     emergMedID=nil
                                 }
                                 await Database.shared.updateSymptomLog(logID: existingLog ?? 0, userID: userID, date: date, onsetTime: onset, severity: severity, symptomID: sympID, medTaken: medTaken, medicationID: emergMedID, medWorked: medEffective, symptomDescription: sympDesc, notes: notes, triggerIDs: triggIDs)
+                                
+                                await preloadManager.preloadAll(userID: userID)
                                 
                                 listView = true
                             }
@@ -296,12 +301,17 @@ struct LogView: View {
                     if existingLog == nil {
                         Task{
                             logID = await Database.shared.createSideEffectLog(userID: userID, date: date, side_effect: sideEffectName, side_effect_severity: sideEffectSev, medicationName: selectedMed ?? "") ?? 0
+                            
+                            await preloadManager.preloadAll(userID: userID)
 
                             listView = true
                         }
                     } else {
                         Task {
                             await Database.shared.updateSideEffectLog(logID: existingLog ?? 0, userID: userID, date: date, sideEffectName: sideEffectName, sideEffectSeverity: sideEffectSev, medicationID: medID)
+                            
+                            await preloadManager.preloadAll(userID: userID)
+                            
                             listView = true
                         }
                     }

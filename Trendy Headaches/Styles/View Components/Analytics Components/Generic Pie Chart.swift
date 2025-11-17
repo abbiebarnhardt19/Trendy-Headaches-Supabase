@@ -225,7 +225,9 @@ struct GenericPieChart<T: Hashable>: View {
                         
                         // Show color key for string values, since labels are too big for slices
                         if !isNumeric && !isBoolean {
-                            PieChartColorKey( items: groupedCounts, colors: sliceColors, bg: bg, width: UIScreen.main.bounds.width - 80)
+                            HStack{
+                                PieChartColorKey( items: groupedCounts, colors: sliceColors, bg: bg, width: UIScreen.main.bounds.width - 80)
+                            }
                         }
                         
                         Spacer()
