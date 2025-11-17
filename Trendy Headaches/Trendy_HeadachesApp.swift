@@ -113,6 +113,8 @@ struct Trendy_HeadachesApp: App {
             } else {
                 InitialView()
                     .environmentObject(userSession)
+                    .environmentObject(tutorialManager)
+                    .environmentObject(preloadManager)
             }
         }
     }
@@ -124,13 +126,18 @@ struct DataLoaderView: View {
 
     @EnvironmentObject var tutorialManager: TutorialManager
     @EnvironmentObject var preloadManager: PreloadManager
+    @EnvironmentObject var userSession: UserSession
     @AppStorage("hasSeenTutorial") private var hasSeenTutorial = false
 
     var body: some View {
         LogView(userID: userID)
             .environmentObject(tutorialManager)
+            .environmentObject(preloadManager)
+            .environmentObject(userSession)
             .task {
                 // PRELOAD EVERYTHING
+                print (userID)
+                preloadManager.isFinished = false
                 await preloadManager.preloadAll(userID: userID)
 
 

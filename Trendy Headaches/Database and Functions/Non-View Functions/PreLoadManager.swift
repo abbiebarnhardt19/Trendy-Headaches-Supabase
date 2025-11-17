@@ -49,83 +49,85 @@ class PreloadManager: ObservableObject {
 
     //function to get all needed values at once
     func preloadAll(userID: Int64) async {
-
-        do {
-            // create tasks
-            async let colorsTask = Database.shared.getColors(userID: userID)
-            async let logsTask = Database.shared.getLogList(userID: userID)
-            async let profileTask = Database.shared.loadData(userID: userID)
-            async let analyticsTask = fetchAnalyticsData(userID: Int(userID))
+        if userID != 0{
             
-            async let sympTask = Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
-            async let sideEffectTask = Database.shared.getListVals(userId: userID, table: "Side_Effects", col: "side_effect_name")
-            async let triggTask = Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
-            async let medTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name")
-            async let emergMedTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterVal: "emergency")
-
-            // get query results
-            let (bgColor, accentColor) = await colorsTask
-            let allLogsResult = (try? await logsTask) ?? []
-            let profileResult = await profileTask
-            let analyticsResult = try? await analyticsTask
-            let sympList = (try? await sympTask) ?? []
-            let sideEffectList = (try? await sideEffectTask) ?? []
-            let triggList = Database.deleteDups(list: (try? await triggTask) ?? [])
-            let medList = (try? await medTask) ?? []
-            let emergMedList = (try? await emergMedTask) ?? []
-
-            // combined logic
-            let combinedSymptoms = Array(Set(sympList + sideEffectList)).sorted()
-            let logSymptoms = Array(Set(allLogsResult.compactMap { $0.symptom_name }))
-                .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
-
-            // ---------------- set the values ----------------
-            await MainActor.run {
-                bg = bgColor
-                accent = accentColor
-                allLogs = allLogsResult
-                sympOptions = sympList
-                triggOptions = triggList
-                medOptions = medList
-                emergMedOptions = emergMedList
-                symptomAndSideEffects = combinedSymptoms
-                filterSymptoms = logSymptoms
-
-                // Dates
-                if let earliest = allLogsResult.map({ $0.date }).min() {
-                    startDate = earliest
-                    stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
+            do {
+                // create tasks
+                async let colorsTask = Database.shared.getColors(userID: userID)
+                async let logsTask = Database.shared.getLogList(userID: userID)
+                async let profileTask = Database.shared.loadData(userID: userID)
+                async let analyticsTask = fetchAnalyticsData(userID: Int(userID))
+                
+                async let sympTask = Database.shared.getListVals(userId: userID, table: "Symptoms", col: "symptom_name")
+                async let sideEffectTask = Database.shared.getListVals(userId: userID, table: "Side_Effects", col: "side_effect_name")
+                async let triggTask = Database.shared.getListVals(userId: userID, table: "Triggers", col: "trigger_name")
+                async let medTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name")
+                async let emergMedTask = Database.shared.getListVals(userId: userID, table: "Medications", col: "medication_name", filterVal: "emergency")
+                
+                // get query results
+                let (bgColor, accentColor) = await colorsTask
+                let allLogsResult = (try? await logsTask) ?? []
+                let profileResult = await profileTask
+                let analyticsResult = try? await analyticsTask
+                let sympList = (try? await sympTask) ?? []
+                let sideEffectList = (try? await sideEffectTask) ?? []
+                let triggList = Database.deleteDups(list: (try? await triggTask) ?? [])
+                let medList = (try? await medTask) ?? []
+                let emergMedList = (try? await emergMedTask) ?? []
+                
+                // combined logic
+                let combinedSymptoms = Array(Set(sympList + sideEffectList)).sorted()
+                let logSymptoms = Array(Set(allLogsResult.compactMap { $0.symptom_name }))
+                    .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+                
+                // ---------------- set the values ----------------
+                await MainActor.run {
+                    bg = bgColor
+                    accent = accentColor
+                    allLogs = allLogsResult
+                    sympOptions = sympList
+                    triggOptions = triggList
+                    medOptions = medList
+                    emergMedOptions = emergMedList
+                    symptomAndSideEffects = combinedSymptoms
+                    filterSymptoms = logSymptoms
+                    
+                    // Dates
+                    if let earliest = allLogsResult.map({ $0.date }).min() {
+                        startDate = earliest
+                        stringStartDate = DateFormatter.localizedString(from: earliest, dateStyle: .short, timeStyle: .none)
+                    }
+                    endDate = Date()
+                    stringEndDate = DateFormatter.localizedString(from: endDate, dateStyle: .short, timeStyle: .none)
+                    todayString = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
+                    
+                    // Profile
+                    if let profile = profileResult {
+                        symps = profile.symps
+                        triggs = profile.triggs
+                        prevMeds = profile.prevMeds
+                        emergMeds = profile.emergMeds
+                        sQ = profile.SQ
+                        sA = profile.SA
+                        themeName = profile.theme
+                    }
+                    
+                    // Analytics
+                    if let result = analyticsResult {
+                        analyticsLogs = result.0
+                        medData = result.1
+                        analyticsSymptoms = result.2
+                        analyticsTriggers = result.3
+                        analyticsPrevMeds = result.4
+                        if let analyticDate = result.5 { startDate = analyticDate }
+                    }
+                    //indicate loading is done so pages can now access values
+                    isFinished = true
                 }
-                endDate = Date()
-                stringEndDate = DateFormatter.localizedString(from: endDate, dateStyle: .short, timeStyle: .none)
-                todayString = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .none)
-
-                // Profile
-                if let profile = profileResult {
-                    symps = profile.symps
-                    triggs = profile.triggs
-                    prevMeds = profile.prevMeds
-                    emergMeds = profile.emergMeds
-                    sQ = profile.SQ
-                    sA = profile.SA
-                    themeName = profile.theme
-                }
-
-                // Analytics
-                if let result = analyticsResult {
-                    analyticsLogs = result.0
-                    medData = result.1
-                    analyticsSymptoms = result.2
-                    analyticsTriggers = result.3
-                    analyticsPrevMeds = result.4
-                    if let analyticDate = result.5 { startDate = analyticDate }
-                }
-                //indicate loading is done so pages can now access values
-                isFinished = true
+                
+            } catch {
+                print("Error during preloadAll:", error)
             }
-
-        } catch {
-            print("Error during preloadAll:", error)
         }
     }
 }

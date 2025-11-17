@@ -19,6 +19,8 @@ struct CreateAccountView3: View {
     @State private var userID: Int64 = -1
     
     @EnvironmentObject var tutorialManager: TutorialManager
+    @EnvironmentObject var userSession: UserSession
+    @EnvironmentObject var preloadManager: PreloadManager
     
     // Layout constants
     private let screenWidth = UIScreen.main.bounds.width
@@ -70,7 +72,9 @@ struct CreateAccountView3: View {
                     .zIndex(1)
                     .navigationDestination(isPresented: $created) {
                         DataLoaderView(userID: userID, firstLogin: true)
-                            .environmentObject(tutorialManager)
+//                            .environmentObject(TutorialManager())
+//                           .environmentObject(PreloadManager())
+//                            .environmentObject(UserSession())
                     }
 
                 }
@@ -103,6 +107,11 @@ struct CreateAccountView3: View {
             // Store it in your UserSession
             userID = newUserID
             created = true
+            
+            await MainActor.run {
+                userSession.login(userID: userID, username: email)
+            }
+            
         } catch {
             print("Failed to create user:", error)
         }
@@ -114,5 +123,7 @@ struct CreateAccountView3: View {
     NavigationStack {
         CreateAccountView3()
             .environmentObject(TutorialManager())
+            .environmentObject(PreloadManager())
+            .environmentObject(UserSession())
     }
 }

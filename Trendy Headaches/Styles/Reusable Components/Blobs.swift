@@ -139,3 +139,122 @@ struct SeededGenerator: RandomNumberGenerator {
         return state
     }
 }
+
+//blob loading spinner
+struct MultiBlobSpinner: View {
+    var color: Color = .blue
+    var size: CGFloat = 200
+    var blobCount: Int = 7
+    var orbitRadius: CGFloat = 50
+    
+    // Define different shape pairs for each blob
+    let blobShapePairs: [([CGFloat], [CGFloat])] = [
+        ([1.0, 0.6, 0.9, 0.65, 1.0, 0.7, 0.95, 0.75, 0.85, 0.8],
+         [0.7, 1.0, 0.65, 0.95, 0.7, 1.0, 0.75, 0.9, 0.8, 0.65]),
+        
+        ([0.8, 0.9, 0.65, 1.0, 0.75, 0.85, 0.95, 0.7, 0.9, 0.8],
+         [1.0, 0.7, 0.9, 0.65, 1.0, 0.8, 0.7, 0.95, 0.75, 0.85]),
+        
+        ([0.9, 0.75, 1.0, 0.7, 0.85, 0.95, 0.65, 0.9, 0.8, 1.0],
+         [0.7, 0.95, 0.8, 1.0, 0.65, 0.85, 0.9, 0.75, 1.0, 0.7]),
+        
+        ([1.0, 0.65, 0.85, 0.9, 0.7, 1.0, 0.8, 0.75, 0.95, 0.85],
+         [0.75, 0.9, 1.0, 0.7, 0.85, 0.65, 0.95, 1.0, 0.8, 0.9]),
+        
+        ([0.85, 1.0, 0.7, 0.9, 0.75, 0.8, 1.0, 0.65, 0.9, 0.95],
+         [0.95, 0.7, 0.85, 0.75, 1.0, 0.9, 0.65, 0.85, 0.8, 1.0]),
+        
+        ([0.7, 0.85, 0.95, 0.8, 1.0, 0.75, 0.9, 0.85, 0.65, 0.95],
+         [0.9, 1.0, 0.75, 0.85, 0.7, 0.95, 0.8, 0.65, 1.0, 0.8]),
+        
+        ([0.8, 0.9, 0.65, 1.0, 0.75, 0.85, 0.95, 0.7, 0.9, 0.8],
+         [1.0, 0.7, 0.9, 0.65, 1.0, 0.8, 0.7, 0.95, 0.75, 0.85])
+    ]
+    
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let time = timeline.date.timeIntervalSinceReferenceDate
+            let rotation = Angle.degrees(time * 60)
+            
+            ZStack {
+                ForEach(0..<blobCount, id: \.self) { index in
+                    let morphPhase = (sin(time * 0.75 + Double(index) * 0.5) + 1) / 2
+                    let shapes = blobShapePairs[index % blobShapePairs.count]
+                    
+                    MorphingBlobShape(
+                        morphPhase: morphPhase,
+                        shape1: shapes.0,
+                        shape2: shapes.1
+                    )
+                    .fill(color.opacity(0.7))
+                    .frame(width: size * 0.2, height: size * 0.2)
+                    .offset(x: orbitRadius)
+                    .rotationEffect(.degrees(Double(index) / Double(blobCount) * 360))
+                }
+            }
+            .frame(width: size, height: size)
+            .rotationEffect(rotation)
+        }
+    }
+}
+
+struct MorphingBlobShape: Shape {
+    var morphPhase: Double
+    var shape1: [CGFloat]
+    var shape2: [CGFloat]
+    
+    var animatableData: Double {
+        get { morphPhase }
+        set { morphPhase = newValue }
+    }
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        let baseRadius = min(rect.width, rect.height) / 2.5
+        
+        let numPoints = min(shape1.count, shape2.count)
+        var points: [CGPoint] = []
+        
+        for i in 0..<numPoints {
+            let angle = (CGFloat(i) / CGFloat(numPoints)) * 2 * .pi
+            
+            // Smoothly interpolate between shapes
+            let t = CGFloat(morphPhase)
+            let radius1 = shape1[i] * baseRadius
+            let radius2 = shape2[i] * baseRadius
+            let radius = radius1 * (1 - t) + radius2 * t
+            
+            let x = center.x + cos(angle) * radius
+            let y = center.y + sin(angle) * radius
+            points.append(CGPoint(x: x, y: y))
+        }
+        
+        guard points.count > 0 else { return path }
+        path.move(to: points[0])
+        
+        // Create smooth curves
+        for i in 0..<points.count {
+            let p0 = points[(i - 1 + points.count) % points.count]
+            let p1 = points[i]
+            let p2 = points[(i + 1) % points.count]
+            let p3 = points[(i + 2) % points.count]
+            
+            let cp1 = CGPoint(
+                x: p1.x + (p2.x - p0.x) / 6,
+                y: p1.y + (p2.y - p0.y) / 6
+            )
+            
+            let cp2 = CGPoint(
+                x: p2.x - (p3.x - p1.x) / 6,
+                y: p2.y - (p3.y - p1.y) / 6
+            )
+            
+            path.addCurve(to: p2, control1: cp1, control2: cp2)
+        }
+        
+        path.closeSubpath()
+        return path
+    }
+}
+

@@ -87,7 +87,6 @@ struct LoginView: SwiftUI.View {
                         .environmentObject(userSession)
                         .environmentObject(tutorialManager)
                         .environmentObject(preloadManager)
-                    
                 }
             }
         }

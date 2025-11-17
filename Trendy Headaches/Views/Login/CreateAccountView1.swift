@@ -48,7 +48,7 @@ struct CreateAccountView: View {
                             }
                             Spacer()
                         }
-                        .padding(.top, topInsert - 0)
+                        .padding(.top, topInsert - 30)
                         .frame(height: screenHeight)
                         .padding(.bottom, 50)
                     }
@@ -68,13 +68,13 @@ private extension CreateAccountView {
     var header: some View {
         CustomText(text: "Create Account", color: accent, textAlign: .center, textSize: screenWidth*0.11)
             .padding(.bottom, 10)
-            .padding(.top, 45)
+            .padding(.top, 25)
     }
     
     var emailSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Email")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $email, width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2, botPad: (!emailAvail && !email.isEmpty) ? 0 : 8)
                 .onChange(of: email) {
                     debounceEmailCheck()
                 }
@@ -88,7 +88,7 @@ private extension CreateAccountView {
     var passwordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2, secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_one,  width: screenWidth-50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2, secure: true, botPad: (!Database.passwordValid(pass_one) && !pass_one.isEmpty) ? 0 : 8)
             
             if !Database.passwordValid(pass_one) && !pass_one.isEmpty {
                 CustomWarningText(text: "8+ chars: uppercase, lowercase, number, & symbol")
@@ -99,7 +99,7 @@ private extension CreateAccountView {
     var confirmPasswordSection: some View {
         VStack(spacing: spacing) {
             fieldLabel("Confirm Password")
-            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth - 50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2,  secure: true)
+            CustomTextField(bg: bg, accent: accent, placeholder: "", text: $pass_two, width: screenWidth - 50, height: screenHeight * 0.06, textSize: screenHeight * 0.0625 / 2.2,  secure: true, botPad: (!pass_two.isEmpty && pass_two != pass_one) ? 0 : 8)
             
             if !pass_two.isEmpty && pass_two != pass_one {
                 CustomWarningText(text: "Passwords do not match.")

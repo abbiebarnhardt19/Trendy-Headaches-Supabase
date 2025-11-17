@@ -171,10 +171,12 @@ struct CustomLink<Destination: View>: View {
 struct CustomWarningText: View {
     var text: String
     var body: some View {
+        let screenWidth: CGFloat = UIScreen.main.bounds.width
         Text(text)
             .foregroundColor(.red)
-            .font(.system(size: 18, design: .serif))
+            .font(.system(size: screenWidth * 0.04, design: .serif))
             .padding(.horizontal, 18)
+            .padding(.bottom, 5)
             .frame(width: UIScreen.main.bounds.width-20)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)

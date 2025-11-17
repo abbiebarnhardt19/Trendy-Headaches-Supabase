@@ -96,27 +96,29 @@ struct LogView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LogBGComps(bg: bg, accent: accent)
+                //only show log screen if data is loaded
+                if preloadManager.isFinished{
+                    LogBGComps(bg: bg, accent: accent)
                     
-                //if log needs emergency treatment effective
-                if showPopup, !oldLogIDs.isEmpty {
-                    EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
-                        .zIndex(5)
-                        .onDisappear {
-                            // When the popup closes, remove the first ID
-                            if !oldLogIDs.isEmpty {
-                                medWorked = nil
-                                oldLogIDs.removeFirst()
-                                
-                                // If there are more, show the next one
+                    //if log needs emergency treatment effective
+                    if showPopup, !oldLogIDs.isEmpty {
+                        EmergencyMedPopup(selectedAnswer: $medWorked, isPresented: $showPopup,  oldLogID: oldLogIDs[0],  background: bg, accent: accent)
+                            .zIndex(5)
+                            .onDisappear {
+                                // When the popup closes, remove the first ID
                                 if !oldLogIDs.isEmpty {
-                                    showPopup = true
+                                    medWorked = nil
+                                    oldLogIDs.removeFirst()
+                                    
+                                    // If there are more, show the next one
+                                    if !oldLogIDs.isEmpty {
+                                        showPopup = true
+                                    }
                                 }
                             }
-                        }
                     }
                     
-                //scrollable part, header+ content
+                    //scrollable part, header+ content
                     ScrollView {
                         headerSection
                             .padding(.top, 20)
@@ -129,16 +131,30 @@ struct LogView: View {
                         }
                     }
                     .padding(.leading, leadPadd)
-                  
-
+                    
+                    
                     if tutorialManager.showTutorial {
                         LogTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                     }
-                  
-                //nav bar
-                VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
-                    .zIndex(1)
-                    .ignoresSafeArea(edges: .bottom)
+                    
+                    //nav bar
+                    VStack { Spacer(); NavBarView(userID: userID, bg: $bg, accent: $accent, selected: .constant(0)) }
+                        .zIndex(1)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+                //show loading screen while waiting for data
+                else{
+                   let tempAccent = "#b5c4b9"
+                   let tempBg = "#001d00"
+                   // Show loading screen while preload is running
+                   VStack {
+                       MultiBlobSpinner(color: Color(hex: tempAccent))
+                       CustomText(text: "Hang tight! We're loading your data.", color: tempAccent, width: screenWidth * 0.75, textAlign: .center, multiAlign: .center)
+                       
+                   }
+                   .frame(maxWidth: screenWidth, maxHeight: .infinity)
+                   .background(Color(hex: tempBg))
+                }
             }
         }
         .task {
