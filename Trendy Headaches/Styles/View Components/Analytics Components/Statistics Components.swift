@@ -23,8 +23,8 @@ struct StatsCard: View {
         VStack(alignment: .leading, spacing: 10) {
             // Header
             HStack(alignment: .top){
-                let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
-                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .bold)
+                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.06)
             
                 Spacer()
                 
@@ -36,7 +36,7 @@ struct StatsCard: View {
             
             // Display each stat
             ForEach(items, id: \.self) { item in
-                CustomText(text: item, color: bg, textSize: screenWidth * 0.045)
+                CustomText(text: item, color: bg, textSize: screenWidth * 0.055)
             }
         }
         .padding(.horizontal, 15)
@@ -174,9 +174,9 @@ struct MedicationTable: View {
         VStack(spacing: 10) {
             //header
             HStack(alignment: .top){
-                let font = UIFont.systemFont(ofSize: screenWidth * 0.05, weight: .bold)
+                let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .bold)
                 let title = "Treatment History: "
-                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 10, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text: title, color: bg, width: title.width(usingFont: font) + 20, bold: true, textSize: screenWidth * 0.06)
             
                 Spacer()
                 
@@ -203,8 +203,9 @@ struct MedicationTable: View {
                         Section(header:
                             HStack(spacing: 0) {
                             //make row headers
+                            
                                 ForEach(columns.indices, id: \.self) { i in
-                                    CustomText(text: columns[i],color: bg,  textAlign: .center, bold: true,  textSize: 16)
+                                    CustomText(text: columns[i],color: bg,  textAlign: .center, bold: true,  textSize: screenWidth * 0.05)
                                     .frame(width: colWidths[i], height: rowHeight)
                                     .background(Color.blend(Color(hex: bg), Color(hex: accent), ratio: 0.8))
                                     .border(Color(hex: bg).opacity(0.2), width: 1)

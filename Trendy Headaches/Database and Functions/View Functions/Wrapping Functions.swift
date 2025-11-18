@@ -14,15 +14,16 @@ func computeRowsForForm(options: [String], textSize: CGFloat, width: CGFloat, it
     var rows: [[String]] = [[]]
     var currentRowWidth: CGFloat = 0
     let font = UIFont.systemFont(ofSize: textSize, weight: .regular)
-    let itemSpacing: CGFloat = 8
+    let itemSpacing: CGFloat = 10
+    let circleWidth: CGFloat = 20
     
     for option in options {
         let textWidth = option.width(usingFont: font)
         // For options > 10 chars, cap the width to prevent overflow
         let maxTextWidth = option.count > 10 ? width - itemHeight - 4 - 50 : textWidth
-        let itemWidth = itemHeight + 4 + min(textWidth, maxTextWidth)
+        let itemWidth = itemHeight  + min(textWidth, maxTextWidth)
         
-        let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth
+        let newRowWidth = currentRowWidth == 0 ? itemWidth : currentRowWidth + itemSpacing + itemWidth + circleWidth + 10
         
         if newRowWidth > width && !rows[rows.count - 1].isEmpty {
             rows.append([option])

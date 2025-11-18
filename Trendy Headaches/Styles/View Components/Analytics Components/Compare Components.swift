@@ -79,7 +79,7 @@ struct CompareMetric: View {
                     .padding(.bottom, 5)
                 
                 
-                CustomText(text: "Comparison Metric", color: bg, width: screenWidth - 80, bold: true, textSize: screenWidth*0.05)
+                CustomText(text: "Comparison Metric", color: bg, width: screenWidth - 80, bold: true, textSize: screenWidth*0.055)
                 
                 MultipleChoice(options: $dropdownOption, selected: $compareMetric, accent: bg, width: screenWidth-80, textSize: screenWidth * 0.05)
                     .padding(.bottom, 10)
@@ -94,9 +94,9 @@ struct CompareMetric: View {
                         .padding(.bottom, 3)
                     
                     VStack{
-                        CustomText(text: "Symptom 1", color: bg, bold: true, textSize: screenWidth * 0.05)
+                        CustomText(text: "Symptom 1", color: bg, bold: true, textSize: screenWidth * 0.055)
                         
-                        MultipleChoice(options: $symptomOptions, selected: $selectedSymptom1, accent: bg, width: screenWidth-80, textSize: screenWidth * 0.045)
+                        MultipleChoice(options: $symptomOptions, selected: $selectedSymptom1, accent: bg, width: screenWidth-75, textSize: screenWidth * 0.05)
                     }
                     
                     Divider()
@@ -105,8 +105,8 @@ struct CompareMetric: View {
                         .padding(.bottom, 3)
                     
                     VStack{
-                        CustomText(text: "Symptom 2", color: bg, bold: true, textSize: screenWidth * 0.05)
-                        MultipleChoice(options: $symptomOptions, selected: $selectedSymptom2, accent: bg, width: screenWidth-80, textSize: screenWidth * 0.045)
+                        CustomText(text: "Symptom 2", color: bg, bold: true, textSize: screenWidth * 0.055)
+                        MultipleChoice(options: $symptomOptions, selected: $selectedSymptom2, accent: bg, width: screenWidth-80, textSize: screenWidth * 0.05)
                     }
                 }
                 
@@ -261,8 +261,8 @@ struct CompareFilter: View{
             VStack(alignment: .leading, spacing: 10) {
                 //top section in h stack so label and hide button on same line
                 HStack{
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
-                    CustomText(text:"Other Filters", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .bold)
+                    CustomText(text:"Other Filters", color: bg, width: "Comparison Metric: ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.06)
                         .padding(.trailing, 10)
                     
                     Spacer()
@@ -277,10 +277,10 @@ struct CompareFilter: View{
                     .padding(.bottom, 3)
                 
                 //alays show this because this isnt a compare metric
-                CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text:"Select Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.055)
 
                 //log type checkbox
-                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
+                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65, textSize: screenWidth * 0.05)
                     .padding(.bottom, 5)
 
                 //dont show symptom selection if thats the selected metric
@@ -291,9 +291,9 @@ struct CompareFilter: View{
                         .overlay(Color(hex: bg))
                         .padding(.bottom, 3)
                     //symptom checkbox
-                    CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                    CustomText(text:"Select Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.055)
                     
-                    MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
+                    MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65, textSize: screenWidth * 0.05)
                         .padding(.bottom, 5)
                     
                 }
@@ -307,12 +307,12 @@ struct CompareFilter: View{
                         .padding(.bottom, 3)
                     
                     //date fields
-                    CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                    CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.055)
                         .padding(.bottom, 5)
                     
-                    DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
+                    DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: screenWidth * 0.05, labelTextSize: screenWidth * 0.055)
                     
-                    DateTextField(date: $endDate, textValue: $endDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "End: ", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
+                    DateTextField(date: $endDate, textValue: $endDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "End: ", height: 35, fieldTextSize: screenWidth * 0.05, labelTextSize: screenWidth * 0.055)
                 }
             }
             .padding(.horizontal, 15)

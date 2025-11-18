@@ -59,8 +59,8 @@ struct AnalyticsFilter: View {
             VStack(alignment: .leading, spacing: 10) {
                 //top section in h stack so label and hide button on same line
                 HStack{
-                    let font = UIFont.systemFont(ofSize: screenWidth * 0.055, weight: .bold)
-                    CustomText(text:"Filters", color: bg, width: "Filters ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.055)
+                    let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .bold)
+                    CustomText(text:"Filters", color: bg, width: "Filters ".width(usingFont: font)+10, bold: true, textSize: screenWidth * 0.06)
                         .padding(.trailing, 10)
                     
                     Spacer()
@@ -74,10 +74,10 @@ struct AnalyticsFilter: View {
                     .overlay(Color(hex: bg))
                     .padding(.bottom, 3)
                 
-                CustomText(text:"Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text:"Log Type: ", color: bg, bold: true, textSize: screenWidth * 0.055)
 
                 //log type checkbox
-                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65)
+                MultipleCheckboxWrapped(options: $typeOptions, selected: $selectedTypes, accent: accent, bg: bg, width: screenWidth * 0.65, textSize: screenWidth * 0.05)
                     .padding(.bottom, 5)
                 
                 Divider()
@@ -86,9 +86,9 @@ struct AnalyticsFilter: View {
                     .padding(.bottom, 3)
                 
                 //symptom checkbox
-                CustomText(text:"Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text:"Symptom: ", color: bg, bold: true, textSize: screenWidth * 0.055)
 
-                MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65)
+                MultipleCheckboxWrapped(options: $symptomOptions, selected: $selectedSymptom, accent: accent, bg: bg, width: screenWidth * 0.65,  textSize: screenWidth * 0.05)
                     .padding(.bottom, 5)
                 
                 Divider()
@@ -97,7 +97,7 @@ struct AnalyticsFilter: View {
                     .padding(.bottom, 3)
                 
                 //date fields
-                CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.05)
+                CustomText(text:"Date Range: ", color: bg, bold: true, textSize: screenWidth * 0.055)
                     .padding(.bottom, 5)
                 
                 DateTextField(date: $startDate, textValue: $startDateString, bg: .constant(accent), accent: .constant(bg), width: screenWidth / 1.5, label: "Start:", height: 35, fieldTextSize: 16, labelTextSize: screenWidth * 0.045)
@@ -128,14 +128,14 @@ struct AnalyticsDropdown: View {
     var bg: String
     var options: [String]
     @Binding var selected: String
-    var textSize: CGFloat = UIScreen.main.bounds.width * 0.09
+    var textSize: CGFloat = UIScreen.main.bounds.width * 0.1
     
     private let screenWidth = UIScreen.main.bounds.width
     @State private var isExpanded = false
     
     var body: some View {
         //used for different sized dropdowns
-        let optionTextSize = max(textSize*0.5, 14)
+        let optionTextSize = max(textSize*0.6, 18)
         let labelFont = UIFont.systemFont(ofSize: textSize, weight: .regular)
         let dropdownFont = UIFont.systemFont(ofSize: optionTextSize, weight: .regular)
         let longestWidthForDropdown = options.map { $0.width(usingFont: dropdownFont) }.max() ?? 0
