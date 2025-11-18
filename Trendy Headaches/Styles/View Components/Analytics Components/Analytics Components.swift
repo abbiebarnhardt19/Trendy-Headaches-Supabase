@@ -36,6 +36,9 @@ struct AnalyticsFilter: View {
     @Binding var selectedTypes:[String]
     
     @State private var showFilter: Bool = false
+    @State private var startDateString: String = ""
+    @State private var endDateString: String = ""
+
     
     // Date Formatter
     private let formatter: DateFormatter = {
@@ -52,8 +55,8 @@ struct AnalyticsFilter: View {
     
     var body: some View {
         //dont need to pass in, just generate from the passed in date
-        @State var startDateString = formatter.string(from: startDate)
-        @State var endDateString = formatter.string(from: endDate)
+//        @State var startDateString = formatter.string(from: startDate)
+//        @State var endDateString = formatter.string(from: endDate)
         
         if showFilter {
             VStack(alignment: .leading, spacing: 10) {
@@ -111,6 +114,11 @@ struct AnalyticsFilter: View {
             .cornerRadius(20)
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
+            .onAppear {
+                startDateString = formatter.string(from: startDate)
+                endDateString = formatter.string(from: endDate)
+            }
+
         }
         //button for when hidden
         else {

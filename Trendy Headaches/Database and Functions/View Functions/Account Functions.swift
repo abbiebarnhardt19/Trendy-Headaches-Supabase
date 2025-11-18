@@ -25,6 +25,10 @@ extension Database {
             // Ignore cancellation errors - they're expected when debouncing
             return false
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return false
+            }
             print("Supabase error in emailExists: \(error)")
             return false
         }
@@ -90,6 +94,10 @@ extension Database {
             
             return true
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return false
+            }
             print("Supabase error in resetPassword: \(error)")
             return false
         }
@@ -104,6 +112,11 @@ extension Database {
                 .eq("user_id", value: Int(userID))
                 .execute()
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
+            
             print("Failed to delete user \(userID): \(error)")
         }
     }
@@ -143,6 +156,10 @@ extension Database {
                 .eq("user_id", value: String(userID))
                 .execute()
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
             print("Failed to update user \(userID): \(error)")
         }
     }
@@ -181,6 +198,10 @@ extension Database {
             return (symps, triggs, prevMeds, emergMeds, SQ, SA, bg, accent, theme)
             
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return nil
+            }
             print("ERROR in loadData: \(error)")
             return nil
         }
@@ -215,6 +236,10 @@ extension Database {
                 print("Unknown table: \(tableName)")
             }
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
             print("Failed to insert \(name): \(error)")
         }
     }
@@ -247,6 +272,10 @@ extension Database {
             
             try await query.execute()
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
             print("Failed to update \(old): \(error)")
         }
     }
@@ -314,6 +343,10 @@ extension Database {
             print(" Ended \(name) with reason: \(reasonToSave) at \(Date())")
 
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
             print(" Failed to end \(name): \(error)")
         }
     }
@@ -342,6 +375,10 @@ extension Database {
                 .value
             return users.first?.userId
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return nil
+            }
             print("Supabase error in userFromEmail: \(error)")
             return nil
         }
@@ -364,6 +401,10 @@ extension Database {
             }
 
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return ("","")
+            }
             print("Supabase error in getColors: \(error)")
             return ("", "")
         }

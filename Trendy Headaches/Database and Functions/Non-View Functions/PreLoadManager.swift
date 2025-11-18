@@ -126,6 +126,10 @@ class PreloadManager: ObservableObject {
                 }
                 
             } catch {
+                if (error as NSError).code == -999 {
+                    print("Request cancelled (safe to ignore)")
+                    return
+                }
                 print("Error during preloadAll:", error)
             }
         }

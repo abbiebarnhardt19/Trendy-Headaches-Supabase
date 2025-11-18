@@ -59,6 +59,10 @@ extension Database {
                 unifiedLogs.append(UnifiedLog(log_id: seData["side_effect_id"] as! Int64, user_id: seData["user_id"] as! Int64, log_type: "Side Effect", date: dateFormatter.date(from: seData["side_effect_date"] as! String) ?? Date(), severity: seData["side_effect_severity"] as! Int64, submit_time: dateFormatter.date(from: seData["side_effect_submit_time"] as! String) ?? Date(), symptom_id: nil, symptom_name: seData["side_effect_name"] as? String, onset_time: nil, med_taken: nil, medication_id: seData["side_effect_medication_id"] as? Int64, medication_name: nil, med_worked: nil, symptom_description: nil, notes: nil, trigger_ids: nil,  trigger_names: nil, side_effect_med: medDict?["medication_name"] as? String))
             }
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return []
+            }
             print("Error fetching unified logs: \(error)")
         }
         return unifiedLogs.sorted { $0.date > $1.date }
@@ -81,6 +85,10 @@ extension Database {
                     .execute()
             }
         } catch {
+            if (error as NSError).code == -999 {
+                print("Request cancelled (safe to ignore)")
+                return
+            }
             print("Failed to delete log with ID \(logID): \(error)")
         }
     }

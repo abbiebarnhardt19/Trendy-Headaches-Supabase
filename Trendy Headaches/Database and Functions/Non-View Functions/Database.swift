@@ -44,6 +44,7 @@ class Database {
             print("- Hint: \(error.hint ?? "no hint")")
             throw DatabaseError.insertFailed("Failed to create user account: \(error.message)")
         } catch {
+            
             print("Unexpected error inserting user: \(error)")
             throw DatabaseError.insertFailed("Failed to create user account")
         }

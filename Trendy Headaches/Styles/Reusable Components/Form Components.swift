@@ -75,12 +75,12 @@ struct DateTextField: View {
     @Binding var textValue: String
     @Binding var bg: String
     @Binding var accent: String
-    @State var width: CGFloat = 220
-    @State var label: String = "Date:"
-    @State var bold: Bool = false
-    @State var height: CGFloat = UIScreen.main.bounds.width * 0.125
-    @State var fieldTextSize: CGFloat = UIScreen.main.bounds.width * 0.05
-    @State var labelTextSize: CGFloat = UIScreen.main.bounds.width * 0.06
+    var width: CGFloat = 220
+    var label: String = "Date:"
+    var bold: Bool = false
+    var height: CGFloat = UIScreen.main.bounds.width * 0.125
+    var fieldTextSize: CGFloat = UIScreen.main.bounds.width * 0.05
+    var labelTextSize: CGFloat = UIScreen.main.bounds.width * 0.06
     
     @State private var showDatePicker: Bool = false
     @State private var screenWidth = UIScreen.main.bounds.width
@@ -99,7 +99,7 @@ struct DateTextField: View {
                 CustomText(text: label, color: accent, width: "Tests".width(usingFont: font)+10, bold: bold, textSize: labelTextSize)
                 
                 //make the text field however much room is left
-                let fieldWidth = width - "Tests".width(usingFont: font)
+                let fieldWidth = max(0, width - label.width(usingFont: font))
                 CustomTextField(bg: bg, accent: accent, placeholder: " ", text: $textValue, width: fieldWidth , height: height, textSize: fieldTextSize, botPad: 0)
             }
             .overlay(

@@ -137,7 +137,7 @@ struct EmergencyMedPopup: View {
                         Spacer()
                         VStack {
                             let font = UIFont.systemFont(ofSize: screenWidth * 0.06, weight: .regular)
-                            let width = "YesNo".width(usingFont: font) + 20 + 20 + 20 + 10
+                            let width = "YesNo".width(usingFont: font) + 90
                             MultipleChoice(options: .constant(yesNoOptions),  selected: Binding(get: {
                                         if let answer = selectedAnswer {
                                             return answer ? "Yes" : "No"
