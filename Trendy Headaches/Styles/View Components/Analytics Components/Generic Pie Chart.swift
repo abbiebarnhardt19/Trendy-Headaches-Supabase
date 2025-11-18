@@ -51,6 +51,8 @@ struct GenericPieChart<T: Hashable>: View {
     @State private var selectedSlice: String? = nil
     @State private var showVisual: Bool = false
     
+    let width = UIScreen.main.bounds.width - 80
+    
     //get the counts for each option
     private var groupedCounts: [(key: String, count: Int)] {
         let grouped = Dictionary(grouping: logList) { log -> String? in
@@ -134,8 +136,8 @@ struct GenericPieChart<T: Hashable>: View {
                 //header with label and hide button
                 VStack(spacing: 10) {
                     HStack {
-                        let font = UIFont.systemFont(ofSize: 20, weight: .bold)
-                        CustomText(text: chartTitle, color: bg, width: chartTitle.width(usingFont: font) + 15, bold: true, textSize: 20)
+                        let font = UIFont.systemFont(ofSize: width * 0.07, weight: .bold)
+                        CustomText(text: chartTitle, color: bg, width: chartTitle.width(usingFont: font) + 15, bold: true, textSize: width * 0.07)
                             .padding(.leading, 30)
                         
                         Spacer()
@@ -256,7 +258,7 @@ struct PieChartColorKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
-        let rows = rowsForKey(items: items, width: width, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8, mapResult: { item in (item.key, item.count, colors[items.firstIndex(where: { $0.key == item.key })!]) }) as! [[(String, Int, Color)]]
+        let rows = rowsForKey(items: items, width: width-20, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8,  font: .systemFont(ofSize: 18), mapResult: { item in (item.key, item.count, colors[items.firstIndex(where: { $0.key == item.key })!]) }) as! [[(String, Int, Color)]]
         
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -268,7 +270,7 @@ struct PieChartColorKey: View {
                                 .frame(width: 10, height: 10)
                                 .foregroundColor(item.2)
                             
-                            CustomText(text: String(item.0.prefix(12)), color: bg, textSize: UIScreen.main.bounds.width * 0.04)
+                            CustomText(text: String(item.0.prefix(12)), color: bg, textSize: UIScreen.main.bounds.width * 0.05)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .fixedSize(horizontal: true, vertical: false)
@@ -296,19 +298,21 @@ struct TooltipView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            let topFontSize = UIScreen.main.bounds.width * 0.055
             //label+ log count + percent
             Text("\(label): \(total) \(total==1 ? "log" : "logs") (\(Int(Double(total)/Double(logListCount)*100))%)")
                 .foregroundColor(Color(hex: accent))
-                .font(.system(size: 18, design: .serif))
+                .font(.system(size: topFontSize, design: .serif))
             
             //show symptom breakdown for severity
             ForEach(symptoms) { item in
                 HStack(alignment: .top, spacing: 6) {
+                    let bottomFontSize = UIScreen.main.bounds.width * 0.05
                     //each symptom and its percent
-                    Text("•").foregroundColor(Color(hex: accent)).font(.system(size: 16, design: .serif))
+                    Text("•").foregroundColor(Color(hex: accent)).font(.system(size: bottomFontSize, design: .serif))
                     Text(item.symptom.prefix(8) + (item.symptom.count > 8 ? "…" : "") + ": \(item.count) (\(Int(Double(item.count)/Double(total)*100))%)")
                         .foregroundColor(Color(hex: accent))
-                        .font(.system(size: 16, design: .serif))
+                        .font(.system(size: bottomFontSize, design: .serif))
                 }
             }
         }

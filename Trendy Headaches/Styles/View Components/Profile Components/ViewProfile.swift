@@ -30,7 +30,7 @@ struct ViewProfile: View {
     @EnvironmentObject var userSession: UserSession
     
     var body: some View {
-        let colWidth = screenWidth / 2
+        let colWidth = screenWidth / 2 - 20
         
         VStack {
             CustomText(text: "User Profile", color: newAcc, textAlign: .center, textSize: 45)

@@ -19,7 +19,7 @@ struct HiddenChart: View {
     
     var body: some View {
         HStack {
-            CustomButton( text: "\(chart)",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { hideChart.toggle() } )
+            CustomButton( text: "\(chart)",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { hideChart.toggle() } )
         }
         .frame(width: screenWidth)
     }
@@ -115,7 +115,7 @@ struct AnalyticsFilter: View {
         //button for when hidden
         else {
             HStack {
-                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.05, action: { showFilter.toggle() } )
+                CustomButton( text: "Filters",  bg: bg,  accent: accent,  height: screenHeight * 0.06, width: screenWidth -  50,   corner: 30, bold: false,  textSize: screenWidth * 0.055, action: { showFilter.toggle() } )
             }
             .frame(width: screenWidth)
         }
@@ -212,13 +212,16 @@ struct HideButton: View{
     var bg: String
     @Binding var show: Bool
     
+    let screenWidth = UIScreen.main.bounds.width
+    
     var body: some View{
+        let size = screenWidth * 0.075
         Button(action: { show.toggle() }) {
             Image(systemName: "eye.slash.circle")
                 .resizable() // Add this!
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(Color(hex: bg))
-                .frame(width: 25, height: 25)
+                .frame(width: size, height: size)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -229,13 +232,17 @@ struct ShowKeyButton: View{
     var bg: String
     @Binding var show: Bool
     
+    let screenWidth = UIScreen.main.bounds.width
+    
     var body: some View{
+        let size = screenWidth * 0.075
+        
         Button(action: { show.toggle() }) {
             Image(systemName: "info.circle")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .foregroundStyle(Color(hex:bg))
-                .frame(width: 25, height: 25)
+                .frame(width: size, height: size)
         }
         .buttonStyle(PlainButtonStyle())
         .padding(.trailing, 5)

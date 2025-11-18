@@ -72,7 +72,8 @@ struct AnalyticsBarChart: View {
     //get the width of the longest key so all are set the same
     var longestKeyWidth: CGFloat {
         let longestKey = frequencyData.max(by: { $0.key.count < $1.key.count })?.key ?? ""
-        let font = UIFont.systemFont(ofSize: 12)
+        let fontSize = (UIScreen.main.bounds.width - 80) * 0.07
+        let font = UIFont.systemFont(ofSize: fontSize)
         let width = (longestKey as NSString).size(withAttributes: [.font: font]).width
         return width + 10
     }
@@ -89,8 +90,9 @@ struct AnalyticsBarChart: View {
                     // Header
                     HStack {
                         //chart title
-                        let font = UIFont.systemFont(ofSize: 19, weight: .bold)
-                        CustomText(text: chartName, color: bg, width: chartName.width(usingFont: font) + 15, textAlign: .leading, bold: true, textSize: 19)
+                        let fontSize = (UIScreen.main.bounds.width - 80) * 0.07
+                        let font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
+                        CustomText(text: chartName, color: bg, width: chartName.width(usingFont: font) + 15, textAlign: .leading, bold: true, textSize: fontSize)
                             .padding(.leading, 35)
 
                         Spacer()
@@ -99,17 +101,20 @@ struct AnalyticsBarChart: View {
                         HideButton(accent: accent, bg: bg, show: $showVisual)
                         .padding(.trailing, 25)
                     }
+                    .padding(.top, 3)
 
                     if !frequencyData.isEmpty {
                         VStack {
                             ForEach(frequencyData, id: \.key) { item in
                                 HStack(spacing: 0) {
                                     // bar label
-                                    let font = UIFont.systemFont(ofSize: 12)
-                                    CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font) + 10, textSize: 12)
+                                    let fontSize = width * 0.05
+                                    let font = UIFont.systemFont(ofSize: fontSize)
+                                    CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font)+5, textSize: fontSize)
                                         .frame(width: longestKeyWidth, alignment: .trailing)
-                                        .padding(.leading, 5)
+                                        .padding(.trailing, 5)
                                         .padding(.bottom, 5)
+                                        
 
                                     // Bar column
                                     GeometryReader { geo in
@@ -119,17 +124,18 @@ struct AnalyticsBarChart: View {
 
                                         ZStack(alignment: .leading) {
                                             //bar with full width, hidden
-                                            RoundedRectangle(cornerRadius: 12)
+                                            RoundedRectangle(cornerRadius: 15)
                                                 .fill(Color(hex: accent))
-                                                .frame(height: 25)
+                                                .frame(height: 30)
 
                                             //actual bar
-                                            RoundedRectangle(cornerRadius: 12)
+                                            RoundedRectangle(cornerRadius: 15)
                                                 .fill(Color(hex: bg))
-                                                .frame(width: barWidth, height: 25)
+                                                .frame(width: barWidth, height: 30)
                                             
                                             //text in the bar, figure out if it needs % or log, and if log needs an s
-                                            CustomText(text: categoryColumn.lowercased() == "med_worked"  ? "\(item.count)% " : "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth,  textAlign: .center,  textSize: 12)
+                                            let fontSize = width * 0.045
+                                            CustomText(text: categoryColumn.lowercased() == "med_worked"  ? "\(item.count)% " : "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth,  textAlign: .center,  textSize: fontSize)
                                                 .clipped()
                                         }
                                     }

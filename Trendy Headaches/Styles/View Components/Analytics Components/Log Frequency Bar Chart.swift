@@ -13,7 +13,7 @@ struct CustomStackedBarChart: View {
     var accent: String
     var bg: String
 
-    @State var showKey: Bool = false
+    @State var showKey: Bool = true
     @State var yearOff: Int = 0
     @State private var selMon: Date? = nil
     @State private var selSymp: String? = nil
@@ -31,7 +31,7 @@ struct CustomStackedBarChart: View {
         // Use yearOff to shift the date range
         let baseDate = cal.date(byAdding: .year, value: yearOff, to: Date())!
         let startMon = cal.date(byAdding: .month, value: -11, to: cal.date(from: cal.dateComponents([.year, .month], from: baseDate))!)!
-        let months = (0..<12).compactMap { cal.date(byAdding: .month, value: $0, to: startMon) }
+        let months = (6..<12).compactMap { cal.date(byAdding: .month, value: $0, to: startMon) }
         
         //break the logs up by month
         let logsByMonth = Dictionary(grouping: logList.filter { $0.date >= startMon && $0.date <= baseDate }) {
@@ -72,7 +72,7 @@ struct CustomStackedBarChart: View {
             let colorMap = Dictionary(uniqueKeysWithValues: zip(sympOrder, color.generateColors(from: color, count: sympOrder.count)))
             
             //use the max number of logs in a month and chart height to set y axis and scale
-            let chartHeight: CGFloat = 150
+            let chartHeight: CGFloat = 170
             let yStep = max(1, Int(ceil(Double(maxCount) / 5)))
             let yMax = ((maxCount + yStep - 1) / yStep) * yStep
             let yVals = Array(stride(from: 0, through: yMax, by: yStep))
@@ -83,24 +83,28 @@ struct CustomStackedBarChart: View {
             let rightPadding: CGFloat = min(10, screenWidth * 0.025)
             let barSpac: CGFloat = max(4, min(10, screenWidth * 0.02))
             let availableWidth = width - yAxWid - leftPadding - rightPadding - (barSpac * 11)
-            let barWidth = max(15, availableWidth / 12)
+            let barWidth = max(20, availableWidth / 6)
             
             VStack(alignment: .leading, spacing: 10) {
-               //header
+                //header
                 HStack {
                     HStack(spacing: 0) {
                         //go back a year
                         CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12, botPad: 0) { yearOff -= 1}
+                            .padding(.trailing, 5)
                         
                         //graph title
-                        let font = UIFont.systemFont(ofSize: 19, weight: .bold)
+                        let fontSize = width * 0.065
+                        let font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
                         let title = "Logs by Symptom"
-                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, bold: true, textSize: 19)
+                        CustomText(text:title, color:bg, width: title.width(usingFont: font) + 15, textAlign:.center, bold: true, textSize: fontSize)
+                        
                         
                         //move up a year, only if thats not in the future
                         CustomButton(systemImage: "chevron.right", bg: bg, accent: accent, height: 20, width: 12, disabled: yearOff >= 0, botPad: 0) {yearOff += 1}
+                            .padding(.leading, 5)
                     }
-                    .padding(.bottom, 10)
+                    .padding(.bottom, 5)
                     
                     Spacer()
                     
@@ -110,6 +114,7 @@ struct CustomStackedBarChart: View {
                     HideButton(accent: accent, bg: bg, show: $showVisual)
                 }
                 .padding(.horizontal, horizontalPadding)
+                .padding(.bottom, 20)
                 
                 // only show graph if theres data
                 if !logList.isEmpty{
@@ -117,8 +122,9 @@ struct CustomStackedBarChart: View {
                         HStack(alignment: .top, spacing:0) {
                             // y-axis
                             VStack(spacing:0) {
+                                let  yAxisFont = width * 0.04
                                 ForEach(yVals.reversed(), id:\.self) { value in
-                                    CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:12)
+                                    CustomText(text:"\(value)", color:bg, width:yAxWid, textAlign: .center, textSize:yAxisFont)
                                         .frame(height:1)
                                         .offset(x:5, y:-3)
                                     
@@ -185,9 +191,9 @@ struct CustomStackedBarChart: View {
                                             .frame(width:barWidth,height:chartHeight)
                                             
                                             //month label underneath that month's segments
-                                            CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(12, screenWidth * 0.023))
-                                                .fixedSize()
-                                                .padding(.top,5)
+                                            CustomText(text: monthLabel(for: monData.month), color:bg, textAlign:.center, textSize: min(18, screenWidth * 0.057))
+                                            //.fixedSize()
+                                                .padding(.top,15)
                                         }
                                     }
                                 }
@@ -197,7 +203,7 @@ struct CustomStackedBarChart: View {
                             Spacer()
                                 .frame(width: rightPadding)
                         }
-
+                        
                         // popup if segment is selected
                         if let selMon, let selSymp {
                             TooltipOverlay(month: selMon, symptom: selSymp, data: data, sympOrder: sympOrder, chartWidth: width - leftPadding - rightPadding, chartHeight: chartHeight, maxCount: maxCount, colorMap: colorMap)
@@ -216,6 +222,7 @@ struct CustomStackedBarChart: View {
                     BarSymptomKey(sympOrder: sympOrder, colorMap: colorMap, bg: bg, width: width - (horizontalPadding * 2))
                         .padding(.horizontal, horizontalPadding)
                         .padding(.bottom, 5)
+                        .padding(.top, 10)
                 }
             }
             .padding(.vertical,10)
@@ -229,13 +236,13 @@ struct CustomStackedBarChart: View {
             HiddenChart(bg: bg, accent: accent, chart: "Log Frequency Chart", hideChart: $showVisual)
         }
     }
-
-    //custom make the month label
+    
     private func monthLabel(for date: Date) -> String {
-        let month = monthFormatter.string(from: date).prefix(3)
-        let year = monthFormatter.string(from: date).suffix(4)
-        return "\(month),\n\(year)"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M/yy"   // 9/25
+        return formatter.string(from: date)
     }
+
 }
 
 //symptom color key
@@ -247,7 +254,7 @@ struct BarSymptomKey: View {
     
     var body: some View {
         //break symptoms into rows
-        let rows = rowsForKey(items: sympOrder, width: width, text: { $0.capitalizedWords.count > 10 ? String($0.capitalizedWords.prefix(10)) + "…" : $0.capitalizedWords }, iconWidth: 10,  iconTextGap: 5, horizontalPadding: 0, font: .systemFont(ofSize: 14), mapResult: { symptom in symptom }) as! [[String]]
+        let rows = rowsForKey(items: sympOrder, width: width-20, text: { $0.capitalizedWords.count > 10 ? String($0.capitalizedWords.prefix(15)) + "…" : $0.capitalizedWords }, iconWidth: 10,  iconTextGap: 5, horizontalPadding: 0, font: .systemFont(ofSize: 18), mapResult: { symptom in symptom }) as! [[String]]
         
         VStack(alignment: .leading, spacing: 8) {
             //each row
@@ -263,8 +270,8 @@ struct BarSymptomKey: View {
                             
                             //symptom label
                             CustomText( text: symptom.capitalizedWords.count > 10
-                                    ? String(symptom.capitalizedWords.prefix(10)) + "…"
-                                    : symptom.capitalizedWords, color: bg, textSize: 14)
+                                    ? String(symptom.capitalizedWords.prefix(15)) + "…"
+                                    : symptom.capitalizedWords, color: bg, textSize: 18)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .fixedSize(horizontal: true, vertical: false)
@@ -300,10 +307,11 @@ struct TooltipOverlay: View {
 
             //display the data
             VStack(spacing: 2) {
+                let fontSize = chartWidth * 0.055
                 Text(symptom.capitalizedWords)
-                    .font(.system(size: 12, weight: .bold, design: .serif))
+                    .font(.system(size: fontSize, weight: .bold, design: .serif))
                 Text("\(info.count) logs (\(Int(info.percent))%)")
-                    .font(.system(size: 10, design: .serif))
+                    .font(.system(size: fontSize * 0.85, design: .serif))
             }
             .foregroundColor(textColor)
             .padding(6)

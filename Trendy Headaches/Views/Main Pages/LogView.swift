@@ -144,6 +144,7 @@ struct LogView: View {
                 }
                 //show loading screen while waiting for data
                 else{
+                    
                    let tempAccent = "#b5c4b9"
                    let tempBg = "#001d00"
                    // Show loading screen while preload is running
@@ -206,12 +207,12 @@ struct LogView: View {
                 Slider(value: $severity, range: 1...10, step: 1, color: accent, width: screenWidth - 50)
                 
                 CustomText(text: "Symptom Onset", color: accent, bold: true, textSize: screenWidth * 0.06)
-                MultipleChoice(options: $onsetOptions, selected: $onset, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
+                MultipleChoice(options: $onsetOptions, selected: $onset, accent: accent, width: screenWidth - 80, textSize: screenHeight * 0.05 / 2.2)
                 
-                SingleCheckbox(text: "Emergency Med Taken?", color: accent, isOn: $medTaken, textSize: screenWidth * 0.06)
+                SingleCheckbox(text: "Emergency Treatment?", color: accent, isOn: $medTaken, textSize: screenWidth * 0.06)
                 
                 if medTaken{
-                    CustomText(text: "Emergency Med Name*", color: accent, bold: true, textSize: screenWidth * 0.06)
+                    CustomText(text: "Emergency Treatment Name*", color: accent, bold: true, textSize: screenWidth * 0.06)
                     MultipleChoice(options: $emergMedOptions, selected: $medTakenName, accent: accent, width: screenWidth - 60,  textSize: screenHeight * 0.05 / 2.2)
                         
                     

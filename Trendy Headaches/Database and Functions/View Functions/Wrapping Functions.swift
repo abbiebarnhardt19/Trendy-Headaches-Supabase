@@ -43,7 +43,7 @@ func rowsForKey<T>(
     iconWidth: CGFloat,
     iconTextGap: CGFloat,
     horizontalPadding: CGFloat,
-    font: UIFont = .systemFont(ofSize: 12),
+    font: UIFont = .systemFont(ofSize: 18),
     itemSpacing: CGFloat = 10,
     mapResult: (T) -> (Any)
 ) -> [[Any]] {

@@ -57,9 +57,10 @@ struct LogCalendarView: View {
             CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
             
             //current month name displayed
-            let font = UIFont.systemFont(ofSize: 19, weight: .bold)
+            let fontSize = width * 0.07
+            let font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
             let title = monthYearString(for: currentMonth)
-            CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, bold: true, textSize: 19)
+            CustomText(text: title, color: bg, width: title.width(usingFont: font)+5, textAlign: .center, bold: true, textSize: fontSize)
                 .padding(.bottom, 9)
             
             //go forward a month, can't if already on most recent month
@@ -81,8 +82,9 @@ struct LogCalendarView: View {
     //make the text for each day of the week
     private var WeekdayLabels: some View {
         HStack {
+            let itemWidth = width / 7 * 0.375
             ForEach(weekDays, id: \.self) { day in
-                CustomText(text: day, color: bg, textAlign: .center, textSize: 14)
+                CustomText(text: day, color: bg, textAlign: .center, textSize: itemWidth)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -91,7 +93,7 @@ struct LogCalendarView: View {
         //lay out the day cells on the grid
     private var CalendarGrid: some View {
         let days = makeDays(for: currentMonth)
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 10) {
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 20) {
             //add each cell individually
             ForEach(days.indices, id: \.self) { idx in
                 if let date = days[idx] {
@@ -112,11 +114,14 @@ struct DayCell: View {
     let bg: String
     let sympIcon: [String: String]
     let calendar: Calendar
+    
+    let width = UIScreen.main.bounds.width - 80
 
     var body: some View {
         ZStack {
+            let size = width / 7 * 0.5
             // Day number
-            CustomText(text: "\(calendar.component(.day, from: date))", color: bg, textAlign: .center, textSize: 14)
+            CustomText(text: "\(calendar.component(.day, from: date))", color: bg, textAlign: .center, textSize: size)
 
             // Log icons
             ForEach(Array(logs.enumerated()), id: \.offset) { i, log in
@@ -133,17 +138,20 @@ struct LogIcon: View {
     let index: Int
     let total: Int
     let sympIcon: [String: String]
+    
+    let width = UIScreen.main.bounds.width - 80
 
     var body: some View {
         //make the circle around the date
         let angle = Double(index)/Double(total) * 360
-        let radius: CGFloat = 12
+        let radius: CGFloat = 17
+        let size =  width * 0.035
         
         //image with the icon set by the symptom and the color set by severity
         Image(systemName: icon(for: log.symptom_name, symptomToIcon: sympIcon))
             .resizable()
             .scaledToFit()
-            .frame(width: 6, height: 6)
+            .frame(width: size, height: size)
             .foregroundColor(color(forSeverity: log.severity))
             .offset(x: cos(angle * .pi / 180) * radius, y: sin(angle * .pi / 180) * radius)
     }
@@ -155,13 +163,13 @@ struct SymptomKey: View {
     var accent: String
     
     //constants
-    let width: CGFloat = UIScreen.main.bounds.width - 80
+    let width: CGFloat = UIScreen.main.bounds.width - 110
     let itemHeight: CGFloat = 13
     
     var body: some View {
         //alphabatize the symptoms
         let sortedSymp = symptomToIcon.sorted(by: { $0.key < $1.key })
-        let rows = rowsForKey(items: sortedSymp, width: width, text: { $0.key },  iconWidth: itemHeight, iconTextGap: 4, horizontalPadding: 8, font: .systemFont(ofSize: 12), mapResult: { pair in
+        let rows = rowsForKey(items: sortedSymp, width: width, text: { $0.key },  iconWidth: itemHeight, iconTextGap: 4, horizontalPadding: 8, font: .systemFont(ofSize: 18), mapResult: { pair in
                 (pair.key, pair.value)
             }) as! [[(String, String)]]
 
@@ -179,7 +187,7 @@ struct SymptomKey: View {
                                 .foregroundColor(Color(hex: accent))
                             
                             //symptom name
-                            CustomText(text: String(item.0.prefix(12)), color: accent, textSize: 12)
+                            CustomText(text: String(item.0.prefix(12)), color: accent, textSize: 18)
                             .lineLimit(1)
                             .truncationMode(.tail)
                             .fixedSize(horizontal: true, vertical: false)
@@ -216,7 +224,7 @@ struct SeverityKeyBar: View {
             //number level
             HStack(spacing: 0) {
                 ForEach(1...10, id: \.self) { level in
-                    CustomText(text: "\(level)", color: accent, textAlign: .center, textSize: 14)
+                    CustomText(text: "\(level)", color: accent, textAlign: .center, textSize: 18)
                         .frame(width: width / 10)
                 }
             }
