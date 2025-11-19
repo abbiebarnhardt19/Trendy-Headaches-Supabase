@@ -11,8 +11,8 @@ struct ProfileView: View {
     var userID: Int64
 
     //colors
-    @State var bg: String = ""
-    @State var accent: String = ""
+    @State var bg: String = "f00000"
+    @State var accent: String = "ffff00"
     
     @EnvironmentObject var userSession: UserSession
     @EnvironmentObject var tutorialManager: TutorialManager
@@ -110,7 +110,7 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView(userID: 12)
+    ProfileView(userID: 47)
         .environmentObject(UserSession())
         .environmentObject(TutorialManager())
         .environmentObject(PreloadManager())

@@ -52,12 +52,16 @@ extension LogView {
             medEffective = log.med_worked ?? false
             showSymptomView = true
         } else if log.log_type == "SideEffect" {
+            
             stringDate = formatter.string(from: log.date)
-            sideEffectName = log.side_effect_med ?? ""
+            sideEffectName = log.symptom_name ?? ""
             sideEffectSev = log.severity
-            selectedMed = log.medication_name ?? ""
+            selectedMed = log.side_effect_med ?? ""
             medID = log.medication_id ?? 0
             showSymptomView = false
+            
+            print(medID)
+            //log not updating in database
         }
     }
 }

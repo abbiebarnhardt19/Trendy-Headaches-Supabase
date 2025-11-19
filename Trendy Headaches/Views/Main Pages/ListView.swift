@@ -126,8 +126,9 @@ struct ListView: View {
             .navigationDestination(isPresented: $showLog) {
                 LogView(userID: userID)
                     .navigationBarBackButtonHidden(true)
-                    .environmentObject(PreloadManager())
-                    .environmentObject(UserSession())
+                    .environmentObject(preloadManager)
+                    .environmentObject(userSession)
+                    .environmentObject(tutorialManager)
             }
             .navigationDestination(
                 isPresented: Binding(
@@ -136,9 +137,11 @@ struct ListView: View {
                         if let id = selectLog, let table = selectTable {
                             LogView(userID: userID, existingLog: id, existingTable: table)
                                 .navigationBarBackButtonHidden(true)
-                                .environmentObject(PreloadManager())
-                                .environmentObject(UserSession())
+                                .environmentObject(preloadManager)
+                                .environmentObject(userSession)
+                                .environmentObject(tutorialManager)
                         }
+                        
             }
         }
         .task {
@@ -167,7 +170,7 @@ struct ListView: View {
 }
 
 #Preview {
-    ListView(userID: 12)
+    ListView(userID: 47)
         .environmentObject(TutorialManager())
         .environmentObject(PreloadManager())
         .environmentObject(UserSession())

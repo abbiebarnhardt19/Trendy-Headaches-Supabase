@@ -268,37 +268,85 @@ extension Database {
         }
     }
 
-    // Update a side effects log
-    func updateSideEffectLog(logID: Int64, userID: Int64, date: Date?, sideEffectName: String?, sideEffectSeverity: Int64?, medicationID: Int64?) async {
+    func updateSideEffectLog(
+        logID: Int64,
+        userID: Int64,
+        date: Date?,
+        sideEffectName: String?,
+        sideEffectSeverity: Int64?,
+        medicationID: Int64?
+    ) async {
         do {
+            // 1️⃣ Build the update dictionary
             var updateDict: [String: Any] = [:]
-            
+
             if let newDate = date {
                 let calendar = Calendar.current
                 let startOfDay = calendar.startOfDay(for: newDate)
                 updateDict["side_effect_date"] = ISO8601DateFormatter().string(from: startOfDay)
             }
+
             if let newName = sideEffectName {
                 updateDict["side_effect_name"] = newName.capitalized
             }
+
             if let newSeverity = sideEffectSeverity {
                 updateDict["side_effect_severity"] = newSeverity
             }
+
             if let newMedicationID = medicationID {
                 updateDict["side_effect_medication_id"] = newMedicationID
             }
-            
-            // Perform update only if there's something to update
+
+            // 2️⃣ Only update if there's something to change
             if !updateDict.isEmpty {
-                let jsonData = try JSONSerialization.data(withJSONObject: updateDict)
-                let jsonString = String(data: jsonData, encoding: .utf8)!
-                
+
+                // Wrap dictionary in Encodable so Supabase properly waits
+                struct EncodableDictionary: Encodable {
+                    let dict: [String: Any]
+
+                    func encode(to encoder: Encoder) throws {
+                        var container = encoder.container(keyedBy: DynamicCodingKeys.self)
+                        for (key, value) in dict {
+                            let codingKey = DynamicCodingKeys(stringValue: key)!
+                            switch value {
+                            case let v as String: try container.encode(v, forKey: codingKey)
+                            case let v as Int: try container.encode(v, forKey: codingKey)
+                            case let v as Int64: try container.encode(v, forKey: codingKey)
+                            case let v as Double: try container.encode(v, forKey: codingKey)
+                            case let v as Bool: try container.encode(v, forKey: codingKey)
+                            case Optional<Any>.none: try container.encodeNil(forKey: codingKey)
+                            default:
+                                throw EncodingError.invalidValue(
+                                    value,
+                                    EncodingError.Context(
+                                        codingPath: container.codingPath,
+                                        debugDescription: "Invalid type"
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+
+                struct DynamicCodingKeys: CodingKey {
+                    var stringValue: String
+                    var intValue: Int? { nil }
+                    init?(stringValue: String) { self.stringValue = stringValue }
+                    init?(intValue: Int) { nil }
+                }
+
+                let encodableUpdate = EncodableDictionary(dict: updateDict)
+
                 try await client
                     .from("Side_Effects")
-                    .update(jsonString)
-                    .eq("side_effect_id", value: String(logID))
+                    .update(encodableUpdate)
+                    .eq("side_effect_id", value: Int(logID))
                     .execute()
+
+                print("Successfully updated side effect log")
             }
+
         } catch {
             if (error as NSError).code == -999 {
                 print("Request cancelled (safe to ignore)")
@@ -307,6 +355,7 @@ extension Database {
             print("Error updating side effect log: \(error)")
         }
     }
+
     
     // Get the details of the log for the popup
     func getLogDetails(logID: Int64) async -> (userID: Int64, date: Date, symptomName: String, symptomID: Int64, emergencyMedID: Int64?, emergencyMedName: String)? {
@@ -439,18 +488,18 @@ extension Database {
                     .single()
                     .execute()
                 
+                //not getting med data right
                 let json = try JSONSerialization.jsonObject(with: response.data) as! [String: Any]
-                let medDict = json["side_effect_medication"] as? [String: Any]
+                let medDict = json["medication"] as? [String: Any]
                 let id = json["side_effect_id"] as! Int64
                 let uid = json["user_id"] as! Int64
                 let dt = dateFormatter.date(from: json["side_effect_date"] as! String) ?? Date()
                 let sev = json["side_effect_severity"] as! Int64
                 let sub = dateFormatter.date(from: json["side_effect_submit_time"] as! String) ?? Date()
-                let mid = json["medication_id"] as? Int64
+                let mid = medDict?["medication_id"] as? Int64
                 let mname = medDict?["medication_name"] as? String
                 let sename = json["side_effect_name"] as? String
-
-                return UnifiedLog(log_id: id, user_id: uid, log_type: "SideEffect", date: dt, severity: sev, submit_time: sub, symptom_id: nil, symptom_name: nil, onset_time: nil, med_taken: nil, medication_id: mid, medication_name: mname, med_worked: nil, symptom_description: nil, notes: nil, trigger_ids: nil, trigger_names: nil, side_effect_med: sename)
+                return UnifiedLog(log_id: id, user_id: uid, log_type: "SideEffect", date: dt, severity: sev, submit_time: sub, symptom_id: nil, symptom_name: sename, onset_time: nil, med_taken: nil, medication_id: mid, medication_name: mname, med_worked: nil, symptom_description: nil, notes: nil, trigger_ids: nil, trigger_names: nil, side_effect_med: mname)
             }
         } catch {
             if (error as NSError).code == -999 {

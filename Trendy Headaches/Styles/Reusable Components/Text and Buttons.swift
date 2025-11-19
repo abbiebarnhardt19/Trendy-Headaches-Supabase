@@ -34,6 +34,7 @@ struct CustomTextField: View {
             }
             else if secure{
                 SecureField(placeholder, text: $text)
+                    .textContentType(nil)
             }
             else {
                 TextField(placeholder, text: $text)

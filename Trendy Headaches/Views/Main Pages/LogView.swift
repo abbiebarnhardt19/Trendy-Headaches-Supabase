@@ -243,7 +243,9 @@ struct LogView: View {
                                 
                                 await preloadManager.preloadAll(userID: userID)
                                 
-                                listView = true
+                                DispatchQueue.main.async {
+                                    listView = true
+                                }
                             }
                         }
                         else{
@@ -258,7 +260,9 @@ struct LogView: View {
                                 
                                 await preloadManager.preloadAll(userID: userID)
                                 
-                                listView = true
+                                DispatchQueue.main.async {
+                                    listView = true
+                                }
                             }
                         }
                     }
@@ -301,19 +305,23 @@ struct LogView: View {
                 CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                     if existingLog == nil {
                         Task{
-                            logID = await Database.shared.createSideEffectLog(userID: userID, date: date, side_effect: sideEffectName, side_effect_severity: sideEffectSev, medicationName: selectedMed ?? "") ?? 0
+                            logID = await Database.shared.createSideEffectLog(userID: userID, date: date, side_effect: sideEffectName, side_effect_severity: sideEffectSev, medicationName: selectedMed ?? "test") ?? 0
                             
                             await preloadManager.preloadAll(userID: userID)
 
-                            listView = true
+                            DispatchQueue.main.async {
+                                listView = true
+                            }
                         }
                     } else {
                         Task {
                             await Database.shared.updateSideEffectLog(logID: existingLog ?? 0, userID: userID, date: date, sideEffectName: sideEffectName, sideEffectSeverity: sideEffectSev, medicationID: medID)
-                            
+                            print(userID)
                             await preloadManager.preloadAll(userID: userID)
                             
-                            listView = true
+                            DispatchQueue.main.async {
+                                listView = true
+                            }
                         }
                     }
                 }
@@ -342,7 +350,7 @@ struct LogView: View {
 }
 
 #Preview {
-    LogView(userID: 12)
+    LogView(userID: 47)
         .environmentObject(TutorialManager())
         .environmentObject(UserSession())
         .environmentObject(PreloadManager())

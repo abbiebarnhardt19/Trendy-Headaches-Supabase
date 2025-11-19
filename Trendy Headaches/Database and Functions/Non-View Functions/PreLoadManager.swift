@@ -50,7 +50,6 @@ class PreloadManager: ObservableObject {
     //function to get all needed values at once
     func preloadAll(userID: Int64) async {
         if userID != 0{
-            
             do {
                 // create tasks
                 async let colorsTask = Database.shared.getColors(userID: userID)
@@ -134,4 +133,5 @@ class PreloadManager: ObservableObject {
             }
         }
     }
+    
 }

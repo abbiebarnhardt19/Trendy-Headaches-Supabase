@@ -206,9 +206,6 @@ extension Database {
             return nil
         }
     }
-
-
-
     
     // Function for users adding a value to a category
     func insertItem(tableName: String, userID: Int64, name: String, medCat: String? = nil) async {

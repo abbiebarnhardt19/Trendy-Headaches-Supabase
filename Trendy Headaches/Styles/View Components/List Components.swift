@@ -444,6 +444,7 @@ struct ScrollableLogTable: View {
         case "Em. Med. Name": return log.medication_name ?? ""
         case "Em. Med. Taken?": return log.med_taken == true ? "Yes" : "No"
         case "Em. Med. Worked?": return log.med_worked == true ? "Yes" : "No"
+        case "S.E. Med.": return log.side_effect_med ?? ""
         default: return ""
         }
     }
