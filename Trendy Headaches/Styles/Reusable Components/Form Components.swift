@@ -95,42 +95,38 @@ struct DateTextField: View {
         VStack(spacing: 0) {
             ZStack(alignment: .top) {
                 HStack {
+                    //label in front of the text field
                     let font = UIFont.systemFont(ofSize: labelTextSize, weight: .regular)
-                    CustomText(
-                        text: label,
-                        color: accent,
-                        width: "Tests".width(usingFont: font) + 10,
-                        bold: bold,
-                        textSize: labelTextSize
-                    )
+                    CustomText(text: label, color: accent, width: "Tests".width(usingFont: font) + 10, bold: bold, textSize: labelTextSize)
                     
+                    //text field that displays selected date or user can input date
                     let fieldWidth = max(0, width - label.width(usingFont: font))
-                    CustomTextField(
-                        bg: bg,
-                        accent: accent,
-                        placeholder: " ",
-                        text: $textValue,
-                        width: fieldWidth,
-                        height: height,
-                        textSize: fieldTextSize,
-                        botPad: 0
-                    )
+                    CustomTextField(bg: bg, accent: accent, placeholder: " ", text: $textValue, width: fieldWidth,  height: height, textSize: fieldTextSize, botPad: 0)
+                    // update date if user types manually
+                    .onChange(of: textValue) {
+                        if let typedDate = formatter.date(from: textValue) {
+                            date = typedDate
+                        }
+                    }
                 }
+                //button overlay to trigger calendar
                 .overlay(
                     HStack {
                         Spacer()
                         Button(action: {
-                            withAnimation { showDatePicker.toggle() }
-                        }) {
+                            withAnimation(.easeInOut(duration: 0.4)) {
+                                showDatePicker.toggle()
+                            }
+                        }){
                             Image(systemName: "calendar")
                                 .foregroundColor(Color(hex: bg))
                                 .font(.system(size: fieldTextSize * 1.2))
                                 .padding(.trailing, 15)
                         }
-                    }
-                )
+                    })
                 .buttonStyle(PlainButtonStyle())
                 
+                //show the calendar
                 if showDatePicker {
                     CustomCalendarView(
                         selectedDate: $date,
@@ -144,14 +140,15 @@ struct DateTextField: View {
                         withAnimation { showDatePicker = false }
                     }
                     .frame(width: width)
-                    .background(Color(hex: accent))
-                    .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                    .colorScheme(Color.isHexDark(accent) ? .dark : .light)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .padding(.top, height + 8) // push calendar below text field
-                    .zIndex(1000)
-                    .allowsHitTesting(showDatePicker) // disable interaction when hidden
+                        .background(Color(hex: accent))
+                        .cornerRadius(20)
+                        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                        .colorScheme(Color.isHexDark(accent) ? .dark : .light)
+                        .padding(.top, height + 8)
+                        .zIndex(1000)
+                        .transition(.asymmetric(
+                            insertion: .scale.combined(with: .opacity),
+                            removal: .scale.combined(with: .opacity)))
                 }
             }
         }
