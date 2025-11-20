@@ -26,7 +26,6 @@ extension Database {
             return false
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return false
             }
             print("Supabase error in emailExists: \(error)")
@@ -95,7 +94,6 @@ extension Database {
             return true
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return false
             }
             print("Supabase error in resetPassword: \(error)")
@@ -113,7 +111,6 @@ extension Database {
                 .execute()
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             
@@ -157,7 +154,6 @@ extension Database {
                 .execute()
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to update user \(userID): \(error)")
@@ -199,7 +195,6 @@ extension Database {
             
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("ERROR in loadData: \(error)")
@@ -234,7 +229,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to insert \(name): \(error)")
@@ -270,7 +264,6 @@ extension Database {
             try await query.execute()
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to update \(old): \(error)")
@@ -341,7 +334,6 @@ extension Database {
 
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print(" Failed to end \(name): \(error)")
@@ -373,7 +365,6 @@ extension Database {
             return users.first?.userId
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("Supabase error in userFromEmail: \(error)")
@@ -399,13 +390,31 @@ extension Database {
 
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return ("","")
             }
             print("Supabase error in getColors: \(error)")
             return ("", "")
         }
     }
+    
+    struct UserIDRow: Decodable { let user_id: Int64 }
+
+    func getAllUserIDs() async -> [Int64] {
+        do {
+            let rows: [UserIDRow] = try await client
+                .from("Users")
+                .select("user_id") 
+                .execute()
+                .value
+
+            return rows.map { $0.user_id }
+        }
+        catch {
+            print("Error fetching user IDs: \(error)")
+            return []
+        }
+    }
+
 
 
 }

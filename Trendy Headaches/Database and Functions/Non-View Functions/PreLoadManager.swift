@@ -49,8 +49,11 @@ class PreloadManager: ObservableObject {
 
     //function to get all needed values at once
     func preloadAll(userID: Int64) async {
-        if userID != 0{
+        let existingUserIDs = await Database.shared.getAllUserIDs()
+        
+        if existingUserIDs.contains(userID){
             do {
+               
                 // create tasks
                 async let colorsTask = Database.shared.getColors(userID: userID)
                 async let logsTask = Database.shared.getLogList(userID: userID)
@@ -76,6 +79,7 @@ class PreloadManager: ObservableObject {
                 
                 // combined logic
                 let combinedSymptoms = Array(Set(sympList + sideEffectList)).sorted()
+                
                 let logSymptoms = Array(Set(allLogsResult.compactMap { $0.symptom_name }))
                     .sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
                 
@@ -111,6 +115,7 @@ class PreloadManager: ObservableObject {
                         themeName = profile.theme
                     }
                     
+                    
                     // Analytics
                     if let result = analyticsResult {
                         analyticsLogs = result.0
@@ -123,15 +128,17 @@ class PreloadManager: ObservableObject {
                     //indicate loading is done so pages can now access values
                     isFinished = true
                 }
+
                 
             } catch {
                 if (error as NSError).code == -999 {
-                    print("Request cancelled (safe to ignore)")
                     return
                 }
                 print("Error during preloadAll:", error)
             }
         }
+        else{
+            print("Tried to run preload manager with \(userID)")
+        }
     }
-    
 }

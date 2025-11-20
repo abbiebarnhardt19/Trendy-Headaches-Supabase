@@ -22,7 +22,7 @@ extension AnalyticsView{
             let range2EndString = "\(DateFormatter.localizedString(from: range2End, dateStyle: .short, timeStyle: .none))"
             labelTwo = "\(range2StartString)-\(range2EndString)"
         }
-        else if selectedMetric == "Symptoms"{
+        else if selectedMetric == "Symptom"{
             labelOne = selectedSymptom1 ?? ""
             labelTwo = selectedSymptom2 ?? ""
         }

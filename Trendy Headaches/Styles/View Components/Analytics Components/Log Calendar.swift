@@ -19,7 +19,7 @@ struct LogCalendarView: View {
     //constants
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    private let width = UIScreen.main.bounds.width - 80
+    private let width = UIScreen.main.bounds.width * 0.8
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
     
     @State var showVisual: Bool = false
@@ -163,7 +163,7 @@ struct SymptomKey: View {
     var accent: String
     
     //constants
-    let width: CGFloat = UIScreen.main.bounds.width - 110
+    let width: CGFloat = UIScreen.main.bounds.width * 0.75
     let itemHeight: CGFloat = 13
     
     var body: some View {
@@ -208,7 +208,7 @@ struct SymptomKey: View {
 struct SeverityKeyBar: View {
     var accent: String
     
-    let width: CGFloat = 300
+    let width: CGFloat = UIScreen.main.bounds.width * 0.75
     let height: CGFloat = 20
 
     //colors for 1-10

@@ -53,7 +53,7 @@ struct ListView: View {
     //size variables
     var screenWidth: CGFloat = UIScreen.main.bounds.width
     var screenHeight: CGFloat = UIScreen.main.bounds.height
-    var maxTableHeight: CGFloat = UIScreen.main.bounds.height * 0.62
+    var maxTableHeight: CGFloat = UIScreen.main.bounds.height * 0.6
     
     @EnvironmentObject var tutorialManager: TutorialManager
     @EnvironmentObject var preloadManager: PreloadManager
@@ -61,87 +61,117 @@ struct ListView: View {
 
     var body: some View {
         
+        
         NavigationStack {
-            ZStack {
-                ListBGComps(bg: bg, accent: accent)
-                
-                VStack {
-                    //page label
-                    VStack{
-                        HStack{
-                            FilterButton(accent: $accent, bg: $bg, popUp: $showFilter, width: screenWidth * 0.12)
-                                .padding(.trailing, 5)
-                            let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
-                            CustomText(text: "Log List", color: accent, width: "Log List".width(usingFont: font), textSize: screenWidth * 0.1)
-                            
-                            Spacer()
-                        }
-                    }
-                    .frame(width: screenWidth)
-                    .padding(.top, 25)
-                    .padding(.bottom, 15)
-                    .padding(.leading, 40)
+            if preloadManager.isFinished{
+                ZStack {
                     
-                    //table
-                    HStack{
-                        Spacer()
-                        ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: $bg, accent: $accent, height: maxTableHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
-                            selectLog = id
-                            selectTable = table
-                        })
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                
-                // Filter popup as overlay
-                if showFilter {
+                    ListBGComps(bg: bg, accent: accent)
+                    
                     VStack {
-                        HStack {
-                            FilterOptions(accent: $accent, bg: $bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
-                                .padding(.leading, 40)
-
+                        //page label
+                        VStack{
+                            HStack{
+                                FilterButton(accent: $accent, bg: $bg, popUp: $showFilter, width: screenWidth * 0.12)
+                                    .padding(.trailing, 5)
+                                let font = UIFont.systemFont(ofSize: screenWidth * 0.1 + 5, weight: .regular)
+                                CustomText(text: "Log List", color: accent, width: "Log List".width(usingFont: font), textSize: screenWidth * 0.1)
+                                
+                                Spacer()
+                            }
+                        }
+                        .frame(width: screenWidth)
+                        .padding(.top, 25)
+                        .padding(.bottom, 15)
+                        .padding(.leading, 40)
+                        
+                        //table
+                        HStack{
+                            Spacer()
+                            ScrollableLogTable( userID: userID, list: logList, selectedCols: selectedCols, bg: $bg, accent: $accent, height: maxTableHeight, width: screenWidth - 20, deleteCount: $deleteCount, onLogTap: { id, table in
+                                selectLog = id
+                                selectTable = table
+                            })
                             Spacer()
                         }
                         Spacer()
                     }
-                    .padding(.top, screenHeight * 0.1)
-                    .zIndex(1000)
+                    
+                    // Filter popup as overlay
+                    if showFilter {
+                        VStack {
+                            HStack {
+                                FilterOptions(accent: $accent, bg: $bg, colOptions: colOptions, selectedCols: $selectedCols, typeOptions: $logTypeOptions, type: $logTypeFilter, start: $startDate, end: $endDate, stringStart: $stringStartDate, stringEnd: $stringEndDate, sevStart: $sevStart, sevEnd: $sevEnd, sympOptions: $sympOptions, selectedSymps: $selectedSymps)
+                                    .padding(.leading, 40)
+                                
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        .padding(.top, screenHeight * 0.1)
+                        .zIndex(1000)
+                    }
+                    
+                    //show tutorial if needed
+                    if tutorialManager.showTutorial {
+                        ListTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
+                    }
+                    
+                    //nav bar
+                    VStack {
+                        Spacer()
+                        NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
+                    }
+                    .ignoresSafeArea(edges: .bottom)
+                    .zIndex(1)
                 }
                 
-                //show tutorial if needed
-                if tutorialManager.showTutorial {
-                    ListTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
+                .navigationDestination(isPresented: $showLog) {
+                    LogView(userID: userID)
+                        .navigationBarBackButtonHidden(true)
+                        .environmentObject(preloadManager)
+                        .environmentObject(userSession)
+                        .environmentObject(tutorialManager)
                 }
-
-                //nav bar
-                VStack {
-                    Spacer()
-                    NavBarView(userID: userID, bg: $bg,  accent: $accent, selected: .constant(1))
-                }
-                .ignoresSafeArea(edges: .bottom)
-                .zIndex(1)
-            }
-
-            .navigationDestination(isPresented: $showLog) {
-                LogView(userID: userID)
-                    .navigationBarBackButtonHidden(true)
-                    .environmentObject(preloadManager)
-                    .environmentObject(userSession)
-                    .environmentObject(tutorialManager)
-            }
-            .navigationDestination(
-                isPresented: Binding(
-                    get: { selectLog != nil },
-                    set: { if !$0 { selectLog = nil } } ) ) {
-                        if let id = selectLog, let table = selectTable {
-                            LogView(userID: userID, existingLog: id, existingTable: table)
-                                .navigationBarBackButtonHidden(true)
-                                .environmentObject(preloadManager)
-                                .environmentObject(userSession)
-                                .environmentObject(tutorialManager)
+                .navigationDestination(
+                    isPresented: Binding(
+                        get: { selectLog != nil },
+                        set: { if !$0 { selectLog = nil } } ) ) {
+                            if let id = selectLog, let table = selectTable {
+                                LogView(userID: userID, existingLog: id, existingTable: table)
+                                    .navigationBarBackButtonHidden(true)
+                                    .environmentObject(preloadManager)
+                                    .environmentObject(userSession)
+                                    .environmentObject(tutorialManager)
+                            }
+                            
                         }
-                        
+                
+                        .onChange(of: startDate) { filterLogs() }
+                        .onChange(of: endDate) {  filterLogs() }
+                        .onChange(of: logTypeFilter) { filterLogs() }
+                        .onChange(of: sevStart) {  filterLogs() }
+                        .onChange(of: sevEnd) {  filterLogs() }
+                        .onChange(of: selectedSymps) {  filterLogs() }
+                        .onChange(of: deleteCount) {
+                            Task {
+                                await preloadManager.preloadAll(userID: userID)
+                                await setupListView() }
+                        }
+                        .navigationBarBackButtonHidden(true)
+                
+            }
+            else {
+                let tempAccent = "#b5c4b9"
+                let tempBg = "#001d00"
+                // Show loading screen while preload is running
+                VStack {
+                    MultiBlobSpinner(color: Color(hex: tempAccent))
+                    CustomText(text: "Hang tight! We're loading your data.", color: tempAccent, width: screenWidth * 0.75, textAlign: .center, multiAlign: .center)
+                    
+                }
+                .frame(maxWidth: screenWidth, maxHeight: .infinity)
+                .background(Color(hex: tempBg))
             }
         }
         .task {
@@ -152,20 +182,8 @@ struct ListView: View {
             
             //get preloaded values
             await setupListView()
-
+            
         }
-        .onChange(of: startDate) { filterLogs() }
-        .onChange(of: endDate) {  filterLogs() }
-        .onChange(of: logTypeFilter) { filterLogs() }
-        .onChange(of: sevStart) {  filterLogs() }
-        .onChange(of: sevEnd) {  filterLogs() }
-        .onChange(of: selectedSymps) {  filterLogs() }
-        .onChange(of: deleteCount) {
-            Task {
-                await preloadManager.preloadAll(userID: userID)
-                await setupListView() }
-        }
-        .navigationBarBackButtonHidden(true)
     }
 }
 

@@ -20,7 +20,7 @@ struct MedTakenCalendarView: View {
     //constants
     private let calendar = Calendar.current
     private let weekDays = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-    private let width = UIScreen.main.bounds.width - 80
+    private let width = UIScreen.main.bounds.width * 0.8
     let maxMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: Date()))!
     
     // Generate medication colors based on unique medications
@@ -144,7 +144,7 @@ struct MedTakenDayCell: View {
     let calendar: Calendar
     let medicationColors: [String: Color]
     
-    let width = UIScreen.main.bounds.width - 80
+    let width = UIScreen.main.bounds.width * 0.8
 
     var body: some View {
         ZStack {

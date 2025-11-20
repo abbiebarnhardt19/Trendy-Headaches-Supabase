@@ -28,6 +28,7 @@ struct LogView: View {
     @EnvironmentObject var tutorialManager: TutorialManager
     @EnvironmentObject var preloadManager: PreloadManager
     @EnvironmentObject var userSession: UserSession
+    @State var isLoading: Bool = true
 
     @State  var showSymptomView = true
     @State  var logID: Int64 = 0
@@ -97,7 +98,8 @@ struct LogView: View {
         NavigationStack {
             ZStack {
                 //only show log screen if data is loaded
-                if preloadManager.isFinished{
+//                if preloadManager.isFinished{
+                if !isLoading{
                     LogBGComps(bg: bg, accent: accent)
                     
                     //if log needs emergency treatment effective
@@ -144,7 +146,6 @@ struct LogView: View {
                 }
                 //show loading screen while waiting for data
                 else{
-                    
                    let tempAccent = "#b5c4b9"
                    let tempBg = "#001d00"
                    // Show loading screen while preload is running
@@ -159,6 +160,7 @@ struct LogView: View {
             }
         }
         .task {
+            isLoading = true
             //wait til data is fetched
             if !preloadManager.isFinished {
                 await preloadManager.preloadAll(userID: userSession.userID)
@@ -173,6 +175,7 @@ struct LogView: View {
                 oldLogIDs = results
                 showPopup = true
             }
+            isLoading = false
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -239,6 +242,8 @@ struct LogView: View {
                     CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                         if existingLog == nil{
                             Task{
+                                isLoading = true
+                                
                                 logID = await Database.shared.createLog(userID: userID, date: date, symptom_onset: onset, symptomName: symp ?? "",  severity: severity, med_taken: medTaken, medTakenName: medTakenName, symptom_desc: sympDesc, notes: notes, submit: Date(), triggerNames: selectedTriggs) ?? 0
                                 
                                 await preloadManager.preloadAll(userID: userID)
@@ -246,10 +251,12 @@ struct LogView: View {
                                 DispatchQueue.main.async {
                                     listView = true
                                 }
+                                isLoading = false
                             }
                         }
                         else{
                             Task {
+                                isLoading = true
                                 if medTakenName != nil && medTakenName != ""{
                                     emergMedID = (await Database.shared.getIDFromName(tableName: "Medications", names: [medTakenName ?? ""], userID: userID)).first
                                 }
@@ -263,6 +270,7 @@ struct LogView: View {
                                 DispatchQueue.main.async {
                                     listView = true
                                 }
+                                isLoading = false
                             }
                         }
                     }
@@ -305,6 +313,7 @@ struct LogView: View {
                 CustomButton(text: buttonText, bg: bg, accent: accent, height: screenHeight * 0.05, width: 150, textSize: screenWidth * 0.055) {
                     if existingLog == nil {
                         Task{
+                            isLoading = true
                             logID = await Database.shared.createSideEffectLog(userID: userID, date: date, side_effect: sideEffectName, side_effect_severity: sideEffectSev, medicationName: selectedMed ?? "test") ?? 0
                             
                             await preloadManager.preloadAll(userID: userID)
@@ -312,16 +321,20 @@ struct LogView: View {
                             DispatchQueue.main.async {
                                 listView = true
                             }
+                            isLoading = false
                         }
                     } else {
                         Task {
+                            isLoading = true
                             await Database.shared.updateSideEffectLog(logID: existingLog ?? 0, userID: userID, date: date, sideEffectName: sideEffectName, sideEffectSeverity: sideEffectSev, medicationID: medID)
-                            print(userID)
+
+                            
                             await preloadManager.preloadAll(userID: userID)
                             
                             DispatchQueue.main.async {
                                 listView = true
                             }
+                            isLoading = false
                         }
                     }
                 }

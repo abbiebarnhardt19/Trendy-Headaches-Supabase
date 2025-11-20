@@ -73,7 +73,6 @@ extension Database {
             
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("Failed to create log: \(error)")
@@ -125,7 +124,6 @@ extension Database {
             return insertedSideEffect.sideEffectId
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("Failed to create side effect log: \(error)")
@@ -152,7 +150,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return []
             }
             
@@ -178,7 +175,6 @@ extension Database {
                 .execute()
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to update log \(logID): \(error)")
@@ -261,7 +257,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Error updating symptom log: \(error)")
@@ -277,7 +272,7 @@ extension Database {
         medicationID: Int64?
     ) async {
         do {
-            // 1️⃣ Build the update dictionary
+            //  Build the update dictionary
             var updateDict: [String: Any] = [:]
 
             if let newDate = date {
@@ -298,7 +293,7 @@ extension Database {
                 updateDict["side_effect_medication_id"] = newMedicationID
             }
 
-            // 2️⃣ Only update if there's something to change
+            //  Only update if there's something to change
             if !updateDict.isEmpty {
 
                 // Wrap dictionary in Encodable so Supabase properly waits
@@ -344,12 +339,10 @@ extension Database {
                     .eq("side_effect_id", value: Int(logID))
                     .execute()
 
-                print("Successfully updated side effect log")
             }
 
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Error updating side effect log: \(error)")
@@ -390,7 +383,6 @@ extension Database {
             return (uid, dt, sname, sid, mid, mname)
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("Database error while fetching log details: \(error)")
@@ -422,7 +414,6 @@ extension Database {
                 }
             } catch {
                 if (error as NSError).code == -999 {
-                    print("Request cancelled (safe to ignore)")
                     return []
                 }
                 print("Error querying \(tableName) for '\(name)': \(error)")
@@ -503,7 +494,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return nil
             }
             print("Error fetching \(logType) log \(logID): \(error)")

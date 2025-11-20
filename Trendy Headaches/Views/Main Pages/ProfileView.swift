@@ -48,63 +48,78 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                ProfileBGComps(bg: newBG, accent: newAcc)
-                
-                // Content
-                ScrollView {
-                    VStack{
-                        if isEditing {
-                            EditProfile(screenWidth: screenWidth, userID: userID, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, newSA: $newSA, newTN: $newTN, newBG: $newBG, newAcc: $newAcc, themeOptions: themeOptions, saveProfileChanges: saveProfileChanges)
-                        } else {
-                            ViewProfile(screenWidth: screenWidth, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, themeName: $newTN, accent: $accent, newAcc: $newAcc, newBG: $newBG, isEditing: $isEditing, showLogView: $showLogView, logOut: $logOut, showDelete: $showDelete, buttonNames: buttonNames)
+            if preloadManager.isFinished {
+                ZStack {
+                    ProfileBGComps(bg: newBG, accent: newAcc)
+                    
+                    // Content
+                    ScrollView {
+                        VStack{
+                            if isEditing {
+                                EditProfile(screenWidth: screenWidth, userID: userID, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, newSA: $newSA, newTN: $newTN, newBG: $newBG, newAcc: $newAcc, themeOptions: themeOptions, saveProfileChanges: saveProfileChanges)
+                            } else {
+                                ViewProfile(screenWidth: screenWidth, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, themeName: $newTN, accent: $accent, newAcc: $newAcc, newBG: $newBG, isEditing: $isEditing, showLogView: $showLogView, logOut: $logOut, showDelete: $showDelete, buttonNames: buttonNames)
+                            }
                         }
                     }
-                }
-                .ignoresSafeArea(edges: .bottom)
-                
-                if tutorialManager.showTutorial{
-                    ProfileTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
-                }
-
-                // Bottom Nav Bar
-                VStack {
-                    Spacer()
-                    NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3))
-                }
-                .ignoresSafeArea(edges: .bottom)
-                .zIndex(1)
-            }
-            //delete confirmation
-            .alert("Are you sure you want to delete your account?", isPresented: $showDelete) {
-                Button("Delete", role: .destructive) {
-                    Task {
-                        await Database.shared.deleteUser(userID: userID)
-                        userSession.logout()
-                        logOut = true
+                    .ignoresSafeArea(edges: .bottom)
+                    
+                    if tutorialManager.showTutorial{
+                        ProfileTutorialPopup(bg: $bg,  accent: $accent, userID: userID, onClose: { tutorialManager.endTutorial() }  )
                     }
+                    
+                    // Bottom Nav Bar
+                    VStack {
+                        Spacer()
+                        NavBarView(userID: userID, bg: $newBG, accent: $newAcc, selected: .constant(3))
+                    }
+                    .ignoresSafeArea(edges: .bottom)
+                    .zIndex(1)
                 }
-                Button("Cancel", role: .cancel) {}
-            }
-            .navigationBarBackButtonHidden(true)
-            //go to login if cancel account
-            .fullScreenCover(isPresented: $logOut) {
-                InitialView()
-            }
-            .fullScreenCover(isPresented: $showLogView) {
-                LogView(userID: userID)
-                    .navigationBarBackButtonHidden(true)
-            }
-            //get data on load
-            .task {
-                //wait til data is loaded
-                if !preloadManager.isFinished {
-                    await preloadManager.preloadAll(userID: userSession.userID)
+                //delete confirmation
+                .alert("Are you sure you want to delete your account?", isPresented: $showDelete) {
+                    Button("Delete", role: .destructive) {
+                        Task {
+                            await Database.shared.deleteUser(userID: userID)
+                            userSession.logout()
+                            logOut = true
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
                 }
-                
-                //assign the data
-                await setupProfile()
+                .navigationBarBackButtonHidden(true)
+                //go to login if cancel account
+                .fullScreenCover(isPresented: $logOut) {
+                    InitialView()
+                }
+                .fullScreenCover(isPresented: $showLogView) {
+                    LogView(userID: userID)
+                        .navigationBarBackButtonHidden(true)
+                }
             }
+            //if data isnt loaded
+            else {
+                let tempAccent = "#b5c4b9"
+                let tempBg = "#001d00"
+                // Show loading screen while preload is running
+                VStack {
+                    MultiBlobSpinner(color: Color(hex: tempAccent))
+                    CustomText(text: "Hang tight! We're loading your data.", color: tempAccent, width: screenWidth * 0.75, textAlign: .center, multiAlign: .center)
+                    
+                }
+                .frame(maxWidth: screenWidth, maxHeight: .infinity)
+                .background(Color(hex: tempBg))
+            }
+        }
+        //get data on load
+        .task {
+            //wait til data is loaded
+            if !preloadManager.isFinished {
+                await preloadManager.preloadAll(userID: userSession.userID)
+            }
+            
+            //assign the data
+            await setupProfile()
         }
     }
 }

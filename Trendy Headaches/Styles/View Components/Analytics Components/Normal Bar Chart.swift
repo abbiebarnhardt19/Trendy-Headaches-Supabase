@@ -16,7 +16,13 @@ struct AnalyticsBarChart: View {
     var bg: String
 
     @State private var showVisual = false
-    let width = UIScreen.main.bounds.width - 50
+    let width = UIScreen.main.bounds.width * 0.9
+    
+    //trunacte long labels
+    func capLabel(_ text: String, max: Int = 8) -> String {
+        text.count > max ? String(text.prefix(max)) + "…" : text
+    }
+
     
     //get the dats that determines bar size
     var frequencyData: [(key: String, count: Int)] {
@@ -71,12 +77,23 @@ struct AnalyticsBarChart: View {
     
     //get the width of the longest key so all are set the same
     var longestKeyWidth: CGFloat {
-        let longestKey = frequencyData.max(by: { $0.key.count < $1.key.count })?.key ?? ""
         let fontSize = (UIScreen.main.bounds.width - 80) * 0.07
         let font = UIFont.systemFont(ofSize: fontSize)
+
+        // Cap all keys to max 8 characters
+        let cappedKeys = frequencyData.map { capLabel($0.key) }
+
+        // Find the visually longest capped key
+        let longestKey = cappedKeys.max(by: {
+            ($0 as NSString).size(withAttributes: [.font: font]).width <
+            ($1 as NSString).size(withAttributes: [.font: font]).width
+        }) ?? ""
+
+        // Return width + padding
         let width = (longestKey as NSString).size(withAttributes: [.font: font]).width
         return width + 10
     }
+
 
     var body: some View {
         if showVisual {
@@ -110,7 +127,8 @@ struct AnalyticsBarChart: View {
                                     // bar label
                                     let fontSize = width * 0.05
                                     let font = UIFont.systemFont(ofSize: fontSize)
-                                    CustomText(text: item.key, color: bg, width: item.key.width(usingFont: font)+5, textSize: fontSize)
+                                    let capped = capLabel(item.key)
+                                    CustomText(text: capped, color: bg, width: capped.width(usingFont: font)+5, textSize: fontSize)
                                         .frame(width: longestKeyWidth, alignment: .trailing)
                                         .padding(.trailing, 5)
                                         .padding(.bottom, 5)
@@ -133,10 +151,22 @@ struct AnalyticsBarChart: View {
                                                 .fill(Color(hex: bg))
                                                 .frame(width: barWidth, height: 30)
                                             
-                                            //text in the bar, figure out if it needs % or log, and if log needs an s
-                                            let fontSize = width * 0.045
-                                            CustomText(text: categoryColumn.lowercased() == "med_worked"  ? "\(item.count)% " : "\(item.count) Log\(item.count == 1 ? "" : "s")", color: accent, width: barWidth,  textAlign: .center,  textSize: fontSize)
-                                                .clipped()
+                                            let fullText = categoryColumn.lowercased() == "med_worked"
+                                                ? "\(item.count)%"
+                                                : "\(item.count) Log\(item.count == 1 ? "" : "s")"
+
+                                            let shortText = "\(item.count)"
+                                            let widthThreshold: CGFloat = 60
+                                           
+
+                                            CustomText(
+                                                text: barWidth < widthThreshold ? shortText : fullText,
+                                                color: accent,
+                                                width: barWidth,
+                                                textAlign: .center,
+                                                textSize: fontSize)
+                                            .clipped()
+
                                         }
                                     }
                                     .frame(height: 30)

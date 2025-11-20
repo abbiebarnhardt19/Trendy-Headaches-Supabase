@@ -51,7 +51,7 @@ struct GenericPieChart<T: Hashable>: View {
     @State private var selectedSlice: String? = nil
     @State private var showVisual: Bool = false
     
-    let width = UIScreen.main.bounds.width - 80
+    let width = UIScreen.main.bounds.width *  0.80
     
     //get the counts for each option
     private var groupedCounts: [(key: String, count: Int)] {

@@ -60,7 +60,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return []
             }
             print("Error fetching unified logs: \(error)")
@@ -86,7 +85,6 @@ extension Database {
             }
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to delete log with ID \(logID): \(error)")

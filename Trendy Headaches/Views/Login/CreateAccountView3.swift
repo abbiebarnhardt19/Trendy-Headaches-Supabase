@@ -114,7 +114,6 @@ struct CreateAccountView3: View {
             
         } catch {
             if (error as NSError).code == -999 {
-                print("Request cancelled (safe to ignore)")
                 return
             }
             print("Failed to create user:", error)

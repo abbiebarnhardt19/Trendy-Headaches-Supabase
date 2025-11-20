@@ -349,10 +349,10 @@ struct Slider: View {
     var color: String
     var width: CGFloat
 
-    //get increments from start to end of range
     private var steps: [Int64] {
-        stride(from: range.lowerBound, through: range.upperBound, by: step).map {$0}}
-    
+        stride(from: range.lowerBound, through: range.upperBound, by: step).map { $0 }
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             GeometryReader { geo in
@@ -363,19 +363,19 @@ struct Slider: View {
                 let index = steps.firstIndex(of: value) ?? 0
 
                 ZStack(alignment: .leading) {
-                    //shows unused part
+                    // Unused part
                     Rectangle()
                         .fill(Color(hex: color).opacity(0.3))
                         .frame(width: usableWidth + 2 * margin, height: 4)
                         .position(x: trackWidth / 2, y: geo.size.height / 2)
 
-                    //shows used part
+                    // Used part
                     Rectangle()
                         .fill(Color(hex: color))
                         .frame(width: CGFloat(index) * spacing, height: 4)
                         .position(x: margin + CGFloat(index) * spacing / 2, y: geo.size.height / 2)
 
-                    //tick marks
+                    // Tick marks
                     ForEach(0..<steps.count, id: \.self) { i in
                         Rectangle()
                             .fill(Color(hex: color))
@@ -383,25 +383,42 @@ struct Slider: View {
                             .position(x: margin + CGFloat(i) * spacing, y: geo.size.height / 2)
                     }
 
-                    //dragable circle
+                    // Draggable circle
                     Circle()
                         .fill(Color(hex: color))
                         .frame(width: 28, height: 28)
                         .position(x: margin + CGFloat(index) * spacing, y: geo.size.height / 2)
-                        .gesture(DragGesture(minimumDistance: 0)
-                            .onChanged { gesture in
-                                let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
-                                let nearestIndex = Int(round(clampedX / spacing))
-                                let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
-                                value = steps[safeIndex] })
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { gesture in
+                                    let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
+                                    let nearestIndex = Int(round(clampedX / spacing))
+                                    let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
+                                    value = steps[safeIndex]
+                                })
                 }
+                // Tap Gesture
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onEnded { gesture in
+                            let clampedX = min(max(gesture.location.x - margin, 0), usableWidth)
+                            let nearestIndex = Int(round(clampedX / spacing))
+                            let safeIndex = min(max(nearestIndex, 0), steps.count - 1)
+                            value = steps[safeIndex]
+                        } )
             }
             .frame(height: 30)
 
-            //tick labels
+            // Tick labels
             HStack(spacing: 0) {
                 ForEach(steps, id: \.self) { stepValue in
-                    CustomText(text: "\(Int(stepValue))",  color: color, textAlign: .center,  textSize: 18)
+                    CustomText(
+                        text: "\(Int(stepValue))",
+                        color: color,
+                        textAlign: .center,
+                        textSize: 18
+                    )
                     .frame(width: width / 10)
                 }
             }
@@ -411,6 +428,7 @@ struct Slider: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
 
 //multiple options, can only choose one
 struct MultipleChoice: View {

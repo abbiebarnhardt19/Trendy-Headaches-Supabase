@@ -19,7 +19,9 @@ extension LogView {
         sympOptions = preloadManager.sympOptions
         triggOptions = preloadManager.triggOptions
         medOptions = preloadManager.medOptions
-        emergMedOptions = preloadManager.emergMedOptions
+        emergMedOptions = preloadManager.emergMeds
+        
+        
 
         // Today’s date
         stringDate = preloadManager.todayString
