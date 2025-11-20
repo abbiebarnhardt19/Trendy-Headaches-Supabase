@@ -7,17 +7,6 @@
 
 import SwiftUI
 
-//class TutorialManager: ObservableObject {
-//    @Published var showTutorial = true
-//
-//    func startTutorial() {
-//        showTutorial = true
-//    }
-//
-//    func endTutorial() {
-//        showTutorial = false
-//    }
-//}
 
 class TutorialManager: ObservableObject {
     @Published var showTutorial: Bool {

@@ -72,9 +72,9 @@ struct CreateAccountView3: View {
                     .zIndex(1)
                     .navigationDestination(isPresented: $created) {
                         DataLoaderView(userID: userID, firstLogin: true)
-//                            .environmentObject(TutorialManager())
-//                           .environmentObject(PreloadManager())
-//                            .environmentObject(UserSession())
+                            .environmentObject(tutorialManager)
+                           .environmentObject(preloadManager)
+                            .environmentObject(userSession)
                     }
 
                 }
@@ -114,6 +114,7 @@ struct CreateAccountView3: View {
             
         } catch {
             if (error as NSError).code == -999 {
+
                 return
             }
             print("Failed to create user:", error)

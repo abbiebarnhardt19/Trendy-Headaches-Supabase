@@ -88,6 +88,9 @@ struct ForgotPasswordView3: View {
                         .opacity(resetValid ? 1.0 : 0.5)
                         .navigationDestination(isPresented: $updated) {
                             LoginView()
+                                .environmentObject(PreloadManager())
+                                .environmentObject(TutorialManager())
+                                .environmentObject(UserSession())
                         }
                     }
                     .frame(height: UIScreen.main.bounds.height)

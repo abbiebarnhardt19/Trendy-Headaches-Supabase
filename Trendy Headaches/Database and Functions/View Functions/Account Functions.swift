@@ -48,7 +48,7 @@ extension Database {
     static func createUser(email: String, pass: String, SQ: String, SA: String, bg: String, accent: String, symps: String, prevMeds: String, emergMeds: String, triggs: String) async throws -> Int64{
         let normalizedEmail = Database.normalize(email)
         
-        let userID = try await Database.shared.addUser( security_question_string: SQ, security_answer_string: SA, emailAddress: normalizedEmail, passwordHash: pass, userBackground: bg, userAccent: accent, preventativeMedsCSV: prevMeds, emergencyMedsCSV: emergMeds, symptomsCSV: symps, triggersCSV: triggs)
+        let userID = try await Database.shared.addUser( security_question_string: SQ, security_answer_string: SA, emailAddress: normalizedEmail, passwordHash: hashString(pass), userBackground: bg, userAccent: accent, preventativeMedsCSV: prevMeds, emergencyMedsCSV: emergMeds, symptomsCSV: symps, triggersCSV: triggs)
         
         return userID
     }
@@ -63,7 +63,7 @@ extension Database {
                 .from("Users")
                 .select()
                 .eq("email", value: normalizedEmail)
-                .eq("password", value: password)
+                .eq("password", value: hashString(password))
                 .execute()
                 .value
             
@@ -87,7 +87,7 @@ extension Database {
             
             try await Database.shared.client
                 .from("Users")
-                .update(["password": password])
+                .update(["password": hashString(password)])
                 .eq("user_id", value: Int(userId))
                 .execute()
             

@@ -46,7 +46,10 @@ struct CreateAccountView2: View {
                     }
                     
                     // Continue button
-                    CustomNavButton(label: "Continue", dest: CreateAccountView3( bg: bg, accent: accent, email: email, passOne: passOne, SQ: SQ,  SA: SA), bg: bg,  accent: accent)
+                    CustomNavButton(label: "Continue", dest: CreateAccountView3( bg: bg, accent: accent, email: email, passOne: passOne, SQ: SQ,  SA: SA)
+                        .environmentObject(UserSession())
+                        .environmentObject(TutorialManager())
+                        .environmentObject(PreloadManager()), bg: bg,  accent: accent)
                 }
                 .padding()
             }
