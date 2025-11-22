@@ -48,6 +48,7 @@ extension ProfileView{
             sQ = preloadManager.sQ
             sA = preloadManager.sA
             newSQ = preloadManager.sQ
+            newSA = preloadManager.sA
 
             // Colors
             bg = preloadManager.bg

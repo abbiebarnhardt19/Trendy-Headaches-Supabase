@@ -23,7 +23,7 @@ struct CompareMetric: View {
     @Binding var selectedMed2: String?
     
     @State var dropdownOption: [String] = ["Symptom", "Dates", "Preventative Treatment"]
-    @State var showFilter: Bool = false
+    @State var showFilter: Bool = true
     
     
     let screenWidth = UIScreen.main.bounds.width
@@ -249,13 +249,15 @@ struct CompareFilter: View{
     let screenWidth = UIScreen.main.bounds.width
     let screenHeight = UIScreen.main.bounds.height
     
+    //dont need to pass in, just generate from the passed in date
+    @State var startDateString: String = ""
+    @State var endDateString: String = ""
+    
     //dont need to pass in because always the same
     @State var typeOptions = ["Symptom", "Side Effect"]
     
     var body: some View {
-        //dont need to pass in, just generate from the passed in date
-        @State var startDateString = formatter.string(from: startDate)
-        @State var endDateString = formatter.string(from: endDate)
+
         
         if showFilter {
             VStack(alignment: .leading, spacing: 10) {
@@ -322,6 +324,10 @@ struct CompareFilter: View{
             .cornerRadius(20)
             .frame(width: screenWidth - 50, alignment: .leading)
             .padding(.bottom, 10)
+            .onAppear{
+                startDateString = formatter.string(from: startDate)
+                endDateString = formatter.string(from: endDate)
+            }
         }
         //button for when hidden
         else {

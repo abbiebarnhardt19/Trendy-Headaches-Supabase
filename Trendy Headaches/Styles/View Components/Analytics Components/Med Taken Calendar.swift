@@ -80,7 +80,7 @@ struct MedTakenCalendarView: View {
                 CustomButton(systemImage: "chevron.left", bg: bg, accent: accent, height: 20, width: 12) {currentMonth = changeMonth(currentMonth: currentMonth, by: -1)}
                 
                 //current month label
-                let fontSize = width * 0.07
+                let fontSize = width * 0.065
                 let font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
                 let title = monthYearString(for: currentMonth)
                 CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, bold: true, textSize: fontSize)

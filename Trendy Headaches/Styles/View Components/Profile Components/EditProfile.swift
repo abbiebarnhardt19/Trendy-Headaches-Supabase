@@ -37,7 +37,7 @@ struct EditProfile: View {
                 VStack(alignment: .center, spacing: 20) {
                     EditableSection(title: "Symptoms", items: $symps, table: "Symptoms", requiresReason: false, bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
                     
-                    EditableSection(title: "Preventative Medications", items: $prevMeds, table: "Medications", requiresReason: true, medCat: "preventative", bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
+                    EditableSection(title: "Preventative Treatments", items: $prevMeds, table: "Medications", requiresReason: true, medCat: "preventative", bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
                     
                     SectionTitle(title:"Security Question", width: colWidth, color: newAcc)
                     CustomTextField(bg: newBG, accent: newAcc, placeholder: "", text: $newSQ, width: colWidth - 15, height: 50, corner: 8, textSize: 20, multiline: true)
@@ -58,10 +58,10 @@ struct EditProfile: View {
                 VStack(alignment: .center, spacing: 20) {
                     EditableSection(title: "Triggers", items: $triggs, table: "Triggers", requiresReason: false, bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
                     
-                    EditableSection(title: "Emergency Medications", items: $emergMeds, table: "Medications", requiresReason: true, medCat: "emergency", bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
+                    EditableSection(title: "Emergency Treatments", items: $emergMeds, table: "Medications", requiresReason: true, medCat: "emergency", bg: newBG, accent: newAcc, colWidth: colWidth, userID: userID)
                     
                     SectionTitle(title:"Security Answer", width: colWidth, color: newAcc)
-                    CustomTextField(bg: newBG, accent: newAcc, placeholder: "", text: $newSA, width: colWidth - 15, height: 50, corner: 8, textSize: 16)
+                    CustomTextField(bg: newBG, accent: newAcc, placeholder: "", text: $newSA, width: colWidth - 15, height: 50, corner: 8, textSize: 20, multiline: true)
                     
                     CustomButton(text: "Save", bg: newBG, accent: newAcc, height: 50, width: colWidth - 25, corner: 36, bold: true, textSize: 25, action: saveProfileChanges)
                         .padding(.top, 10)

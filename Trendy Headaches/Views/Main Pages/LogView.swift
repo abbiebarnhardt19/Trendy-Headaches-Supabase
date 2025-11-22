@@ -302,7 +302,7 @@ struct LogView: View {
             CustomText(text: "Side Effect Severity*", color: accent, bold: true, textSize: 24)
             Slider(value: $sideEffectSev, range: 1...10, step: 1, color: accent, width: screenWidth - 50)
             
-            CustomText(text: "Medication*", color: accent, bold: true, textSize: 24)
+            CustomText(text: "Treatment*", color: accent, bold: true, textSize: 24)
             MultipleChoice(options: $medOptions, selected: $selectedMed, accent: accent, width: screenWidth - 60, textSize: screenHeight * 0.05 / 2.2)
             
             HStack {
