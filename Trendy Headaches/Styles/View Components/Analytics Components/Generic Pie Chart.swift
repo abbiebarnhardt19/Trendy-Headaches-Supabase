@@ -121,7 +121,7 @@ struct GenericPieChart<T: Hashable>: View {
     var body: some View {
         if showVisual {
             //set constants
-            let chartSize: CGFloat = 170
+            let chartSize: CGFloat = 200
             let baseColor = Color(hex: accent)
             let popOutOffset: CGFloat = 15
             let counts = groupedCounts.map(\.count)
@@ -258,7 +258,7 @@ struct PieChartColorKey: View {
     var itemHeight: CGFloat = 13
     
     var body: some View {
-        let rows = rowsForKey(items: items, width: width-20, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8,  font: .systemFont(ofSize: 18), mapResult: { item in (item.key, item.count, colors[items.firstIndex(where: { $0.key == item.key })!]) }) as! [[(String, Int, Color)]]
+        let rows = rowsForKey(items: items, width: width-50, text: { $0.key },  iconWidth: 10, iconTextGap: 4, horizontalPadding: 8,  font: .systemFont(ofSize: 18), mapResult: { item in (item.key, item.count, colors[items.firstIndex(where: { $0.key == item.key })!]) }) as! [[(String, Int, Color)]]
         
         VStack(alignment: .leading, spacing: 8) {
             ForEach(0..<rows.count, id: \.self) { rowIndex in
@@ -300,7 +300,7 @@ struct TooltipView: View {
         VStack(alignment: .leading, spacing: 6) {
             let topFontSize = UIScreen.main.bounds.width * 0.055
             //label+ log count + percent
-            Text("\(label): \(total) \(total==1 ? "log" : "logs") (\(Int(Double(total)/Double(logListCount)*100))%)")
+            Text("Sev. \(label):  \(Int(Double(total)/Double(logListCount)*100))%")
                 .foregroundColor(Color(hex: accent))
                 .font(.system(size: topFontSize, design: .serif))
             
@@ -310,7 +310,7 @@ struct TooltipView: View {
                     let bottomFontSize = UIScreen.main.bounds.width * 0.05
                     //each symptom and its percent
                     Text("•").foregroundColor(Color(hex: accent)).font(.system(size: bottomFontSize, design: .serif))
-                    Text(item.symptom.prefix(8) + (item.symptom.count > 8 ? "…" : "") + ": \(item.count) (\(Int(Double(item.count)/Double(total)*100))%)")
+                    Text(item.symptom.prefix(8) + (item.symptom.count > 8 ? "…" : "") + ": \(Int(Double(item.count)/Double(total)*100))%")
                         .foregroundColor(Color(hex: accent))
                         .font(.system(size: bottomFontSize, design: .serif))
                 }

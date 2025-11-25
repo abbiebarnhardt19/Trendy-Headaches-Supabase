@@ -83,7 +83,7 @@ struct MedTakenCalendarView: View {
                 let fontSize = width * 0.065
                 let font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
                 let title = monthYearString(for: currentMonth)
-                CustomText(text: title, color: bg, width: title.width(usingFont: font), textAlign: .center, bold: true, textSize: fontSize)
+                CustomText(text: title, color: bg, width: title.width(usingFont: font)+10, textAlign: .center, bold: true, textSize: fontSize)
                     .padding(.bottom, 9)
                 
                 //more forward one month

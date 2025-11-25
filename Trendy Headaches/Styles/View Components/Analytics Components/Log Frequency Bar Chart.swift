@@ -13,7 +13,7 @@ struct CustomStackedBarChart: View {
     var accent: String
     var bg: String
 
-    @State var showKey: Bool = true
+    @State var showKey: Bool = false
     @State var yearOff: Int = 0
     @State private var selMon: Date? = nil
     @State private var selSymp: String? = nil
@@ -78,7 +78,7 @@ struct CustomStackedBarChart: View {
             let yVals = Array(stride(from: 0, through: yMax, by: yStep))
             
             // size y axis width and the size of the bars
-            let yAxWid: CGFloat = 15
+            let yAxWid: CGFloat = 25
             let leftPadding: CGFloat = min(10, screenWidth * 0.025)
             let rightPadding: CGFloat = min(10, screenWidth * 0.025)
             let barSpac: CGFloat = max(4, min(10, screenWidth * 0.02))

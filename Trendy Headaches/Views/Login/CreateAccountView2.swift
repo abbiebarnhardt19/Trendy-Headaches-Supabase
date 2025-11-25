@@ -35,7 +35,7 @@ struct CreateAccountView2: View {
 
                     // Custom theme input fields
                     if theme == "Custom" {
-                        CustomText(text: "Or, enter two hex codes to design a theme", color: accent, width: screenWidth - 50,  multiAlign: .center)
+                        CustomText(text: "Or, enter two hex codes to design a theme", color: accent, width: screenWidth - 50,  textAlign: .center, multiAlign: .center)
                         .padding(.bottom, 10)
                         
                         HStack (spacing: 20){

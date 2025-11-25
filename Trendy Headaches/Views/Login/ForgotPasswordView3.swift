@@ -20,7 +20,7 @@ struct ForgotPasswordView3: View {
     // Theme
     private let accent = "#b5c4b9"
     private let bg = "#001d00"
-    private let leadPadd: CGFloat = 30
+    private let leadPadd: CGFloat = 50
     private let screenWidth = UIScreen.main.bounds.width
 
     //  Validation

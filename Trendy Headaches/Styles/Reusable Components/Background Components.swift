@@ -150,8 +150,8 @@ struct Forgot3BGComps: View {
     var body: some View {
         ZStack {
             
-            SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.39, y: 0, rotation: 270, width: height * 0.25, height: width)
-            SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.39, y: 0, rotation: 90, width: height * 0.25, height: width)
+            SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.425, y: 0, rotation: 270, width: height * 0.25, height: width)
+            SameAmplitudeBlob(waves: 5, amp: 30, accent: accent, x: height * 0.425, y: 0, rotation: 90, width: height * 0.25, height: width)
         }
     }
 }
@@ -167,7 +167,7 @@ struct InitialViewBGComps: View {
         ZStack {
             Color(hex: bg).ignoresSafeArea()
             SameAmplitudeBlob(waves: 5, amp: 25, accent: accent, x: height * 0.4, y: 0, rotation: 90, width: 200, height: width)
-            SameAmplitudeBlob(waves: 5, amp: 25, accent: accent, x: height * 0.4, y: 0, rotation: 270, width: 200, height: width)
+            SameAmplitudeBlob(waves: 5, amp: 25, accent: accent, x: height * 0.425, y: 0, rotation: 270, width: 200, height: width)
         }
     }
 }

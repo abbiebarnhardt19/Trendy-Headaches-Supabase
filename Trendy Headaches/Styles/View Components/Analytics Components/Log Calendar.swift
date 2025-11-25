@@ -144,7 +144,7 @@ struct LogIcon: View {
     var body: some View {
         //make the circle around the date
         let angle = Double(index)/Double(total) * 360
-        let radius: CGFloat = 17
+        let radius: CGFloat = 18
         let size =  width * 0.035
         
         //image with the icon set by the symptom and the color set by severity

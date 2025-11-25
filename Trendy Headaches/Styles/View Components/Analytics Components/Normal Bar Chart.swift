@@ -128,7 +128,7 @@ struct AnalyticsBarChart: View {
                                     let fontSize = width * 0.05
                                     let font = UIFont.systemFont(ofSize: fontSize)
                                     let capped = capLabel(item.key)
-                                    CustomText(text: capped, color: bg, width: capped.width(usingFont: font)+5, textSize: fontSize)
+                                    CustomText(text: capped, color: bg, width: capped.width(usingFont: font)+10, textSize: fontSize)
                                         .frame(width: longestKeyWidth, alignment: .trailing)
                                         .padding(.trailing, 5)
                                         .padding(.bottom, 5)

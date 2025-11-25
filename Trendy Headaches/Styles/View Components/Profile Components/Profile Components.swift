@@ -37,7 +37,7 @@ struct EditableList: View {
         }
         //for medications, ask why stop
         .alert(
-            requiresReason ? "Please list a reason for stopping this medication" : "Are you sure you want to delete this item?",
+            requiresReason ? "Please list a reason for stopping this treatment" : "Are you sure you want to delete this item?",
             isPresented: $showDeleteConfirmation,
             presenting: itemToDelete
         ) { item in
