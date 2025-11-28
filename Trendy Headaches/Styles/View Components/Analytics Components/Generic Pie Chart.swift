@@ -300,7 +300,7 @@ struct TooltipView: View {
         VStack(alignment: .leading, spacing: 6) {
             let topFontSize = UIScreen.main.bounds.width * 0.055
             //label+ log count + percent
-            Text("Sev. \(label):  \(Int(Double(total)/Double(logListCount)*100))%")
+            Text("\(label):  \(Int(Double(total)/Double(logListCount)*100))%")
                 .foregroundColor(Color(hex: accent))
                 .font(.system(size: topFontSize, design: .serif))
             

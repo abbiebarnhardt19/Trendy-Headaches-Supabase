@@ -39,14 +39,14 @@ struct ViewProfile: View {
             HStack(alignment: .top) {
                 VStack {
                     SectionList(colTitle: "Symptoms", items: symps, width: colWidth, color: accent)
-                    SectionList(colTitle: "Preventative Meds", items: prevMeds, width: colWidth, color: accent)
+                    SectionList(colTitle: "Preventative Treatments", items: prevMeds, width: colWidth, color: accent)
                     SectionList(colTitle: "Security Question", items: [newSQ], width: colWidth, color: accent)
                 }
                 .frame(maxWidth: colWidth)
                 
                 VStack {
                     SectionList(colTitle: "Triggers", items: triggs, width: colWidth, color: accent)
-                    SectionList(colTitle: "Emergency Meds", items: emergMeds, width: colWidth, color: accent)
+                    SectionList(colTitle: "Emergency Treatments", items: emergMeds, width: colWidth, color: accent)
                     SectionList(colTitle: "Color Theme", items: [themeName], width: colWidth, color: accent)
                     
                     HStack {
