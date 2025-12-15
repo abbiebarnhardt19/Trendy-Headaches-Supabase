@@ -439,6 +439,7 @@ struct ScrollableLogTable: View {
         case "Date": return dateFormatter.string(from: log.date)
         case "Sev.": return "\(log.severity)"
         case "Notes": return log.notes ?? ""
+        case "Symp. Desc.": return log.symptom_description ?? ""
         case "Triggers": return log.trigger_names?.joined(separator: ", ") ?? ""
         case "Onset": return log.onset_time ?? ""
         case "Em. Med. Name": return log.medication_name ?? ""

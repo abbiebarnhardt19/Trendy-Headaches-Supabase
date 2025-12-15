@@ -141,4 +141,56 @@ class PreloadManager: ObservableObject {
             print("Tried to run preload manager with \(userID)")
         }
     }
+    
+    //function to load just the logs
+//    func preloadLogs(userID: Int64) async {
+//        let startTime = Date()
+//        let existingUserIDs = await Database.shared.getAllUserIDs()
+//        
+//        if existingUserIDs.contains(userID){
+//            do {
+//                async let logsTask = Database.shared.getLogList(userID: userID)
+//
+//                let allLogsResult = (try? await logsTask) ?? []
+//                
+//                // ---------------- set the values ----------------
+//                await MainActor.run {
+//                    
+//                    allLogs = allLogsResult
+//
+//                    //indicate loading is done so pages can now access values
+//                    isFinished = true
+//                    
+//                    let elapsed = Date().timeIntervalSince(startTime)
+//                    print("preload Logs took \(String(format: "%.3f", elapsed)) seconds")
+//                }
+//                
+//            } catch {
+//                if (error as NSError).code == -999 {
+//                    return
+//                }
+//                print("Error during preloadLogs:", error)
+//            }
+//        }
+//        else{
+//            print("Tried to run preload manager with \(userID)")
+//        }
+//    }
+    func preloadLogs(userID: Int64) async {
+
+        do {
+            let logs = try await Database.shared.getLogList(userID: userID)
+
+            await MainActor.run {
+                allLogs = logs
+                isFinished = true
+            }
+
+        } catch {
+            if (error as NSError).code == -999 { return }
+            print("Error during preloadLogs:", error)
+        }
+    }
+
+    
 }

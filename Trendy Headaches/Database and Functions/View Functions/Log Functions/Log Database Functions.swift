@@ -80,7 +80,6 @@ extension Database {
         }
     }
 
-    
     func createSideEffectLog(userID: Int64, date: Date, side_effect: String, side_effect_severity: Int64, medicationName: String) async -> Int64? {
         do {
             // Capitalize first letter of each word
