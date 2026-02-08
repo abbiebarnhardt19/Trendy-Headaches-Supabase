@@ -269,8 +269,8 @@ struct BarSymptomKey: View {
                                 .frame(width: 10, height: 10)
                             
                             //symptom label
-                            CustomText( text: symptom.capitalizedWords.count > 10
-                                    ? String(symptom.capitalizedWords.prefix(15)) + "…"
+                            CustomText( text: symptom.capitalizedWords.count > 25
+                                    ? String(symptom.capitalizedWords.prefix(25)) + "…"
                                     : symptom.capitalizedWords, color: bg, textSize: 18)
                             .lineLimit(1)
                             .truncationMode(.tail)

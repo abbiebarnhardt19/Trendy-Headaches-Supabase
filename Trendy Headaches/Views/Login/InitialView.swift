@@ -30,8 +30,7 @@ struct InitialView: View {
                     CustomNavButton( label: "Sign In", dest: LoginView()
                         .environmentObject(UserSession())
                         .environmentObject(TutorialManager())
-                        .environmentObject(PreloadManager())
-                                     , bg: bg, accent: accent)
+                        .environmentObject(PreloadManager()) , bg: bg, accent: accent)
 
                     // Sign Up Button (Shows Policy First)
                     CustomButton(text: "Sign Up", bg: bg, accent: accent,  height: 55, width: 180 ) {

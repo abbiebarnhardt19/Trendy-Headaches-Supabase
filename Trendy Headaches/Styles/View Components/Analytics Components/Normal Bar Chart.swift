@@ -15,13 +15,13 @@ struct AnalyticsBarChart: View {
     var accent: String
     var bg: String
 
-    @State private var showVisual = false
+    @State private var showVisual = true
     let width = UIScreen.main.bounds.width * 0.9
     
     //trunacte long labels
-    func capLabel(_ text: String, max: Int = 8) -> String {
-        text.count > max ? String(text.prefix(max)) + "…" : text
-    }
+//    func capLabel(_ text: String, max: Int = 8) -> String {
+//        text.count > max ? String(text.prefix(max)) + "…" : text
+//    }
 
     
     //get the dats that determines bar size
@@ -76,27 +76,34 @@ struct AnalyticsBarChart: View {
     }
     
     //get the width of the longest key so all are set the same
-    var longestKeyWidth: CGFloat {
-        let fontSize = (UIScreen.main.bounds.width - 80) * 0.07
-        let font = UIFont.systemFont(ofSize: fontSize)
-
-        // Cap all keys to max 8 characters
-        let cappedKeys = frequencyData.map { capLabel($0.key) }
-
-        // Find the visually longest capped key
-        let longestKey = cappedKeys.max(by: {
-            ($0 as NSString).size(withAttributes: [.font: font]).width <
-            ($1 as NSString).size(withAttributes: [.font: font]).width
-        }) ?? ""
-
-        // Return width + padding
-        let width = (longestKey as NSString).size(withAttributes: [.font: font]).width
-        return width + 10
-    }
+//    var longestKeyWidth: CGFloat {
+//        let fontSize = (UIScreen.main.bounds.width - 80) * 0.07
+//        let font = UIFont.systemFont(ofSize: fontSize)
+//
+//        // Cap all keys to max 8 characters
+//        let cappedKeys = frequencyData.map { capLabel($0.key) }
+//
+//        // Find the visually longest capped key
+//        let longestKey = cappedKeys.max(by: {
+//            ($0 as NSString).size(withAttributes: [.font: font]).width <
+//            ($1 as NSString).size(withAttributes: [.font: font]).width
+//        }) ?? ""
+//
+//        // Return width + padding
+//        let width = (longestKey as NSString).size(withAttributes: [.font: font]).width
+//        return width + 10
+//    }
 
 
     var body: some View {
+        
+         
         if showVisual {
+            
+            let baseColor = Color(hex: accent)
+            // Generate a distinct color for each bar using the provided helper
+            let barColors: [Color] = baseColor.generateColors(from: baseColor, count: frequencyData.count)
+            
             ZStack {
                 RoundedRectangle(cornerRadius: 30)
                     .fill(Color(hex: accent))
@@ -122,33 +129,33 @@ struct AnalyticsBarChart: View {
 
                     if !frequencyData.isEmpty {
                         VStack {
-                            ForEach(frequencyData, id: \.key) { item in
+                            ForEach(Array(frequencyData.enumerated()), id: \.element.key) { index, item in
                                 HStack(spacing: 0) {
                                     // bar label
                                     let fontSize = width * 0.05
-                                    let font = UIFont.systemFont(ofSize: fontSize)
-                                    let capped = capLabel(item.key)
-                                    CustomText(text: capped, color: bg, width: capped.width(usingFont: font)+10, textSize: fontSize)
-                                        .frame(width: longestKeyWidth, alignment: .trailing)
-                                        .padding(.trailing, 5)
-                                        .padding(.bottom, 5)
+//                                    let font = UIFont.systemFont(ofSize: fontSize)
+//                                    let capped = capLabel(item.key)
+//                                    CustomText(text: capped, color: bg, width: capped.width(usingFont: font)+10, textSize: fontSize)
+//                                        .frame(width: longestKeyWidth, alignment: .trailing)
+//                                        .padding(.trailing, 5)
+//                                        .padding(.bottom, 5)
                                         
 
                                     // Bar column
                                     GeometryReader { geo in
                                         let maxCount = frequencyData.first?.count ?? 1
                                         let ratio = CGFloat(item.count) / CGFloat(maxCount)
-                                        let barWidth = geo.size.width * ratio - 5
+                                        let barWidth = max((width * 0.9) * ratio , 20)
 
-                                        ZStack(alignment: .leading) {
+                                        ZStack(alignment: .center) {
                                             //bar with full width, hidden
                                             RoundedRectangle(cornerRadius: 15)
-                                                .fill(Color(hex: accent))
+                                                .fill(.clear)
                                                 .frame(height: 30)
 
                                             //actual bar
                                             RoundedRectangle(cornerRadius: 15)
-                                                .fill(Color(hex: bg))
+                                                .fill(index < barColors.count ? barColors[index] : baseColor)
                                                 .frame(width: barWidth, height: 30)
                                             
                                             let fullText = categoryColumn.lowercased() == "med_worked"
@@ -158,22 +165,30 @@ struct AnalyticsBarChart: View {
                                             let shortText = "\(item.count)"
                                             let widthThreshold: CGFloat = 60
                                            
+                                            let barHex = barColors[index].toHex() ?? accent
+                                            let isDark = Color.isHexDark(barHex)
+                                            let textColor: Color = isDark ? .white : .black
 
                                             CustomText(
                                                 text: barWidth < widthThreshold ? shortText : fullText,
-                                                color: accent,
+                                                color: textColor.toHex() ?? accent,
                                                 width: barWidth,
                                                 textAlign: .center,
                                                 textSize: fontSize)
                                             .clipped()
 
                                         }
+                                        .padding(.leading, 10)
                                     }
                                     .frame(height: 30)
                                 }
                             }
+                            let labels = frequencyData.map { $0.key }
+                            let colorMap = Dictionary(uniqueKeysWithValues: zip(labels, barColors))
+                            BarChartKey(labels: labels, colorMap: colorMap, bg: bg, width: width*0.9)
                         }
-                        .padding(.horizontal)
+
+                        
                     }
                     //no data warning
                     else{
@@ -192,3 +207,48 @@ struct AnalyticsBarChart: View {
         }
     }
 }
+
+
+//symptom color key
+
+//symptom color key
+struct BarChartKey: View {
+    var labels: [String]
+    var colorMap: [String: Color]
+    var bg: String
+    var width: CGFloat
+    
+    var body: some View {
+        //break symptoms into rows
+        let rows = rowsForKey(items: labels, width: width-20, text: { $0.capitalizedWords.count > 10 ? String($0.capitalizedWords.prefix(15)) + "…" : $0.capitalizedWords }, iconWidth: 10,  iconTextGap: 5, horizontalPadding: 0, font: .systemFont(ofSize: 18), mapResult: { symptom in symptom }) as! [[String]]
+        
+        VStack(alignment: .center, spacing: 8) {
+            //each row
+            ForEach(0..<rows.count, id: \.self) { rowIndex in
+                HStack(spacing: 10) {
+                    //each symptom in the row
+                    ForEach(rows[rowIndex], id: \.self) { symptom in
+                        HStack(spacing: 5) {
+                            //circle with the color
+                            Circle()
+                                .fill(colorMap[symptom] ?? .gray)
+                                .frame(width: 10, height: 10)
+                            
+                            //symptom label
+                            CustomText( text: symptom.capitalizedWords.count > 25
+                                    ? String(symptom.capitalizedWords.prefix(25)) + "…"
+                                    : symptom.capitalizedWords, color: bg, textSize: 18)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize(horizontal: true, vertical: false)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+        }
+        .frame(width: width, alignment: .leading)
+        .padding(.top, 10)
+    }
+}
+
