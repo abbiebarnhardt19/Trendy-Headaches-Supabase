@@ -5,6 +5,7 @@
 //  Created by Abigail Barnhardt on 8/31/25.
 
 import SwiftUI
+import MessageUI
 
 struct ProfileView: View {
     // Passed-in Values
@@ -23,6 +24,7 @@ struct ProfileView: View {
     @State  var logOut = false
     @State  var showLogView = false
     @State  var showDelete = false
+    @State var showReportIssue = true
     
     //  User Data
     @State  var symps: [String] = []
@@ -42,7 +44,7 @@ struct ProfileView: View {
     
     //  Constants
      let themeOptions = ["Classic Light", "Light Pink", "Classic Dark",  "Dark Green", "Dark Blue", "Dark Purple", "Custom"]
-     let buttonNames = ["Edit Profile", "App Tutorial", "Sign Out", "Delete Account"]
+     let buttonNames = ["Edit Profile", "Report Issue", "Sign Out", "Delete Account"]
      let screenWidth = UIScreen.main.bounds.width
      let screenHeight = UIScreen.main.bounds.height
 
@@ -58,7 +60,7 @@ struct ProfileView: View {
                             if isEditing {
                                 EditProfile(screenWidth: screenWidth, userID: userID, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, newSA: $newSA, newTN: $newTN, newBG: $newBG, newAcc: $newAcc, themeOptions: themeOptions, saveProfileChanges: saveProfileChanges)
                             } else {
-                                ViewProfile(screenWidth: screenWidth, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, themeName: $newTN, accent: $accent, newAcc: $newAcc, newBG: $newBG, isEditing: $isEditing, showLogView: $showLogView, logOut: $logOut, showDelete: $showDelete, buttonNames: buttonNames)
+                                ViewProfile(screenWidth: screenWidth, symps: $symps, prevMeds: $prevMeds, triggs: $triggs, emergMeds: $emergMeds, newSQ: $newSQ, themeName: $newTN, accent: $accent, newAcc: $newAcc, newBG: $newBG, isEditing: $isEditing, showReportIssue: $showReportIssue, logOut: $logOut, showDelete: $showDelete, buttonNames: buttonNames)
                             }
                         }
                     }
