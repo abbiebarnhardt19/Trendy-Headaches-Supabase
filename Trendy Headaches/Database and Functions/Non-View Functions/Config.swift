@@ -1,8 +1,8 @@
 //
-//  SupabaseConfig.swift
+//  Config.swift
 //  Trendy Headaches Supabase
 //
-//  Created by Abigail Barnhardt on 10/21/25.
+//  Created by Abigail Barnhardt on 5/5/26.
 //
 
 import Foundation
